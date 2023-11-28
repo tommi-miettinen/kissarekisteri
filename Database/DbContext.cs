@@ -1,0 +1,30 @@
+﻿using Kissarekisteribackend.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace Kissarekisteribackend.Database
+{
+    public class KissarekisteriDbContext : DbContext
+    {
+        public KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> options) : base(options)
+        {
+        }
+        public DbSet<Cat> Cats { get; set; }
+        public DbSet<CatShow> CatShows { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Attendee> Attendees { get; set; }
+        public DbSet<CatAttendee> CatAttendees { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<CatShow>()
+             .HasMany(c => c.Attendees)
+             .WithOne(a => a.CatShow)
+             .HasForeignKey(a => a.EventId);
+
+            modelBuilder.Entity<Attendee>()
+           .HasOne(a => a.User)
+           .WithMany()
+           .HasForeignKey(a => a.UserId);
+        }
+    }
+}
