@@ -6,19 +6,28 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Graph;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
 public class UserController : Controller
 {
     private readonly KissarekisteriDbContext _dbContext;
     private readonly IConfiguration _config;
+    private readonly GraphServiceClient _graphServiceClient;
 
-    public UserController(KissarekisteriDbContext dbContext, IConfiguration config)
+    public UserController(
+        KissarekisteriDbContext dbContext,
+        IConfiguration config
+
+        )
     {
         _dbContext = dbContext;
         _config = config;
+
+
     }
 
     [Authorize]
@@ -46,16 +55,27 @@ public class UserController : Controller
 
     public IActionResult SignedOut()
     {
-
         return RedirectToAction("Index", "Home");
+    }
+
+    [Authorize]
+    [HttpGet("profile")]
+    public async Task<IActionResult> Microsoft()
+    {
+        var user = await _graphServiceClient.Me.GetAsync();
+        return Ok(user);
+
     }
 
     [Authorize]
     [HttpGet("claims")]
     public IActionResult GetClaims()
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        return Json(userId);
+        var claims = User.Claims
+            .Select(claim => new { claim.Type, claim.Value })
+            .ToList();
+
+        return Json(new { Claims = claims });
     }
 
     [HttpPost("users")]
@@ -87,12 +107,19 @@ public class UserController : Controller
         return Ok(users);
     }
 
+    [Authorize]
     [HttpGet("me")]
     public IActionResult GetCurrentUser()
     {
-
         var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
         var user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
+        if (user == null)
+        {
+            user = new User { Id = userId, Username = userId };
+            _dbContext.Users.Add(user);
+            _dbContext.SaveChanges();
+        }
 
         return Ok(user);
     }
