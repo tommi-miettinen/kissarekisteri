@@ -10,6 +10,8 @@ D:\Desktop\1-5-B2C\bin\Debug\net7.0\Azure.Core.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\Azure.Identity.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\Azure.Security.KeyVault.Certificates.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\Azure.Security.KeyVault.Secrets.dll
+D:\Desktop\1-5-B2C\bin\Debug\net7.0\Azure.Storage.Blobs.dll
+D:\Desktop\1-5-B2C\bin\Debug\net7.0\Azure.Storage.Common.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.OpenIdConnect.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\Microsoft.Bcl.AsyncInterfaces.dll
@@ -51,6 +53,7 @@ D:\Desktop\1-5-B2C\bin\Debug\net7.0\Microsoft.Win32.SystemEvents.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\System.Configuration.ConfigurationManager.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\System.Drawing.Common.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\System.IdentityModel.Tokens.Jwt.dll
+D:\Desktop\1-5-B2C\bin\Debug\net7.0\System.IO.Hashing.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\System.Memory.Data.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\System.Runtime.Caching.dll
 D:\Desktop\1-5-B2C\bin\Debug\net7.0\System.Security.Cryptography.Pkcs.dll

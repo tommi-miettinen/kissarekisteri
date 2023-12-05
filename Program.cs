@@ -1,5 +1,8 @@
-﻿using Kissarekisteribackend.Database;
+﻿using Azure.Storage.Blobs;
+using Kissarekisteribackend.Database;
 using Kissarekisteribackend.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +15,7 @@ using Microsoft.Identity.Web;
 using System.Linq;
 using System.Security.Claims;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 var config = builder.Configuration;
@@ -21,17 +25,25 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         builder =>
         {
-            builder.AllowAnyOrigin()
+            builder.WithOrigins("http://localhost:5173")
                    .AllowAnyHeader()
-                   .AllowAnyMethod();
+                   .AllowAnyMethod()
+                   .AllowCredentials();
         });
 });
+
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
     options.CheckConsentNeeded = context => true;
     options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
     options.HandleSameSiteCookieCompatibility();
+});
+
+
+builder.Services.AddSingleton(serviceProvider =>
+{
+    return new BlobServiceClient(config.GetConnectionString("Storage"));
 });
 
 
@@ -58,13 +70,23 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
                     var user = dbContext.Users.FirstOrDefault(u => u.Id == userId);
                     if (user == null)
                     {
-                        user = new User { Id = userId, Username = userId };
+
+                        var UserId = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        var GivenName = context.Principal.FindFirst(ClaimTypes.GivenName)?.Value;
+                        var Surname = context.Principal.FindFirst(ClaimTypes.Surname)?.Value;
+
+                        user = new User { Id = userId, GivenName = GivenName, Surname = Surname };
                         dbContext.Users.Add(user);
                         await dbContext.SaveChangesAsync();
                     }
                 }
             }
+
+            await context.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.Principal);
+            context.Response.Redirect("http://localhost:5173/cats");
+            context.HandleResponse();
         }
+
     };
 });
 
@@ -80,8 +102,15 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        var context = services.GetRequiredService<KissarekisteriDbContext>();
+        // context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
+    }
 }
-
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();

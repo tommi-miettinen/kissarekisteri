@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WebApp-OpenIDConnect-DotNet")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a36224ff72cd65a22f83075070e05e86adfb2fc3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2d15bd597d3d8a3a9823bbaba59953889ad056d0")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebApp-OpenIDConnect-DotNet")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebApp-OpenIDConnect-DotNet")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
