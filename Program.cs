@@ -1,6 +1,7 @@
-﻿using Azure.Storage.Blobs;
+﻿using Azure.Identity;
+using Azure.Storage.Blobs;
 using Kissarekisteribackend.Database;
-using Kissarekisteribackend.Models;
+using Kissarekisteribackend.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -11,9 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Graph;
 using Microsoft.Identity.Web;
-using System.Linq;
-using System.Security.Claims;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,14 +40,29 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.HandleSameSiteCookieCompatibility();
 });
 
+builder.Services.AddSingleton(serviceProvider =>
+{
 
+    var graphConfig = config.GetSection("Graph");
+    var tenantId = graphConfig["TenantId"];
+    var appId = graphConfig["AppId"];
+    var clientSecret = graphConfig["ClientSecret"];
+    var clientSecretCredential = new ClientSecretCredential(tenantId, appId, clientSecret);
+
+    var scopes = new[] { "https://graph.microsoft.com/.default" };
+
+    return new GraphServiceClient(clientSecretCredential, scopes);
+});
 builder.Services.AddSingleton(serviceProvider =>
 {
     return new BlobServiceClient(config.GetConnectionString("Storage"));
 });
 
 
-builder.Services.AddMicrosoftIdentityWebAppAuthentication(config, Constants.AzureAdB2C);
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<UploadService>();
+
+builder.Services.AddMicrosoftIdentityWebAppAuthentication(config, Microsoft.Identity.Web.Constants.AzureAdB2C);
 
 
 builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
@@ -58,35 +73,10 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
     {
         OnTokenValidated = async context =>
         {
-            var userId = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-
-            if (userId != null)
-            {
-                using (var scope = context.HttpContext.RequestServices.CreateScope())
-                {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
-
-                    var user = dbContext.Users.FirstOrDefault(u => u.Id == userId);
-                    if (user == null)
-                    {
-
-                        var UserId = context.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                        var GivenName = context.Principal.FindFirst(ClaimTypes.GivenName)?.Value;
-                        var Surname = context.Principal.FindFirst(ClaimTypes.Surname)?.Value;
-
-                        user = new User { Id = userId, GivenName = GivenName, Surname = Surname };
-                        dbContext.Users.Add(user);
-                        await dbContext.SaveChangesAsync();
-                    }
-                }
-            }
-
             await context.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.Principal);
             context.Response.Redirect("http://localhost:5173/cats");
             context.HandleResponse();
         }
-
     };
 });
 

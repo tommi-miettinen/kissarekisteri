@@ -1,13 +1,16 @@
 ﻿using Kissarekisteribackend.Database;
-using Kissarekisteribackend.Models;
+using Kissarekisteribackend.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using User = Kissarekisteribackend.Models.User;
 
 
 namespace Kissarekisteribackend.Controllers;
@@ -15,14 +18,18 @@ public class UserController : Controller
 {
     private readonly KissarekisteriDbContext _dbContext;
     private readonly IConfiguration _config;
+    private readonly UserService _userService;
+
 
     public UserController(
         KissarekisteriDbContext dbContext,
-        IConfiguration config
+        IConfiguration config,
+        UserService userService
     )
     {
         _dbContext = dbContext;
         _config = config;
+        _userService = userService;
     }
 
     [HttpGet("signout")]
@@ -41,53 +48,45 @@ public class UserController : Controller
     }
 
     [Authorize]
-    [HttpGet("claims")]
-    public IActionResult GetClaims()
+    [HttpGet("login")]
+    public async Task<IActionResult> Login()
     {
-        var claims = User.Claims
-            .Select(claim => new { claim.Type, claim.Value })
-            .ToList();
-
-        return Json(new { Claims = claims });
+        return Ok("ok");
     }
 
-    [HttpPost("users")]
-    public IActionResult CreateUser([FromBody] User userPayload)
-    {
-        var user = _dbContext.Users.Add(userPayload).Entity;
-        _dbContext.SaveChanges();
 
+    [HttpGet("users/{userId}")]
+    public async Task<IActionResult> GetUser([FromRoute] string userId)
+    {
+        var user = await _userService.GetUserById(userId);
         return Json(user);
     }
 
-    [HttpGet("users/{userId}")]
-    public IActionResult GetUser([FromRoute] string userId)
-    {
-        var user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(user);
-    }
-
     [HttpGet("users")]
-    public IActionResult GetUsers()
+    public async Task<IActionResult> GetUsers()
     {
-        var users = _dbContext.Users.ToList();
-        return Ok(users);
+        var users = await _userService.GetUsers();
+        return Json(users);
     }
 
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [HttpGet("me")]
-    public IActionResult GetCurrentUser()
+    public async Task<IActionResult> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
-        return Ok(user);
+        var user = await _userService.GetUserById(userId);
+        return Json(user);
     }
+
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [HttpPost("avatar")]
+    public async Task<IActionResult> UploadUserAvatar(IFormFile file)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = await _userService.UploadUserPhotoAsync(userId, file);
+        return Json(user);
+    }
+
 
     [HttpPut("users/{userId}")]
     public IActionResult EditUser([FromRoute] string userId, [FromBody] User updatedUser)

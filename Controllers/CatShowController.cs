@@ -1,5 +1,7 @@
 ﻿using Kissarekisteribackend.Database;
 using Kissarekisteribackend.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -17,17 +19,12 @@ namespace Kissarekisteribackend.Controllers
             _dbContext = dbContext;
         }
 
-        [HttpPost]
-        [Route("catshows/{catShowId}/join")]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        [HttpPost("catshows/{catShowId}/join")]
         public async Task<IActionResult> JoinCatShow(int catShowId, [FromBody] CatShowCatAttendeeIds catIds)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (user == null)
-            {
-                return NotFound("User not found");
-            }
 
             var catShow = _dbContext.CatShows.FirstOrDefault(e => e.Id == catShowId);
             if (catShow == null)
@@ -67,24 +64,17 @@ namespace Kissarekisteribackend.Controllers
             return Ok("onnistu");
         }
 
-        [HttpDelete]
-        [Route("catshows/{catShowId}/leave")]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        [HttpDelete("catshows/{catShowId}/leave")]
         public async Task<IActionResult> LeaveCatShow(int catShowId)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
-            {
-                return NotFound("User not found");
-            }
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             var catShow = await _dbContext.CatShows.FirstOrDefaultAsync(e => e.Id == catShowId);
             if (catShow == null)
             {
                 return NotFound("Cat show not found");
             }
-
 
             var attendee = await _dbContext.Attendees.FirstOrDefaultAsync(a => a.UserId == userId && a.EventId == catShowId);
             if (attendee != null)
