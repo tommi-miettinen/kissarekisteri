@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Kissarekisteribackend.Models
+﻿namespace Kissarekisteribackend.Models
 {
     public class User
     {
@@ -8,6 +6,6 @@ namespace Kissarekisteribackend.Models
         public string GivenName { get; set; }
         public string Surname { get; set; }
         public string Email { get; set; } = "default";
-        public Boolean IsBreeder { get; set; } = false;
+        public bool IsBreeder { get; set; } = false;
     }
 }

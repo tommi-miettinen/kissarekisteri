@@ -4,6 +4,6 @@ namespace Kissarekisteribackend.Models
 {
     public class CatShowCatAttendeeIds
     {
-        public List<int> catIds { get; set; }
+        public List<int> CatIds { get; set; }
     }
 }
