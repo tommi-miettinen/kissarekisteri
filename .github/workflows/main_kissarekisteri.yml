@@ -69,5 +69,5 @@ jobs:
         with:
           app-name: "kissarekisteri"
           slot-name: "Production"
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F16FFFFE0103456291C7441E07327DB1 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B00C7B8E48BA4F078B21ECA707A5904C }}
           package: .
