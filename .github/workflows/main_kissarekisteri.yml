@@ -36,6 +36,7 @@ jobs:
           Move-Item -Path Frontend/dist/* -Destination ${{env.DOTNET_ROOT}}/myapp/wwwroot -Force
 
       - name: Build with dotnet
+        run: dotnet clean
         run: dotnet build --configuration Release 1-5-B2C.sln
 
       - name: dotnet publish
