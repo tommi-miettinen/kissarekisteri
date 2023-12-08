@@ -1,0 +1,70 @@
+name: Build and deploy ASP.Net Core app to Azure Web App - kissarekisteri
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "8.x"
+          include-prerelease: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "latest"
+
+      - name: Build Vue.js frontend
+        run: |
+          cd Frontend
+          npm install
+          npm run build
+
+      - name: Move frontend build to wwwroot
+        run: |
+          New-Item -ItemType Directory -Force -Path ${{env.DOTNET_ROOT}}/myapp/wwwroot
+          Move-Item -Path Frontend/dist/* -Destination ${{env.DOTNET_ROOT}}/myapp/wwwroot -Force
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    environment:
+      name: "Production"
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: .net-app
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: "kissarekisteri"
+          slot-name: "Production"
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F16FFFFE0103456291C7441E07327DB1 }}
+          package: .

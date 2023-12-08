@@ -8,13 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="AppCreationScripts\**" />
-    <Compile Remove="ReadmeFiles\**" />
+    <Compile Remove="Frontend\**" />
     <Content Remove="AppCreationScripts\**" />
-    <Content Remove="ReadmeFiles\**" />
+    <Content Remove="Frontend\**" />
     <EmbeddedResource Remove="AppCreationScripts\**" />
-    <EmbeddedResource Remove="ReadmeFiles\**" />
+    <EmbeddedResource Remove="Frontend\**" />
     <None Remove="AppCreationScripts\**" />
-    <None Remove="ReadmeFiles\**" />
+      <None Remove="Frontend\**" />
   </ItemGroup>
 
   <ItemGroup>
