@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "YAb5EPcv2gGXA2x9sZqMFPEhdv1TbfUVMD3VhOhwyTA=",
+  "Hash": "ww0WyUfb89NuPKXFYubVsBZGLhphtzBcZCbWvd4rTm8=",
   "Source": "WebApp-OpenIDConnect-DotNet",
   "BasePath": "_content/WebApp-OpenIDConnect-DotNet",
   "Mode": "Default",
@@ -17,12 +17,12 @@
   ],
   "Assets": [
     {
-      "Identity": "D:\\Desktop\\1-5-B2C\\wwwroot\\assets\\index-39T2pbOT.js",
+      "Identity": "D:\\Desktop\\1-5-B2C\\wwwroot\\assets\\index-b2clpJMW.css",
       "SourceId": "WebApp-OpenIDConnect-DotNet",
       "SourceType": "Discovered",
       "ContentRoot": "D:\\Desktop\\1-5-B2C\\wwwroot\\",
       "BasePath": "_content/WebApp-OpenIDConnect-DotNet",
-      "RelativePath": "assets/index-39T2pbOT.js",
+      "RelativePath": "assets/index-b2clpJMW.css",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -33,15 +33,15 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\assets\\index-39T2pbOT.js"
+      "OriginalItemSpec": "wwwroot\\assets\\index-b2clpJMW.css"
     },
     {
-      "Identity": "D:\\Desktop\\1-5-B2C\\wwwroot\\assets\\index-GfdGAAAF.css",
+      "Identity": "D:\\Desktop\\1-5-B2C\\wwwroot\\assets\\index-HqF1RIvM.js",
       "SourceId": "WebApp-OpenIDConnect-DotNet",
       "SourceType": "Discovered",
       "ContentRoot": "D:\\Desktop\\1-5-B2C\\wwwroot\\",
       "BasePath": "_content/WebApp-OpenIDConnect-DotNet",
-      "RelativePath": "assets/index-GfdGAAAF.css",
+      "RelativePath": "assets/index-HqF1RIvM.js",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -52,7 +52,7 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\assets\\index-GfdGAAAF.css"
+      "OriginalItemSpec": "wwwroot\\assets\\index-HqF1RIvM.js"
     },
     {
       "Identity": "D:\\Desktop\\1-5-B2C\\wwwroot\\index.html",
