@@ -58,6 +58,18 @@ const editCat = async (updatedCat: Cat) => {
   }
 };
 
+const uploadCatImage = async (catId: number, image: File) => {
+  try {
+    const formData = new FormData();
+    if (image) formData.append("image", image);
+
+    const result = await axios.post(`${baseUrl}/cats/${catId}/photo`, formData);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const getCatImages = async () => {
   const result = await axios.get(`${apiManagementBaseUrl}/images`);
   console.log(result);
@@ -72,4 +84,5 @@ export default {
   getCatsByUserId,
   editCat,
   getCatImages,
+  uploadCatImage,
 };

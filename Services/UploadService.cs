@@ -6,13 +6,9 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Services;
 
-public class UploadService
+public class UploadService(BlobServiceClient blobServiceClient)
 {
-    private readonly BlobServiceClient _blobServiceClient;
-    public UploadService(BlobServiceClient blobServiceClient)
-    {
-        _blobServiceClient = blobServiceClient;
-    }
+    private readonly BlobServiceClient _blobServiceClient = blobServiceClient;
 
     public async Task<BlobClient> UploadFile(IFormFile file)
     {

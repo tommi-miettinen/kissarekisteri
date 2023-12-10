@@ -6,16 +6,10 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Services
 {
-    public class CatShowService
+    public class CatShowService(KissarekisteriDbContext dbContext, UserService userService)
     {
-        private readonly KissarekisteriDbContext _dbContext;
-        private readonly UserService _userService;
-
-        public CatShowService(KissarekisteriDbContext dbContext, UserService userService)
-        {
-            _dbContext = dbContext;
-            _userService = userService;
-        }
+        private readonly KissarekisteriDbContext _dbContext = dbContext;
+        private readonly UserService _userService = userService;
 
         public async Task<bool> JoinCatShowAsync(int catShowId, string userId, CatShowCatAttendeeIds catIds)
         {
@@ -62,13 +56,9 @@ namespace Kissarekisteribackend.Services
                 .Include(e => e.Attendees)
                 .FirstOrDefaultAsync(e => e.Id == catShowId);
 
-            if (catShow == null)
-            {
-                return null;
-            }
+            if (catShow == null) return null;
 
             catShow.AttendeeDetails = [];
-
 
             foreach (var attendee in catShow.Attendees)
             {
@@ -80,6 +70,7 @@ namespace Kissarekisteribackend.Services
             }
 
             return catShow;
+
         }
     }
 }

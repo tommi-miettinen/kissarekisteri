@@ -21,7 +21,9 @@ const user = ref(userStore((state) => state.user));
 const selectedCatIds = ref<number[]>([]);
 const joiningEvent = ref<boolean>(false);
 
-const isUserAnAttendee = computed(() => catshow.value && catshow.value.attendees.some((attendee: any) => attendee.id === user.value.id));
+const isUserAnAttendee = computed(
+  () => catshow.value && catshow.value.attendees.some((attendee: any) => attendee.userId === user.value.id)
+);
 
 const leaveEvent = async () => {
   await userAPI.leaveEvent(eventId);
@@ -66,8 +68,8 @@ const joinEvent = async () => {
 
       <div v-if="catshow && catshow.attendees && catshow.attendees.length > 0" class="attendees-list mt-3">
         <h4>Osallistujat</h4>
-        <div v-for="attendee in catshow.attendees" :key="attendee.id" class="mb-2">
-          <div class="fw-bold">{{ attendee.givenName + attendee.surname }}</div>
+        <div v-for="attendee in catshow.attendeeDetails" :key="attendee.id" class="mb-2">
+          <div class="fw-bold">{{ `${attendee.givenName}  ${attendee.surname}` }}</div>
           <ul v-if="attendee.cats && attendee.cats.length">
             <li v-for="cat in attendee.cats" :key="cat.id">{{ cat.name }} ({{ cat.breed }})</li>
           </ul>

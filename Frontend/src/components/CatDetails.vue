@@ -30,6 +30,14 @@ const setCurrentImage = (catImage?: any) => {
   if (!catImage) currentImage.value = null;
 };
 
+const handleFileChange = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (!input || !input.files) return;
+
+  await catAPI.uploadCatImage(cat.value.id, input.files[0]);
+  fetchCatImages();
+};
+
 onMounted(async () => {
   const route = useRoute();
   const catId = +route.params.catId;
@@ -46,7 +54,7 @@ onMounted(async () => {
     <div v-if="cat" class="card" style="max-width: 800px">
       <div class="row g-0">
         <div class="col-md-4">
-          <img src="https://placekitten.com/300/300" class="img-fluid rounded-start" alt="..." />
+          <img :src="cat.imageUrl" class="img-fluid rounded-start" alt="..." />
         </div>
         <div class="col-md-8 d-flex flex-column">
           <div class="card-body d-flex flex-column">
@@ -66,6 +74,7 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+    <button class="btn btn-primary"><input type="file" @change="handleFileChange" id="catImageInput" /></button>
     <h3>Kuvat</h3>
     <div class="gap-2" style="width: 800px; display: grid; grid-template-columns: 1fr 1fr 1fr">
       <img

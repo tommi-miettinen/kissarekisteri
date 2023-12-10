@@ -15,11 +15,6 @@ const newEvent = ref({
   startDate: "",
   endDate: "",
 });
-const fields = [
-  { key: "location", label: "Sijainti" },
-  { key: "startDate", label: "Aloitus" },
-  { key: "endDate", label: "Lopetus" },
-];
 
 const addingEvent = ref(false);
 
@@ -50,6 +45,17 @@ const loadEvents = async () => {
   events.value = response;
 };
 
+const formatDate = (dateString: string) =>
+  new Intl.DateTimeFormat("fi-FI", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: "Europe/Helsinki", // Specify the time zone if needed
+  }).format(new Date(dateString));
+
 onMounted(async () => {
   await loadEvents();
 });
@@ -58,11 +64,10 @@ onMounted(async () => {
   <div class="w-100 h-100 p-5 d-flex flex-column align-items-center justify-content-center">
     <div class="p-5 border rounded w-75 overflow-auto" style="height: 700px">
       <h3>Näyttelyt</h3>
-      <div class="d-flex gap-4 py-3 sticky-top border-bottom bg-white align-items-center">
-        <div class="col">
+      <div class="d-flex gap-4 py-3 sticky-top bg-white align-items-center">
+        <div class="col-12 col-md-8 col-xxl-4">
           <input type="text" class="form-control" v-model="searchQuery" placeholder="Etsi näyttelyistä..." />
         </div>
-        <div class="col" v-for="field in fields" :key="field.key">{{ field.label }}</div>
         <div class="col d-flex">
           <button @click="() => setAddingEvent(true)" type="button" class="btn btn-primary ms-auto">Lisää näyttely</button>
         </div>
@@ -73,13 +78,14 @@ onMounted(async () => {
           @click="() => navigateToEvent(event.id!)"
           v-for="event in filteredEvents"
           :key="event.id"
-          class="d-flex gap-4 border-bottom p-3 align-items-center pointer cat-show"
+          class="d-flex gap-4 border-bottom p-3 align-items-center pointer cat-show justify-content-between"
         >
-          <div class="col">{{ event.name }}</div>
-          <div class="col">{{ event.location }}</div>
-          <div class="col">{{ event.startDate }}</div>
-          <div class="col">{{ event.endDate }}</div>
-          <div class="col"></div>
+          <div>
+            <div>{{ event.name }}</div>
+            <span class="text-body-secondary">{{ event.location }}</span>
+          </div>
+
+          <div>{{ `${formatDate(event.startDate)} -  ${formatDate(event.endDate)}` }}</div>
         </div>
       </div>
     </div>
@@ -95,11 +101,18 @@ onMounted(async () => {
       <div class="input-group mb-3">
         <input type="text" class="form-control" v-model="newEvent.location" placeholder="Event Location" />
       </div>
-      <div class="input-group mb-3">
-        <input type="date" class="form-control" v-model="newEvent.startDate" placeholder="Start Date" />
+      <div class="row mb-3 g-2">
+        <div class="col-8">
+          <input type="date" class="form-control" v-model="newEvent.startDate" placeholder="Start Date" />
+        </div>
+        <div class="col-4">
+          <input type="time" class="form-control" v-model="newEvent.endDate" placeholder="End Date" />
+        </div>
       </div>
+
       <div class="input-group mb-3">
         <input type="date" class="form-control" v-model="newEvent.endDate" placeholder="End Date" />
+        <input type="time" class="form-control" v-model="newEvent.endDate" placeholder="End Date" />
       </div>
       <button @click="createCatShow" type="button" class="btn btn-primary ms-auto">Luo tapahtuma</button>
     </div>

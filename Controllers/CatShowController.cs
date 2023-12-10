@@ -11,16 +11,10 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers
 {
-    public class CatShowController : Controller
+    public class CatShowController(KissarekisteriDbContext dbContext, CatShowService catShowService) : Controller
     {
-        private readonly KissarekisteriDbContext _dbContext;
-        private readonly CatShowService _catShowService;
-
-        public CatShowController(KissarekisteriDbContext dbContext, CatShowService catShowService)
-        {
-            _dbContext = dbContext;
-            _catShowService = catShowService;
-        }
+        private readonly KissarekisteriDbContext _dbContext = dbContext;
+        private readonly CatShowService _catShowService = catShowService;
 
         [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpPost("catshows/{catShowId}/join")]
@@ -66,8 +60,7 @@ namespace Kissarekisteribackend.Controllers
             return Ok("Left cat show successfully");
         }
 
-        [HttpGet]
-        [Route("catshows")]
+        [HttpGet("catshows")]
         public IActionResult GetEvents()
         {
             var catShows = _dbContext.CatShows.ToList();
@@ -75,15 +68,14 @@ namespace Kissarekisteribackend.Controllers
         }
 
         [HttpGet("catshows/{catShowId}")]
-        public IActionResult GetEvent(int catShowId)
+        public async Task<IActionResult> GetEvent(int catShowId)
         {
 
-            var catShow = _catShowService.GetCatShowByIdAsync(catShowId);
+            var catShow = await _catShowService.GetCatShowByIdAsync(catShowId);
             return Json(catShow);
         }
 
         [HttpPost("catshows")]
-        [Route("catshows")]
         public IActionResult CreateEvent([FromBody] CatShow newCatShow)
         {
             if (newCatShow == null)

@@ -17,16 +17,10 @@ public class UserResponse
     public string AvatarUrl { get; set; }
 }
 
-public class UserService
+public class UserService(GraphServiceClient graphClient, UploadService uploadService)
 {
-
-    private readonly GraphServiceClient _graphClient;
-    private readonly UploadService _uploadService;
-    public UserService(GraphServiceClient graphClient, UploadService uploadService)
-    {
-        _graphClient = graphClient;
-        _uploadService = uploadService;
-    }
+    private readonly GraphServiceClient _graphClient = graphClient;
+    private readonly UploadService _uploadService = uploadService;
 
     public async Task<List<UserResponse>> GetUsers()
     {

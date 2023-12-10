@@ -10,14 +10,9 @@ using System.Threading.Tasks;
 
 
 namespace Kissarekisteribackend.Controllers;
-public class UserController : Controller
+public class UserController(UserService userService) : Controller
 {
-    private readonly UserService _userService;
-
-    public UserController(UserService userService)
-    {
-        _userService = userService;
-    }
+    private readonly UserService _userService = userService;
 
     [HttpGet("signout")]
     public IActionResult Logout()

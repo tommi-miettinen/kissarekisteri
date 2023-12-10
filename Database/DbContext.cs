@@ -22,11 +22,6 @@ namespace Kissarekisteribackend.Database
             .WithOne(a => a.CatShow)
             .HasForeignKey(a => a.EventId);
 
-            modelBuilder.Entity<Attendee>()
-           .HasOne(a => a.User)
-           .WithMany()
-           .HasForeignKey(a => a.UserId);
-
 
             modelBuilder.Entity<Cat>()
             .HasMany(c => c.Photos)
