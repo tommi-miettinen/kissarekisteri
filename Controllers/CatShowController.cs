@@ -1,5 +1,6 @@
 ﻿using Kissarekisteribackend.Database;
 using Kissarekisteribackend.Models;
+using Kissarekisteribackend.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,12 @@ namespace Kissarekisteribackend.Controllers
     public class CatShowController : Controller
     {
         private readonly KissarekisteriDbContext _dbContext;
+        private readonly CatShowService _catShowService;
 
-        public CatShowController(KissarekisteriDbContext dbContext)
+        public CatShowController(KissarekisteriDbContext dbContext, CatShowService catShowService)
         {
             _dbContext = dbContext;
+            _catShowService = catShowService;
         }
 
         [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
@@ -24,43 +27,8 @@ namespace Kissarekisteribackend.Controllers
         public async Task<IActionResult> JoinCatShow(int catShowId, [FromBody] CatShowCatAttendeeIds catIds)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _catShowService.JoinCatShowAsync(catShowId, userId, catIds);
 
-
-            var catShow = _dbContext.CatShows.FirstOrDefault(e => e.Id == catShowId);
-            if (catShow == null)
-            {
-                return NotFound("Cat show not found");
-            }
-
-            var attendee = new Attendee
-            {
-                UserId = userId,
-                EventId = catShowId
-
-            };
-            _dbContext.Attendees.Add(attendee);
-            _dbContext.SaveChanges();
-
-            if (catIds.catIds != null)
-            {
-
-                foreach (var catId in catIds.catIds)
-                {
-                    var cat = _dbContext.Cats.FirstOrDefault(c => c.Id == catId);
-                    if (cat != null)
-                    {
-                        var catAttendee = new CatAttendee
-                        {
-                            CatId = catId,
-                            EventId = catShowId,
-
-                        };
-                        _dbContext.CatAttendees.Add(catAttendee);
-                        _dbContext.SaveChanges();
-
-                    }
-                }
-            }
             return Ok("onnistu");
         }
 
@@ -110,25 +78,7 @@ namespace Kissarekisteribackend.Controllers
         public IActionResult GetEvent(int catShowId)
         {
 
-            var catShow = _dbContext.CatShows
-                   .Where(e => e.Id == catShowId)
-                   .Select(e => new
-                   {
-                       e.Id,
-                       e.Name,
-                       e.Description,
-                       e.Location,
-                       e.StartDate,
-                       e.EndDate,
-                       Attendees = e.Attendees.Select(a => a.User).ToList()
-                   })
-                   .FirstOrDefault();
-
-            if (catShow == null)
-            {
-                return NotFound();
-            }
-
+            var catShow = _catShowService.GetCatShowByIdAsync(catShowId);
             return Json(catShow);
         }
 

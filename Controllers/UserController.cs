@@ -1,34 +1,21 @@
-﻿using Kissarekisteribackend.Database;
-using Kissarekisteribackend.Services;
+﻿using Kissarekisteribackend.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using User = Kissarekisteribackend.Models.User;
 
 
 namespace Kissarekisteribackend.Controllers;
 public class UserController : Controller
 {
-    private readonly KissarekisteriDbContext _dbContext;
-    private readonly IConfiguration _config;
     private readonly UserService _userService;
 
-
-    public UserController(
-        KissarekisteriDbContext dbContext,
-        IConfiguration config,
-        UserService userService
-    )
+    public UserController(UserService userService)
     {
-        _dbContext = dbContext;
-        _config = config;
         _userService = userService;
     }
 
@@ -85,22 +72,6 @@ public class UserController : Controller
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await _userService.UploadUserPhotoAsync(userId, file);
         return Json(user);
-    }
-
-
-    [HttpPut("users/{userId}")]
-    public IActionResult EditUser([FromRoute] string userId, [FromBody] User updatedUser)
-    {
-        var user = _dbContext.Users.FirstOrDefault(u => u.Id == userId);
-
-        if (user == null)
-        {
-            return NotFound();
-        }
-        user.IsBreeder = updatedUser.IsBreeder;
-        _dbContext.SaveChanges();
-
-        return Ok(user);
     }
 }
 

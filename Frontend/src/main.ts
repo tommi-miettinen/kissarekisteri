@@ -8,6 +8,7 @@ import Cats from "./components/Cats.vue";
 import Users from "./components/Users.vue";
 import CatDetails from "./components/CatDetails.vue";
 import UserDetails from "./components/UserDetails.vue";
+import "./custom.scss";
 
 const app = createApp(App);
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Kissarekisteribackend.Models
 {
@@ -10,6 +11,7 @@ namespace Kissarekisteribackend.Models
         public string Breed { get; set; }
         public string OwnerId { get; set; }
         public string BreederId { get; set; }
-
+        public string ImageUrl { get; set; } = "test";
+        public ICollection<CatPhoto> Photos { get; set; }
     }
 }

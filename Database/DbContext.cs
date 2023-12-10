@@ -9,22 +9,29 @@ namespace Kissarekisteribackend.Database
         {
         }
         public DbSet<Cat> Cats { get; set; }
+        public DbSet<CatPhoto> CatPhotos { get; set; }
         public DbSet<CatShow> CatShows { get; set; }
-        public DbSet<User> Users { get; set; }
+        public DbSet<CatShowPhoto> CatShowPhotos { get; set; }
         public DbSet<Attendee> Attendees { get; set; }
         public DbSet<CatAttendee> CatAttendees { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<CatShow>()
-             .HasMany(c => c.Attendees)
-             .WithOne(a => a.CatShow)
-             .HasForeignKey(a => a.EventId);
+            .HasMany(c => c.Attendees)
+            .WithOne(a => a.CatShow)
+            .HasForeignKey(a => a.EventId);
 
             modelBuilder.Entity<Attendee>()
            .HasOne(a => a.User)
            .WithMany()
            .HasForeignKey(a => a.UserId);
+
+
+            modelBuilder.Entity<Cat>()
+            .HasMany(c => c.Photos)
+            .WithOne(p => p.Cat)
+            .HasForeignKey(p => p.CatId);
         }
     }
 }

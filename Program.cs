@@ -17,7 +17,6 @@ using Microsoft.Identity.Web;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
 var config = builder.Configuration;
 
 builder.Services.AddCors(options =>
@@ -53,15 +52,12 @@ builder.Services.AddSingleton(serviceProvider =>
 
     return new GraphServiceClient(clientSecretCredential, scopes);
 });
-builder.Services.AddSingleton(serviceProvider =>
-{
-    return new BlobServiceClient(config.GetConnectionString("Storage"));
-});
 
-
+builder.Services.AddSingleton(new BlobServiceClient(config.GetConnectionString("Storage")));
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UploadService>();
-
+builder.Services.AddScoped<CatService>();
+builder.Services.AddScoped<CatShowService>();
 builder.Services.AddMicrosoftIdentityWebAppAuthentication(config, Microsoft.Identity.Web.Constants.AzureAdB2C);
 
 

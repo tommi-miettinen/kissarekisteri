@@ -1,5 +1,6 @@
 ﻿using Kissarekisteribackend.Database;
 using Kissarekisteribackend.Models;
+using Kissarekisteribackend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -10,30 +11,26 @@ namespace Kissarekisteribackend.Controllers
     public class CatController : Controller
     {
         private readonly KissarekisteriDbContext _dbContext;
+        private readonly CatService _catService;
 
-        public CatController(KissarekisteriDbContext dbContext)
+        public CatController(KissarekisteriDbContext dbContext, CatService catService)
         {
             _dbContext = dbContext;
+            _catService = catService;
         }
 
         [HttpGet("/cats")]
         public async Task<IActionResult> GetCats()
         {
-            var cats = await _dbContext.Cats.ToListAsync();
-
+            var cats = await _catService.GetCatsAsync();
             return Json(cats);
         }
 
         [HttpGet("/cats/{catId}")]
-        public async Task<IActionResult> GetCat(int catId)
+        public async Task<IActionResult> GetCatAsync(int catId)
         {
-            var catById = await _dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
-            if (catById == null)
-            {
-                return NotFound();
-            }
-
-            return Json(catById);
+            var cat = await _catService.GetCatByIdAsync(catId);
+            return Json(cat);
         }
 
         [HttpGet("/users/{userId}/cats")]

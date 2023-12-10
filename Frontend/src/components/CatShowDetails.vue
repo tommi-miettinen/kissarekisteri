@@ -6,6 +6,7 @@ import { userStore } from "../store/userStore";
 import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
 import { useQuery } from "@tanstack/vue-query";
+import Modal from "./Modal.vue";
 
 const route = useRoute();
 
@@ -18,11 +19,9 @@ const { data: userCats } = useQuery({
 const user = ref(userStore((state) => state.user));
 
 const selectedCatIds = ref<number[]>([]);
+const joiningEvent = ref<boolean>(false);
 
-const isUserAnAttendee = computed(() => {
-  //@ts-ignore
-  return catshow.value && catshow.value.attendees.some((attendee) => attendee.id === user.value.id);
-});
+const isUserAnAttendee = computed(() => catshow.value && catshow.value.attendees.some((attendee: any) => attendee.id === user.value.id));
 
 const leaveEvent = async () => {
   await userAPI.leaveEvent(eventId);
@@ -55,7 +54,7 @@ const joinEvent = async () => {
               </p>
               <p class="card-text mt-auto d-flex align-items-center justify-content-between">
                 <span class="badge rounded-pill text-bg-secondary">{{ catshow.location }}</span>
-                <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+                <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary" @click="joiningEvent = true">
                   Osallistu tapahtumaan
                 </button>
                 <button v-else @click="leaveEvent" type="button" class="btn btn-danger">Poistu tapahtumasta</button>
@@ -76,35 +75,20 @@ const joinEvent = async () => {
       </div>
     </div>
 
-    <div class="modal fade" id="myModal">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <!-- Modal Header -->
-          <div class="modal-header">
-            <h4 class="modal-title">Modal Title</h4>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-
-          <!-- Modal body -->
-          <div class="modal-body">
-            <div v-if="user && userCats && userCats.length > 0">
-              <h5>Osallistuvat kissat:</h5>
-              <div v-for="(cat, index) in userCats" :key="index">
-                <label>
-                  <input type="checkbox" v-model="selectedCatIds" :value="cat.id" />
-                  {{ cat.name }}
-                </label>
-              </div>
-            </div>
-            <div v-else>No cats available.</div>
-          </div>
-
-          <!-- Modal footer -->
-          <div class="modal-footer">
-            <button @click="() => joinEvent()" type="button" class="btn btn-primary" data-bs-dismiss="modal">Osallistu</button>
+    <Modal :modalId="'join-event-modal'" :visible="joiningEvent" @onCancel="joiningEvent = false">
+      <div class="d-flex flex-column bg-white w-100 p-4 gap-4 rounded">
+        <div v-if="user && userCats && userCats.length > 0">
+          <h5>Osallistuvat kissat:</h5>
+          <div v-for="(cat, index) in userCats" :key="index">
+            <label>
+              <input type="checkbox" v-model="selectedCatIds" :value="cat.id" />
+              {{ cat.name }}
+            </label>
           </div>
         </div>
+        <div v-else>No cats available.</div>
+        <button @click="() => joinEvent()" type="button" class="btn btn-primary" data-bs-dismiss="modal">Osallistu</button>
       </div>
-    </div>
+    </Modal>
   </div>
 </template>

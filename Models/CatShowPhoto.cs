@@ -1,10 +1,10 @@
 ﻿namespace Kissarekisteribackend.Models
 {
-    public class Attendee
+    public class CatShowPhoto
     {
         public int Id { get; set; }
-        public int EventId { get; set; }
+        public string Url { get; set; }
+        public int CatShowId { get; set; }
         public CatShow CatShow { get; set; }
-        public string UserId { get; set; }
     }
 }

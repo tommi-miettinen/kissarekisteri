@@ -31,14 +31,13 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="w-100 h-100 p-5 d-flex flex-column align-items-center justify-content-center">
-    <div class="p-5 border rounded w-75 overflow-auto">
+  <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center justify-content-center">
+    <div class="p-4 p-sm-5 border-sm rounded overflow-auto col-12 col-lg-8">
       <h3>Jäsenet</h3>
-      <div class="d-flex py-3 border-bottom sticky-top bg-white align-items-center">
-        <div class="col"><input class="form-control" type="text" v-model="searchQuery" placeholder="Etsi jäsenistä..." /></div>
-        <div class="col">Käyttäjä</div>
-        <div class="col">Sähköposti</div>
-        <div class="col">Kasvattaja</div>
+      <div class="d-flex py-3 sticky-top bg-white align-items-center">
+        <div class="col-12 col-md-8 col-xxl-4">
+          <input class="form-control" type="text" v-model="searchQuery" placeholder="Etsi jäsenistä..." />
+        </div>
       </div>
 
       <div class="d-flex flex-column overflow-auto">
@@ -52,7 +51,7 @@ watchEffect(() => {
           @click="() => navigateToUser(user.id)"
           class="user p-3 d-flex border-bottom p-2 flex align-items-center"
         >
-          <div class="col">
+          <div class="col d-flex align-items-center gap-2 col-8">
             <img
               v-if="user.avatarUrl"
               class="rounded-circle"
@@ -69,11 +68,10 @@ watchEffect(() => {
             >
               {{ user.givenName[0] + user.surname[0] }}
             </div>
+            <div>{{ `${user.givenName}  ${user.surname}` }}</div>
           </div>
-          <div class="col">{{ `${user.givenName}  ${user.surname}` }}</div>
-          <div>{{ user.id }}</div>
           <div class="col"></div>
-          <div class="col">{{ user.isBreeder ? "Kasvattaja" : "" }}</div>
+          <span class="badge rounded-pill text-bg-primary">{{ user.isBreeder ? "Kasvattaja" : "Kasvattaja" }}</span>
         </div>
       </div>
     </div>
