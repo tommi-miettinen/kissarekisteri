@@ -19,7 +19,7 @@ const logoutFromApp = () => {
 
 <template>
   <nav class="border w-100 p-2 sticky-top bg-white">
-    <ul class="nav align-items-center" style="color: black">
+    <ul class="nav align-items-center px-2" style="color: black">
       <div v-if="user" class="dropdown">
         <div class="rounded-circle" type="button" data-bs-toggle="dropdown">
           <img class="rounded-circle" height="32" width="32" style="object-fit: fill" :src="user.avatarUrl" alt="Cat Image" />

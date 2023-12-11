@@ -2,9 +2,11 @@
 import { ref, onMounted, computed } from "vue";
 import userAPI from "../api/userAPI";
 import { useRouter } from "vue-router";
-import Modal from "./Modal.vue";
+import Modal from "../components/Modal.vue";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
+const { t } = useI18n();
 
 const events = ref<CatShowEvent[]>([]);
 const searchQuery = ref("");
@@ -17,8 +19,6 @@ const newEvent = ref({
 });
 
 const addingEvent = ref(false);
-
-const setAddingEvent = (bool: boolean) => (addingEvent.value = bool);
 
 const filteredEvents = computed(() => {
   if (!searchQuery.value) {
@@ -53,26 +53,25 @@ const formatDate = (dateString: string) =>
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-    timeZone: "Europe/Helsinki", // Specify the time zone if needed
+    timeZone: "Europe/Helsinki",
   }).format(new Date(dateString));
 
-onMounted(async () => {
-  await loadEvents();
-});
+onMounted(async () => await loadEvents());
 </script>
 <template>
-  <div class="w-100 h-100 p-5 d-flex flex-column align-items-center justify-content-center">
-    <div class="p-5 border rounded w-75 overflow-auto" style="height: 700px">
-      <h3>Näyttelyt</h3>
+  <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center justify-content-center">
+    <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
+      <h3>{{ t("CatShowList.catShows") }}</h3>
       <div class="d-flex gap-4 py-3 sticky-top bg-white align-items-center">
         <div class="col-12 col-md-8 col-xxl-4">
-          <input type="text" class="form-control" v-model="searchQuery" placeholder="Etsi näyttelyistä..." />
+          <input type="text" class="form-control" v-model="searchQuery" :placeholder="t('CatShowList.searchInput')" />
         </div>
         <div class="col d-flex">
-          <button @click="() => setAddingEvent(true)" type="button" class="btn btn-primary ms-auto">Lisää näyttely</button>
+          <button @click="addingEvent = true" type="button" class="btn btn-primary ms-auto">
+            {{ t("CatShowList.addCatShow") }}
+          </button>
         </div>
       </div>
-
       <div class="d-flex flex-column overflow-auto">
         <div
           @click="() => navigateToEvent(event.id!)"
@@ -84,13 +83,12 @@ onMounted(async () => {
             <div>{{ event.name }}</div>
             <span class="text-body-secondary">{{ event.location }}</span>
           </div>
-
           <div>{{ `${formatDate(event.startDate)} -  ${formatDate(event.endDate)}` }}</div>
         </div>
       </div>
     </div>
   </div>
-  <Modal :modalId="'event-modal'" @onCancel="() => setAddingEvent(false)" :visible="addingEvent">
+  <Modal :modalId="'event-modal'" @onCancel="addingEvent = false" :visible="addingEvent">
     <div class="modal-body d-flex flex-column w-100">
       <div class="input-group mb-3">
         <input type="text" class="form-control" v-model="newEvent.name" placeholder="Event Name" />

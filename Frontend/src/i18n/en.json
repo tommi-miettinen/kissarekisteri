@@ -12,9 +12,20 @@
   },
   "Users": {
     "members": "Members",
-    "searchInput": "Search members",
+    "searchInput": "Search members...",
     "breeder": "Breeder"
   },
-  "joinEvent": "Leave event",
-  "leaveEvent": "Join event"
+  "Cats": {
+    "cats": "Cats",
+    "searchInput": "Search cats..."
+  },
+  "CatShowList": {
+    "catShows": "Cat shows",
+    "searchInput": "Search cat shows...",
+    "addCatShow": "Add cat show"
+  },
+  "CatShow": {
+    "joinEvent": "Leave event",
+    "leaveEvent": "Join event"
+  }
 }

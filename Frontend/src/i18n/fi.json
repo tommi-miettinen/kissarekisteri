@@ -12,8 +12,18 @@
   },
   "Users": {
     "members": "Jäsenet",
-    "searchInput": "Etsi jäsenistä",
+    "searchInput": "Etsi jäsenistä...",
     "breeder": "Kasvattaja"
+  },
+  "Cats": {
+    "cats": "Kissat",
+    "searchInput": "Etsi kissoista..."
+  },
+
+  "CatShowList": {
+    "catShows": "Näyttelyt",
+    "searchInput": "Etsi näyttelyistä...",
+    "addCatShow": "Lisää näyttely"
   },
   "joinEvent": "Liity tapahtumaan",
   "leaveEvent": "Poistu tapahtumasta"

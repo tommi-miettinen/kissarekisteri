@@ -4,11 +4,11 @@ import { userStore } from "../store/userStore";
 import { toast } from "vue-sonner";
 import { useRouter } from "vue-router";
 import userAPI from "../api/userAPI";
-import Modal from "./Modal.vue";
+import Modal from "../components/Modal.vue";
 import catAPI from "../api/catAPI";
 import { useQuery, useMutation } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
-import Cropper from "./Cropper.vue";
+import Cropper from "../components/Cropper.vue";
 
 const router = useRouter();
 const { t } = useI18n();

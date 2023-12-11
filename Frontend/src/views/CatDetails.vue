@@ -2,18 +2,17 @@
 import { onMounted, ref } from "vue";
 import catAPI from "../api/catAPI";
 import { useRoute, useRouter } from "vue-router";
-import Modal from "./Modal.vue";
+import Modal from "../components/Modal.vue";
 
 interface CatImage {
   Url: string;
 }
 
 const router = useRouter();
+const route = useRoute();
 
 const cat = ref();
-
 const catImages = ref<CatImage[]>([]);
-
 const currentImage = ref();
 
 const navigateToBreeder = (breederId: number) => router.push(`/users/${breederId}`);
@@ -39,9 +38,7 @@ const handleFileChange = async (event: Event) => {
 };
 
 onMounted(async () => {
-  const route = useRoute();
-  const catId = +route.params.catId;
-  const result = await catAPI.getCatById(catId);
+  const result = await catAPI.getCatById(+route.params.catId);
   if (!result) return;
   fetchCatImages();
 

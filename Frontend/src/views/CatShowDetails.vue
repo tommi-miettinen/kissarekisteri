@@ -6,7 +6,7 @@ import { userStore } from "../store/userStore";
 import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
 import { useQuery } from "@tanstack/vue-query";
-import Modal from "./Modal.vue";
+import Modal from "../components/Modal.vue";
 
 const route = useRoute();
 

@@ -5,7 +5,6 @@ interface CatShowEvent {
   location: string;
   startDate: string;
   endDate: string;
-
   attendees?: User[];
 }
 
