@@ -1,0 +1,20 @@
+{
+  "Navigation": {
+    "profile": "Profiili",
+    "login": "Kirjaudu sisään",
+    "logout": "Kirjaudu ulos",
+    "cats": "Kissat",
+    "catShows": "Näyttelyt",
+    "members": "Jäsenet"
+  },
+  "Profile": {
+    "addCat": "Lisää kissa"
+  },
+  "Users": {
+    "members": "Jäsenet",
+    "searchInput": "Etsi jäsenistä",
+    "breeder": "Kasvattaja"
+  },
+  "joinEvent": "Liity tapahtumaan",
+  "leaveEvent": "Poistu tapahtumasta"
+}

@@ -1,9 +1,15 @@
 <script lang="ts" setup>
+import { computed } from "vue";
 import { userStore, logout } from "../store/userStore";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const user = userStore((state) => state.user);
 const router = useRouter();
+const { t, locale } = useI18n();
+
+const handleLocaleClick = () => (locale.value === "fi" ? (locale.value = "en") : (locale.value = "fi"));
+const localeString = computed(() => (locale.value === "fi" ? "In English" : "Suomeksi"));
 
 const logoutFromApp = () => {
   logout();
@@ -19,20 +25,21 @@ const logoutFromApp = () => {
           <img class="rounded-circle" height="32" width="32" style="object-fit: fill" :src="user.avatarUrl" alt="Cat Image" />
         </div>
         <ul class="dropdown-menu">
-          <router-link class="dropdown-item" to="/profile">Profiili</router-link>
-          <li @click="logoutFromApp" class="dropdown-item">Kirjaudu ulos</li>
+          <router-link class="dropdown-item" to="/profile">{{ t("Navigation.profile") }}</router-link>
+          <li @click="logoutFromApp" class="dropdown-item">{{ t("Navigation.logout") }}</li>
         </ul>
       </div>
-      <a v-if="!user" href="https://localhost:44316/login" class="btn btn-primary">Kirjaudu sisään</a>
+      <a v-if="!user" href="https://localhost:44316/login" class="btn btn-primary">{{ t("Navigation.login") }}</a>
       <li class="nav-item">
-        <router-link style="color: black" class="nav-link" to="/catshows">Tapahtumat</router-link>
+        <router-link style="color: black" class="nav-link" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
       </li>
       <li class="nav-item">
-        <router-link style="color: black" class="nav-link" to="/cats">Kissat</router-link>
+        <router-link style="color: black" class="nav-link" to="/cats">{{ t("Navigation.cats") }}</router-link>
       </li>
       <li class="nav-item">
-        <router-link style="color: black" class="nav-link" to="/users">Jäsenet</router-link>
+        <router-link style="color: black" class="nav-link" to="/users">{{ t("Navigation.members") }}</router-link>
       </li>
+      <a style="cursor: pointer" @click="handleLocaleClick" class="ms-auto">{{ localeString }}</a>
     </ul>
   </nav>
 </template>

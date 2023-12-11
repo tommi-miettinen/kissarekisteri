@@ -8,6 +8,9 @@ import Cats from "./components/Cats.vue";
 import Users from "./components/Users.vue";
 import CatDetails from "./components/CatDetails.vue";
 import UserDetails from "./components/UserDetails.vue";
+import { createI18n } from "vue-i18n";
+import en from "./i18n/en.json";
+import fi from "./i18n/fi.json";
 import "./custom.scss";
 
 const app = createApp(App);
@@ -34,6 +37,17 @@ const router = createRouter({
   routes,
 });
 
+const i18n = createI18n({
+  legacy: false,
+  locale: "fi",
+
+  messages: {
+    en: en,
+    fi: fi,
+  },
+});
+
+app.use(i18n);
 app.use(VueQueryPlugin);
 app.use(router);
 app.mount("#app");

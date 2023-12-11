@@ -3,11 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kissarekisteribackend.Database
 {
-    public class KissarekisteriDbContext : DbContext
+    public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> options) : DbContext(options)
     {
-        public KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> options) : base(options)
-        {
-        }
         public DbSet<Cat> Cats { get; set; }
         public DbSet<CatPhoto> CatPhotos { get; set; }
         public DbSet<CatShow> CatShows { get; set; }

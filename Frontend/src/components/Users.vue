@@ -3,8 +3,11 @@ import { ref, watchEffect } from "vue";
 import userAPI from "../api/userAPI";
 import { useRouter } from "vue-router";
 import { useQuery } from "@tanstack/vue-query";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
+const { t } = useI18n();
+
 const { data, isLoading } = useQuery({
   queryKey: ["users"],
   queryFn: userAPI.getUsers,
@@ -33,10 +36,10 @@ watchEffect(() => {
 <template>
   <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center justify-content-center">
     <div class="p-4 p-sm-5 border-sm rounded overflow-auto col-12 col-lg-8">
-      <h3>Jäsenet</h3>
+      <h3>{{ t("Users.members") }}</h3>
       <div class="d-flex py-3 sticky-top bg-white align-items-center">
         <div class="col-12 col-md-8 col-xxl-4">
-          <input class="form-control" type="text" v-model="searchQuery" placeholder="Etsi jäsenistä..." />
+          <input class="form-control" type="text" v-model="searchQuery" :placeholder="t('Users.searchInput')" />
         </div>
       </div>
 
@@ -71,7 +74,7 @@ watchEffect(() => {
             <div>{{ `${user.givenName}  ${user.surname}` }}</div>
           </div>
           <div class="col"></div>
-          <span class="badge rounded-pill text-bg-primary">{{ user.isBreeder ? "Kasvattaja" : "Kasvattaja" }}</span>
+          <span class="badge rounded-pill text-bg-primary">{{ user.isBreeder ? t("Users.breeder") : t("Users.breeder") }}</span>
         </div>
       </div>
     </div>

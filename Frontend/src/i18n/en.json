@@ -1,0 +1,20 @@
+{
+  "Navigation": {
+    "profile": "Profile",
+    "login": "Login",
+    "logout": "Logout",
+    "cats": "Cats",
+    "catShows": "Cat shows",
+    "members": "Members"
+  },
+  "Profile": {
+    "addCat": "Add cat"
+  },
+  "Users": {
+    "members": "Members",
+    "searchInput": "Search members",
+    "breeder": "Breeder"
+  },
+  "joinEvent": "Leave event",
+  "leaveEvent": "Join event"
+}

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.12.2",
+    "@types/vue-i18n": "^7.0.0",
     "axios": "^1.6.2",
     "bootstrap": "^5.3.2",
     "bootstrap-vue": "^2.23.1",
@@ -17,6 +18,7 @@
     "cropperjs": "^1.6.1",
     "primevue": "^3.40.1",
     "vue": "^3.3.8",
+    "vue-i18n": "^9.8.0",
     "vue-router": "^4.2.5",
     "vue-sonner": "^1.0.2",
     "vue-zustand": "^0.6.0",

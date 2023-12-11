@@ -41,7 +41,7 @@ public class UserService(GraphServiceClient graphClient, UploadService uploadSer
                 Id = u.Id,
                 DisplayName = u.DisplayName,
                 Surname = u.Surname,
-                AvatarUrl = u.AdditionalData.ContainsKey(avatarUrl) ? u.AdditionalData[avatarUrl].ToString() : null
+                AvatarUrl = u.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null
             }).ToList();
 
             return response;
@@ -79,7 +79,7 @@ public class UserService(GraphServiceClient graphClient, UploadService uploadSer
             Id = user.Id,
             DisplayName = user.DisplayName,
             Surname = user.Surname,
-            AvatarUrl = user.AdditionalData.ContainsKey(avatarUrl) ? user.AdditionalData[avatarUrl].ToString() : null
+            AvatarUrl = user.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null
         };
 
         return response;
@@ -104,7 +104,7 @@ public class UserService(GraphServiceClient graphClient, UploadService uploadSer
                 Id = user.Id,
                 DisplayName = user.DisplayName,
                 Surname = user.Surname,
-                AvatarUrl = user.AdditionalData.ContainsKey(avatarUrl) ? user.AdditionalData[avatarUrl].ToString() : null
+                AvatarUrl = user.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null
             };
 
             return response;

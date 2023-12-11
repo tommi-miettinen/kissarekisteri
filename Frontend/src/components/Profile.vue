@@ -1,21 +1,23 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
-import { userStore, fetchUser, editUser } from "../store/userStore";
+import { ref, computed, watch } from "vue";
+import { userStore } from "../store/userStore";
 import { toast } from "vue-sonner";
 import { useRouter } from "vue-router";
 import userAPI from "../api/userAPI";
 import Modal from "./Modal.vue";
 import catAPI from "../api/catAPI";
 import { useQuery, useMutation } from "@tanstack/vue-query";
+import { useI18n } from "vue-i18n";
 import Cropper from "./Cropper.vue";
 
 const router = useRouter();
+const { t } = useI18n();
 
 const user = ref<User>(userStore((state) => state.user));
 
 const userId = computed(() => user.value?.id);
 
-const { data: cats } = useQuery({
+const { data: cats, refetch: refetchCats } = useQuery({
   queryKey: ["cats" + userId.value],
   queryFn: () => userAPI.getCatsByUserId(userId.value),
   enabled: Boolean(userId.value),
@@ -26,10 +28,14 @@ const { mutate } = useMutation({
   onSuccess: () => toast.success("Kissan tiedot lisätty"),
 });
 
+/*
 const { mutate: mutateUser } = useMutation({
   mutationFn: (userPayload: User) => editUser(userPayload),
   onSuccess: () => toast.info("Tiedot tallennettu"),
 });
+*/
+
+watch(userId, () => refetchCats());
 
 const newCat = ref<Cat>({
   id: 0,
@@ -49,20 +55,14 @@ const updatedCat = ref<Cat>({
   breederId: "0",
 });
 
-const email = ref("");
-
 const editingCat = ref(false);
 const editingAvatar = ref(false);
 
 const deletingCat = ref(false);
 const deletingCatId = ref();
 
-const handleEditUserClick = async () => mutateUser({ ...user.value, email: email.value });
-
 const addCat = () => mutate(newCat.value);
 
-const setDeletingCat = (bool: boolean) => (deletingCat.value = bool);
-const setDeletingCatId = (catId: number) => (deletingCatId.value = catId);
 const setEditingCat = (bool: boolean) => (editingCat.value = bool);
 
 const deleteCat = async (catId: number) => {
@@ -84,9 +84,6 @@ const loadCatForEdit = (cat: Cat) => {
   setEditingCat(true);
 };
 const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
-onMounted(async () => {
-  await fetchUser();
-});
 </script>
 
 <template>
@@ -97,20 +94,10 @@ onMounted(async () => {
           <img @click="() => setEditingAvatar(!editingAvatar)" class="rounded-circle" width="50" height="50" :src="user.avatarUrl" />
           <h3>{{ `${user.givenName}  ${user.surname}` }}</h3>
         </div>
-        <div class="form-group">
-          <label for="email">Sähköposti</label>
-          <input type="email" class="form-control" id="email" v-model="email" />
-        </div>
-        <button @click="handleEditUserClick" class="btn btn-primary ms-auto mt-2">Tallenna muutokset</button>
       </div>
       <div class="d-flex flex-column border p-5 rounded" style="width: 70%" v-if="cats">
         <h3>Kissat</h3>
-        <div
-          @click="() => navigateToCat(cat.id)"
-          v-for="cat in cats"
-          :key="cat.id"
-          class="cat d-flex border-bottom p-2 flex align-items-center"
-        >
+        <div @click="navigateToCat(cat.id)" v-for="cat in cats" :key="cat.id" class="cat d-flex border-bottom p-2 flex align-items-center">
           <div class="col">
             <img
               class="rounded-circle"
@@ -136,18 +123,8 @@ onMounted(async () => {
                 </svg>
               </button>
               <ul class="dropdown-menu">
-                <li class="dropdown-item" @click.stop="() => loadCatForEdit(cat)">Muokkaa</li>
-                <li
-                  class="dropdown-item"
-                  @click.stop="
-                    () => {
-                      setDeletingCatId(cat.id);
-                      setDeletingCat(true);
-                    }
-                  "
-                >
-                  Poista
-                </li>
+                <li class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
+                <li class="dropdown-item" @click.stop="(deletingCatId = cat.id), (deletingCat = true)">Poista</li>
               </ul>
             </div>
           </div>
@@ -160,7 +137,7 @@ onMounted(async () => {
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">Lisää kissa</h4>
+          <h4 class="modal-title">{{ t("Profile.addCat") }}</h4>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body d-flex flex-column">
@@ -203,10 +180,10 @@ onMounted(async () => {
       <button @click="editCat" class="btn btn-primary ms-auto">Tallenna</button>
     </div>
   </Modal>
-  <Modal :modalId="'delete-modal'" @onCancel="() => setDeletingCat(false)" :visible="deletingCat">
+  <Modal :modalId="'delete-modal'" @onCancel="deletingCat = false" :visible="deletingCat">
     <div class="modal-content">
       <div class="modal-header">
-        <button @click="() => setDeletingCat(false)" type="button" class="btn-close" aria-label="Close"></button>
+        <button @click="deletingCat = false" type="button" class="btn-close" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <p>Poistetaanko kissan tiedot?</p>
