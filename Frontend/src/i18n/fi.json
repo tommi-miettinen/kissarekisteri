@@ -8,7 +8,8 @@
     "members": "Jäsenet"
   },
   "Profile": {
-    "addCat": "Lisää kissa"
+    "addCat": "Lisää kissa",
+    "cats": "Kissat"
   },
   "Users": {
     "members": "Jäsenet",
@@ -17,7 +18,9 @@
   },
   "Cats": {
     "cats": "Kissat",
-    "searchInput": "Etsi kissoista..."
+    "searchInput": "Etsi kissoista...",
+    "breed": "Rotu",
+    "birthDate": "Syntymäaika"
   },
 
   "CatShowList": {
@@ -25,6 +28,8 @@
     "searchInput": "Etsi näyttelyistä...",
     "addCatShow": "Lisää näyttely"
   },
-  "joinEvent": "Liity tapahtumaan",
-  "leaveEvent": "Poistu tapahtumasta"
+  "CatShowDetails": {
+    "joinEvent": "Liity tapahtumaan",
+    "leaveEvent": "Poistu tapahtumasta"
+  }
 }

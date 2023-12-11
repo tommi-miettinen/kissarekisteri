@@ -6,9 +6,11 @@ import { userStore } from "../store/userStore";
 import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
 import { useQuery } from "@tanstack/vue-query";
+import { useI18n } from "vue-i18n";
 import Modal from "../components/Modal.vue";
 
 const route = useRoute();
+const { t } = useI18n();
 
 const eventId = +route.params.eventId;
 const { data: catshow, refetch } = useQuery({ queryKey: ["catshow"], queryFn: () => userAPI.getEventById(eventId) });
@@ -57,9 +59,9 @@ const joinEvent = async () => {
               <p class="card-text mt-auto d-flex align-items-center justify-content-between">
                 <span class="badge rounded-pill text-bg-secondary">{{ catshow.location }}</span>
                 <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary" @click="joiningEvent = true">
-                  Osallistu tapahtumaan
+                  {{ t("CatShowDetails.joinEvent") }}
                 </button>
-                <button v-else @click="leaveEvent" type="button" class="btn btn-danger">Poistu tapahtumasta</button>
+                <button v-else @click="leaveEvent" type="button" class="btn btn-danger">{{ t("CatShowDetails.leaveEvent") }}</button>
               </p>
             </div>
           </div>

@@ -4,6 +4,7 @@ import userAPI from "../api/userAPI";
 import { useRouter } from "vue-router";
 import Modal from "../components/Modal.vue";
 import { useI18n } from "vue-i18n";
+import { formatDate } from "../utils/formatDate";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -45,17 +46,6 @@ const loadEvents = async () => {
   events.value = response;
 };
 
-const formatDate = (dateString: string) =>
-  new Intl.DateTimeFormat("fi-FI", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    timeZone: "Europe/Helsinki",
-  }).format(new Date(dateString));
-
 onMounted(async () => await loadEvents());
 </script>
 <template>
@@ -77,13 +67,15 @@ onMounted(async () => await loadEvents());
           @click="() => navigateToEvent(event.id!)"
           v-for="event in filteredEvents"
           :key="event.id"
-          class="d-flex gap-4 border-bottom p-3 align-items-center pointer cat-show justify-content-between"
+          class="d-flex gap-4 border-bottom px-3 py-2 align-items-center pointer cat-show justify-content-between"
         >
           <div>
             <div>{{ event.name }}</div>
             <span class="text-body-secondary">{{ event.location }}</span>
           </div>
-          <div>{{ `${formatDate(event.startDate)} -  ${formatDate(event.endDate)}` }}</div>
+          <div style="font-size: 12px; font-weight: bold; margin-top: auto">
+            {{ `${formatDate(event.startDate)} -  ${formatDate(event.endDate)}` }}
+          </div>
         </div>
       </div>
     </div>

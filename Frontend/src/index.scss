@@ -4,6 +4,7 @@
 @import "bootstrap/scss/maps";
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
+@import "bootstrap/scss/utilities/api";
 
 $utilities: map-merge(
   $utilities,
@@ -18,4 +19,14 @@ $utilities: map-merge(
   )
 );
 
-@import "bootstrap/scss/utilities/api";
+$utilities: map-merge(
+  $utilities,
+  (
+    "cursor": (
+      property: cursor,
+      class: cursor,
+      responsive: true,
+      values: auto pointer grab,
+    ),
+  )
+);

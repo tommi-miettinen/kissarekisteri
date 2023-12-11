@@ -4,6 +4,7 @@ import catAPI from "../api/catAPI";
 import { useRouter } from "vue-router";
 import { useQuery } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
+import { formatDateNoHours } from "../utils/formatDate";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -17,7 +18,6 @@ const filteredCats = ref<Cat[]>([]);
 const searchQuery = ref("");
 
 const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
-const navigateToCatOwner = (ownerId: string) => router.push(`/users/${ownerId}`);
 
 watchEffect(() => {
   if (!searchQuery.value) {
@@ -33,9 +33,11 @@ watchEffect(() => {
     <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
       <h3>{{ t("Cats.cats") }}</h3>
       <div class="d-flex gap-3 py-3 sticky-top bg-white align-items-center">
-        <div class="col"><input class="form-control" type="text" v-model="searchQuery" :placeholder="t('Cats.searchInput')" /></div>
-        <div class="col">Rotu</div>
-        <div class="col">Syntymäaika</div>
+        <div class="col">
+          <input class="form-control" type="text" v-model="searchQuery" :placeholder="t('Cats.searchInput')" />
+        </div>
+        <div class="col">{{ t("Cats.breed") }}</div>
+        <div class="col">{{ t("Cats.birthDate") }}</div>
       </div>
 
       <div class="d-flex flex-column overflow-auto" style="height: 500px">
@@ -47,27 +49,29 @@ watchEffect(() => {
           v-for="cat in filteredCats"
           :key="cat.id"
           @click="() => navigateToCat(cat.id)"
-          class="cat d-flex border-bottom p-2 flex align-items-center"
+          class="cat border-bottom gap-3 p-3 align-items-center"
         >
-          <div class="col d-flex align-items-center bg-body-secondary">
+          <div class="d-flex align-items-center justify-content-start gap-2">
             <img
               class="rounded-circle"
               height="30"
               width="30"
-              style="object-fit: contain; margin-right: auto"
+              style="object-fit: contain"
               src="https://placekitten.com/300/300"
               alt="Cat Image"
             />
-            <span>
+            <span class="text-upper-capitalize">
               {{ cat.name }}
             </span>
           </div>
 
-          <div class="col">{{ cat.breed }}</div>
-          <div class="col overflow-hidden">{{ cat.birthDate }}</div>
-          <div class="col overflow-hidden gap-2 d-flex justify-content-end">
-            <button @click.stop="() => navigateToCatOwner(cat.ownerId)" class="btn btn-secondary">Omistaja</button>
-            <button @click.stop="() => navigateToCatOwner(cat.breederId)" class="btn btn-secondary">Kasvattaja</button>
+          <div class="">{{ cat.breed }}</div>
+          <div class="overflow-hidden gap-2 align-items-center d-flex justify-content-between">
+            <span>{{
+              //@ts-ignore
+              formatDateNoHours(cat.birthDate)
+            }}</span>
+            <span class="badge rounded-pill text-bg-primary">{{ "Myytävänä" }}</span>
           </div>
         </div>
       </div>
@@ -76,6 +80,10 @@ watchEffect(() => {
 </template>
 
 <style>
+.cat {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
 .cat:hover {
   cursor: pointer;
   background-color: #f3f4f6;

@@ -87,16 +87,16 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
 </script>
 
 <template>
-  <div class="w-100 h-100 d-flex justify-content-center p-5">
-    <div class="d-flex gap-2 w-75" style="height: 75vh">
-      <div class="d-flex flex-column p-5 border rounded" style="width: 30%" v-if="user">
+  <div class="w-100 h-100 d-flex justify-content-center align-items-center p-5">
+    <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
+      <div class="d-flex flex-column" v-if="user">
         <div class="d-flex align-items-center gap-2 mb-4">
-          <img @click="() => setEditingAvatar(!editingAvatar)" class="rounded-circle" width="50" height="50" :src="user.avatarUrl" />
+          <img @click="() => setEditingAvatar(!editingAvatar)" class="rounded-circle" width="42" height="42" :src="user.avatarUrl" />
           <h3>{{ `${user.givenName}  ${user.surname}` }}</h3>
         </div>
       </div>
-      <div class="d-flex flex-column border p-5 rounded" style="width: 70%" v-if="cats">
-        <h3>Kissat</h3>
+      <div class="d-flex flex-column rounded" v-if="cats">
+        <h3>{{ t("Profile.cats") }}</h3>
         <div @click="navigateToCat(cat.id)" v-for="cat in cats" :key="cat.id" class="cat d-flex border-bottom p-2 flex align-items-center">
           <div class="col">
             <img
@@ -129,7 +129,9 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
             </div>
           </div>
         </div>
-        <button type="button" class="btn btn-primary ms-auto mt-2" data-bs-toggle="modal" data-bs-target="#myModal">Lisää kissa</button>
+        <button type="button" class="btn btn-primary ms-auto mt-2" data-bs-toggle="modal" data-bs-target="#myModal">
+          {{ t("Profile.addCat") }}
+        </button>
       </div>
     </div>
   </div>

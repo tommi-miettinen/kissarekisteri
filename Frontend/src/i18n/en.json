@@ -8,7 +8,8 @@
     "members": "Members"
   },
   "Profile": {
-    "addCat": "Add cat"
+    "addCat": "Add cat",
+    "cats": "Cats"
   },
   "Users": {
     "members": "Members",
@@ -17,15 +18,17 @@
   },
   "Cats": {
     "cats": "Cats",
-    "searchInput": "Search cats..."
+    "searchInput": "Search cats...",
+    "breed": "Breed",
+    "birthDate": "Birth date"
   },
   "CatShowList": {
     "catShows": "Cat shows",
     "searchInput": "Search cat shows...",
     "addCatShow": "Add cat show"
   },
-  "CatShow": {
-    "joinEvent": "Leave event",
-    "leaveEvent": "Join event"
+  "CatShowDetails": {
+    "joinEvent": "Join event",
+    "leaveEvent": "Leave event"
   }
 }

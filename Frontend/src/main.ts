@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import { createRouter, createWebHistory } from "vue-router";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import App from "./App.vue";
 import Profile from "./views/Profile.vue";
@@ -11,11 +12,9 @@ import UserDetails from "./views/UserDetails.vue";
 import { createI18n } from "vue-i18n";
 import en from "./i18n/en.json";
 import fi from "./i18n/fi.json";
-import "./custom.scss";
+import "./index.scss";
 
 const app = createApp(App);
-
-import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   { path: "/profile", component: Profile },
@@ -40,7 +39,6 @@ const router = createRouter({
 const i18n = createI18n({
   legacy: false,
   locale: "fi",
-
   messages: {
     en: en,
     fi: fi,

@@ -14,7 +14,6 @@
     <EmbeddedResource Remove="AppCreationScripts\**" />
     <EmbeddedResource Remove="Frontend\**" />
     <None Remove="AppCreationScripts\**" />
-      <None Remove="Frontend\**" />
   </ItemGroup>
 
   <ItemGroup>
