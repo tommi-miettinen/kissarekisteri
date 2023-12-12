@@ -40,3 +40,5 @@ dist-ssr
 *.override.tf
 *.override.tf.json
 *_override.tf
+
+azurite-data

@@ -16,22 +16,20 @@ using Microsoft.Graph;
 using Microsoft.Identity.Web;
 using System.Text.Json.Serialization;
 
-
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(
-        builder =>
-        {
-            builder.WithOrigins("http://localhost:5173")
-                   .AllowAnyHeader()
-                   .AllowAnyMethod()
-                   .AllowCredentials();
-        });
+    options.AddDefaultPolicy(builder =>
+    {
+        builder
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
-
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
@@ -42,7 +40,6 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 builder.Services.AddSingleton(serviceProvider =>
 {
-
     var graphConfig = config.GetSection("Graph");
     var tenantId = graphConfig["TenantId"];
     var appId = graphConfig["AppId"];
@@ -59,34 +56,43 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UploadService>();
 builder.Services.AddScoped<CatService>();
 builder.Services.AddScoped<CatShowService>();
-builder.Services.AddMicrosoftIdentityWebAppAuthentication(config, Microsoft.Identity.Web.Constants.AzureAdB2C);
+builder.Services.AddMicrosoftIdentityWebAppAuthentication(
+    config,
+    Microsoft.Identity.Web.Constants.AzureAdB2C
+);
 
-
-builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
-{
-    options.Scope.Add(options.ClientId);
-
-    options.Events = new OpenIdConnectEvents
+builder.Services.Configure<OpenIdConnectOptions>(
+    OpenIdConnectDefaults.AuthenticationScheme,
+    options =>
     {
-        OnTokenValidated = async context =>
+        options.Scope.Add(options.ClientId);
+
+        options.Events = new OpenIdConnectEvents
         {
-            await context.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.Principal);
-            context.Response.Redirect("http://localhost:5173/cats");
-            context.HandleResponse();
-        }
-    };
-});
+            OnTokenValidated = async context =>
+            {
+                await context.HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    context.Principal
+                );
+                context.Response.Redirect("http://localhost:5173/cats");
+                context.HandleResponse();
+            }
+        };
+    }
+);
 
 builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"));
 });
 
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-});
-
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 builder.Services.AddControllers();
 
