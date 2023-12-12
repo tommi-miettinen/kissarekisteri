@@ -1,0 +1,19 @@
+{
+  "name": "kissarekisteriapp",
+  "version": "1.0.0",
+  "description": "--- services: active-directory platforms: dotnet author: TiagoBrenck level: 100 client: ASP.NET Core Web App endpoint: Microsoft identity platform --- # An ASP.NET Core Web app signing-in users with the Microsoft identity platform in Azure AD B2C",
+  "main": "index.js",
+  "dependencies": {
+    "playwright": "^1.40.1",
+    "playwright-core": "^1.40.1",
+    "undici-types": "^5.26.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.1",
+    "@types/node": "^20.10.4"
+  },
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
