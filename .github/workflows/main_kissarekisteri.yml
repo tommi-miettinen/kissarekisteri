@@ -67,7 +67,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "kissarekisteri"
+          app-name: "kissarekisteri-app"
           slot-name: "Production"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_B00C7B8E48BA4F078B21ECA707A5904C }}
           package: .
