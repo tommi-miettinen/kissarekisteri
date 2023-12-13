@@ -7,13 +7,13 @@ terraform {
   }
 }
 
-provider azurerm {
+provider "azurerm" {
   features {}
 }
 
 locals {
-rg_name = "kissarekisteri"
-location = "northeurope"
+  rg_name  = "kissarekisteri"
+  location = "northeurope"
 }
 
 
@@ -30,13 +30,13 @@ variable sql_admin_password {
 
 
 
-resource azurerm_resource_group rg {
+resource "azurerm_resource_group" "rg" {
   name     = local.rg_name
   location = local.location
 }
 
 
-resource azurerm_storage_account sa {
+resource "azurerm_storage_account" "sa" {
   name                     = "kissarekisteritf"
   resource_group_name      = local.rg_name
   location                 = local.location
@@ -54,7 +54,7 @@ resource azurerm_storage_account sa {
     }
   }
 
-  depends_on = [ azurerm_resource_group.rg ]
+  depends_on = [azurerm_resource_group.rg]
 }
 
 
@@ -78,40 +78,40 @@ resource azurerm_sql_database sql {
 */
 
 
-resource azurerm_service_plan example {
+resource "azurerm_service_plan" "example" {
   name                = "kissarekisterisp"
   location            = local.location
   resource_group_name = local.rg_name
-  os_type = "Windows"
-  sku_name = "F1"
+  os_type             = "Windows"
+  sku_name            = "F1"
 
-    depends_on = [ azurerm_resource_group.rg ]
+  depends_on = [azurerm_resource_group.rg]
 }
 
-resource azurerm_windows_web_app appservice {
-    name                =   "kissarekisteri-app"
-    location              =   local.location
-    resource_group_name   =   local.rg_name
-    service_plan_id =   azurerm_service_plan.example.id
+resource "azurerm_windows_web_app" "appservice" {
+  name                = "kissarekisteri-app"
+  location            = local.location
+  resource_group_name = local.rg_name
+  service_plan_id     = azurerm_service_plan.example.id
 
 
-    
-    site_config {
-      always_on = false
-          application_stack {
-          current_stack = "dotnet"
-          dotnet_version = "v8.0"
+
+  site_config {
+    always_on = false
+    application_stack {
+      current_stack  = "dotnet"
+      dotnet_version = "v8.0"
     }
-       
-    }
-    https_only = true
 
-    depends_on = [ azurerm_resource_group.rg,azurerm_service_plan.example ]
+  }
+  https_only = true
+
+  depends_on = [azurerm_resource_group.rg, azurerm_service_plan.example]
 }
 
 
-output app_service_publish_profile {
+output "app_service_publish_profile" {
   description = "Azure App Services publish profile, add this to github secrets for deployment workflow"
-  value = azurerm_windows_web_app.appservice.site_credential
-  sensitive = true
+  value       = azurerm_windows_web_app.appservice.site_credential
+  sensitive   = true
 }
