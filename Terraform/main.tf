@@ -15,7 +15,9 @@ provider "azurerm" {
   features {}
 }
 
-provider "azuread" {}
+provider "azuread" {
+ # tenant_id = "d128e5ef-7125-45c2-8e8c-4fd41c0c862e"
+}
 
 /*
 variable "sql_admin_password" {
@@ -26,16 +28,50 @@ variable "sql_admin_password" {
 */
 
 resource "azurerm_aadb2c_directory" "kissarekisteriAdB2C" {
+  country_code            = "FI"
   data_residency_location = "Europe"
-  domain_name             = "kissarekisteri.onmicrosoft.com"
+  display_name            = "KissarekisteriAdB2C"
+  domain_name             = "kissarekisterib2c.onmicrosoft.com"
   resource_group_name     = azurerm_resource_group.rg.name
   sku_name                = "PremiumP1"
 }
 
-resource "azuread_application" "kissarekisteriAuth" {
-  display_name = "test"
+data "azuread_application_published_app_ids" "well_known" {}
 
+resource "azuread_application" "kissarekisteriAuth" {
+  display_name = "kissarekisteriAuthAdB2C"
+  sign_in_audience = "AzureADandPersonalMicrosoftAccount"
+
+
+  api {
+    requested_access_token_version = 2
+  }
+  
+  required_resource_access {
+    resource_app_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+
+    #https://learn.microsoft.com/en-us/graph/permissions-reference
+    resource_access {
+      id   = "7427e0e9-2fba-42fe-b0c0-848c9e6a8182" # #offline_access
+      type = "Scope"
+    }
+
+    resource_access {
+      id   = "37f7f235-527c-4136-accd-4a02d197296e" # openid
+      type = "Scope"
+    }
+  }
+
+  web {
+    redirect_uris = ["https://jwt.ms/"]
+
+    implicit_grant {
+      access_token_issuance_enabled = true
+      id_token_issuance_enabled     = true
+    }
+  }
 }
+
 
 resource "azurerm_resource_group" "rg" {
   name     = "kissarekisteri"
