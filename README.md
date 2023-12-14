@@ -36,7 +36,7 @@ https://developer.hashicorp.com/terraform/tutorials/azure-get-started/azure-buil
 
 ##### Update the terraform azuread provider tenant_id so the ad application will be created inside the AdB2C directory.
 
-```json
+```hcl
 provider "azuread" {
  # tenant_id = "tenant-id-from-aadb2c"
 }
@@ -44,16 +44,16 @@ provider "azuread" {
 
 ##### Create the ad application.
 
-`terraform plan -target="azuread_application.kissarekisteriAuth"`
-`terraform apply -target="azuread_application.kissarekisteriAuth"`
+    terraform plan -target="azuread_application.kissarekisteriAuth"
+    terraform apply -target="azuread_application.kissarekisteriAuth"
 
 ##### Remove the tenant_id so rest of the resources get created in the default directory.
 
-```json
+```hcl
 provider "azuread" {}
 ```
 
 ##### Create rest of the resources.
 
-`terraform plan`
-`terraform apply`
+    terraform plan
+    terraform apply
