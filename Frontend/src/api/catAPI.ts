@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseUrl = import.meta.env.MODE === "development" ? "https://localhost:44316" : "https://kissarekisteri.azurewebsites.net";
+const baseUrl = import.meta.env.MODE === "development" ? "https://localhost:44316" : "/";
 
 const apiManagementBaseUrl = "https://kissarekisteriapimanagement.azure-api.net";
 

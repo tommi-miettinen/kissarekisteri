@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 
 namespace Kissarekisteribackend.Controllers;
+
 public class UserController(UserService userService) : Controller
 {
     private readonly UserService _userService = userService;

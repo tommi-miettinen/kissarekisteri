@@ -15,6 +15,7 @@ const { data, isLoading } = useQuery({
 
 const filteredUsers = ref<User[]>([]);
 const searchQuery = ref("");
+const avatarLoadError = ref(false);
 
 const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
 
@@ -56,13 +57,14 @@ watchEffect(() => {
         >
           <div class="col d-flex align-items-center gap-2 col-8">
             <img
-              v-if="user.avatarUrl"
+              v-if="user.avatarUrl && !avatarLoadError"
               class="rounded-circle"
               height="32"
               width="32"
               style="object-fit: fill"
               :src="user.avatarUrl"
               alt="User avatar"
+              :onerror="(avatarLoadError = true)"
             />
             <div
               style="width: 32px; height: 32px; font-size: 14px"

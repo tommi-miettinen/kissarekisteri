@@ -52,14 +52,7 @@ watchEffect(() => {
           class="cat border-bottom gap-3 p-3 align-items-center"
         >
           <div class="d-flex align-items-center justify-content-start gap-2">
-            <img
-              class="rounded-circle"
-              height="30"
-              width="30"
-              style="object-fit: contain"
-              src="https://placekitten.com/300/300"
-              alt="Cat Image"
-            />
+            <img class="rounded-circle bg-primary" height="30" width="30" style="object-fit: contain" />
             <span class="text-upper-capitalize">
               {{ cat.name }}
             </span>

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { userStore, logout } from "../store/userStore";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -7,6 +7,8 @@ import { useI18n } from "vue-i18n";
 const user = userStore((state) => state.user);
 const router = useRouter();
 const { t, locale } = useI18n();
+
+const avatarLoadError = ref(false);
 
 const handleLocaleClick = () => (locale.value === "fi" ? (locale.value = "en") : (locale.value = "fi"));
 const localeString = computed(() => (locale.value === "fi" ? "In English" : "Suomeksi"));
@@ -22,14 +24,30 @@ const logoutFromApp = () => {
     <ul class="nav align-items-center px-2" style="color: black">
       <div v-if="user" class="dropdown">
         <div class="rounded-circle" type="button" data-bs-toggle="dropdown">
-          <img class="rounded-circle" height="32" width="32" style="object-fit: fill" :src="user.avatarUrl" alt="Cat Image" />
+          <img
+            v-if="user.avatarUrl && !avatarLoadError"
+            class="rounded-circle"
+            height="32"
+            width="32"
+            style="object-fit: fill"
+            :src="user.avatarUrl"
+            alt="User avatar"
+            :onerror="(avatarLoadError = true)"
+          />
+          <div
+            style="width: 32px; height: 32px; font-size: 14px"
+            class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
+            v-else
+          >
+            {{ user.givenName[0] + user.surname[0] }}
+          </div>
         </div>
         <ul class="dropdown-menu">
           <router-link class="dropdown-item" to="/profile">{{ t("Navigation.profile") }}</router-link>
           <li @click="logoutFromApp" class="dropdown-item">{{ t("Navigation.logout") }}</li>
         </ul>
       </div>
-      <a v-if="!user" href="https://localhost:44316/login" class="btn btn-primary">{{ t("Navigation.login") }}</a>
+      <a data-testid="login-btn" v-if="!user" href="https://localhost:44316/login" class="btn btn-primary">{{ t("Navigation.login") }}</a>
       <li class="nav-item">
         <router-link style="color: black" class="nav-link" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
       </li>

@@ -73,6 +73,8 @@ const deleteCat = async (catId: number) => {
   deletingCat.value = false;
 };
 
+const avatarLoadError = ref(false);
+
 const editCat = async () => {
   await catAPI.editCat(updatedCat.value);
 };
@@ -91,7 +93,25 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
     <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
       <div class="d-flex flex-column" v-if="user">
         <div class="d-flex align-items-center gap-2 mb-4">
-          <img @click="() => setEditingAvatar(!editingAvatar)" class="rounded-circle" width="42" height="42" :src="user.avatarUrl" />
+          <div class="d-flex align-items-center" @click="() => setEditingAvatar(!editingAvatar)">
+            <img
+              v-if="user.avatarUrl && !avatarLoadError"
+              class="rounded-circle"
+              height="32"
+              width="32"
+              style="object-fit: fill"
+              :src="user.avatarUrl"
+              alt="User avatar"
+              :onerror="(avatarLoadError = true)"
+            />
+            <div
+              style="width: 32px; height: 32px; font-size: 14px"
+              class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
+              v-else
+            >
+              {{ user.givenName[0] + user.surname[0] }}
+            </div>
+          </div>
           <h3>{{ `${user.givenName}  ${user.surname}` }}</h3>
         </div>
       </div>
@@ -129,7 +149,13 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
             </div>
           </div>
         </div>
-        <button type="button" class="btn btn-primary ms-auto mt-2" data-bs-toggle="modal" data-bs-target="#myModal">
+        <button
+          data-testid="add-new-cat-btn"
+          type="button"
+          class="btn btn-primary ms-auto mt-2"
+          data-bs-toggle="modal"
+          data-bs-target="#myModal"
+        >
           {{ t("Profile.addCat") }}
         </button>
       </div>
@@ -138,22 +164,18 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
   <div class="modal fade" id="myModal">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">{{ t("Profile.addCat") }}</h4>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
         <div class="modal-body d-flex flex-column">
           <div class="mb-3">
             <label for="catName" class="form-label">Nimi</label>
-            <input type="text" class="form-control" id="catName" v-model="newCat.name" />
+            <input data-testid="new-cat-name-input" type="text" class="form-control" id="catName" v-model="newCat.name" />
           </div>
           <div class="mb-3">
             <label for="catBreed" class="form-label">Rotu</label>
-            <input type="text" class="form-control" id="catBreed" v-model="newCat.breed" />
+            <input data-testid="new-cat-breed-input" type="text" class="form-control" id="catBreed" v-model="newCat.breed" />
           </div>
           <div class="mb-3">
             <label for="catBirthDate" class="form-label">Syntymäaika</label>
-            <input type="date" class="form-control" id="catBirthDate" v-model="newCat.birthDate" />
+            <input data-testid="new-cat-birthdate-input" type="date" class="form-control" id="catBirthDate" v-model="newCat.birthDate" />
           </div>
           <button @click="addCat" class="btn btn-primary ms-auto">Lisää kissa</button>
         </div>
@@ -166,7 +188,7 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
     </div>
   </Modal>
   <Modal :modalId="'edit-modal'" @onCancel="() => setEditingCat(false)" :visible="editingCat">
-    <div class="modal-body d-flex flex-column">
+    <div class="w-100 p-4 d-flex flex-column">
       <div class="mb-3">
         <label for="catName" class="form-label">Nimi</label>
         <input type="text" class="form-control" id="catName" v-model="updatedCat.name" />

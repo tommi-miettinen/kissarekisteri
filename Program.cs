@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,18 +23,11 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(builder =>
     {
         builder
-            .WithOrigins("http://localhost:5173")
+            .WithOrigins("https://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
-});
-
-builder.Services.Configure<CookiePolicyOptions>(options =>
-{
-    options.CheckConsentNeeded = context => true;
-    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
-    options.HandleSameSiteCookieCompatibility();
 });
 
 builder.Services.AddSingleton(serviceProvider =>
@@ -75,7 +67,7 @@ builder.Services.Configure<OpenIdConnectOptions>(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     context.Principal
                 );
-                context.Response.Redirect("http://localhost:5173/cats");
+                context.Response.Redirect("https://localhost:5173/cats");
                 context.HandleResponse();
             }
         };
@@ -84,14 +76,7 @@ builder.Services.Configure<OpenIdConnectOptions>(
 
 builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
 {
-    if (builder.Environment.IsDevelopment())
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"));
-    }
-    else
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSQL"));
-    }
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSQL"));
 });
 
 builder.Services
