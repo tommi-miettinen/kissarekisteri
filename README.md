@@ -103,7 +103,8 @@ provider "azuread" {}
 - Navigate to Azure AdB2C / App registrations
 - Select "User flows" from the sidebar
 - Click "New user flow"
-- Select "Sign up and sign in", use the recommended option
+- Select "Sign up and sign in"
+- Select "Recommended"
 - Name the user flow "B2C_1_SIGN_IN_SIGN_UP"
 - Select local accounts "Email"
 - MFA method "Email"
