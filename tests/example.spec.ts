@@ -21,7 +21,7 @@ test("login works", async () => {
   await page.locator("id=password").fill("testiukkeli_123");
   await page.locator("id=next").click();
 
-  await page.waitForTimeout(5000);
+  await page.waitForURL("https://localhost:5173/cats");
 
   expect(page.url()).toBe("https://localhost:5173/cats");
 });
@@ -29,15 +29,17 @@ test("login works", async () => {
 test("cat creation works", async () => {
   await page.goto("https://localhost:5173/profile");
 
+  await page.waitForTimeout(2000);
+
   await page.getByTestId("add-new-cat-btn").click();
   await page.getByTestId("new-cat-name-input").fill("testikissa");
   await page.getByTestId("new-cat-breed-input").fill("testirotu");
-  await page.getByTestId("new-cat-breed-input").fill("testirotu");
+  await page.getByTestId("new-cat-birthdate-input").fill("2023-12-22");
   await page.getByTestId("add-new-cat-btn-save").click();
 
   await page.reload();
 
-  await page.waitForTimeout(5000);
+  const testikissa = await page.getByText("testikissa");
 
-  expect(page.url()).toBe("https://localhost:5173/cats");
+  expect(testikissa).toBeTruthy();
 });

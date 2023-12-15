@@ -177,7 +177,7 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
             <label for="catBirthDate" class="form-label">Syntymäaika</label>
             <input data-testid="new-cat-birthdate-input" type="date" class="form-control" id="catBirthDate" v-model="newCat.birthDate" />
           </div>
-          <button @click="addCat" class="btn btn-primary ms-auto">Lisää kissa</button>
+          <button data-testid="add-new-cat-btn-save" @click="addCat" class="btn btn-primary ms-auto">Lisää kissa</button>
         </div>
       </div>
     </div>
