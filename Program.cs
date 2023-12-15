@@ -84,7 +84,14 @@ builder.Services.Configure<OpenIdConnectOptions>(
 
 builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"));
+    if (builder.Environment.IsDevelopment())
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"));
+    }
+    else
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSQL"));
+    }
 });
 
 builder.Services

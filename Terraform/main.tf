@@ -27,6 +27,12 @@ variable "sql_admin_password" {
 }
 */
 
+locals {
+  #https://learn.microsoft.com/en-us/graph/permissions-reference
+  openid_scope_id = "37f7f235-527c-4136-accd-4a02d197296e"
+  offline_access_scope_id = "7427e0e9-2fba-42fe-b0c0-848c9e6a8182"
+}
+
 resource "azurerm_aadb2c_directory" "kissarekisteriAdB2C" {
   country_code            = "FI"
   data_residency_location = "Europe"
@@ -50,14 +56,13 @@ resource "azuread_application" "kissarekisteriAuth" {
   required_resource_access {
     resource_app_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
 
-    #https://learn.microsoft.com/en-us/graph/permissions-reference
     resource_access {
-      id   = "7427e0e9-2fba-42fe-b0c0-848c9e6a8182" # #offline_access
+      id   = local.offline_access_scope_id
       type = "Scope"
     }
 
     resource_access {
-      id   = "37f7f235-527c-4136-accd-4a02d197296e" # openid
+      id   = local.openid_scope_id
       type = "Scope"
     }
   }
@@ -128,6 +133,7 @@ resource "azurerm_windows_web_app" "appservice" {
   location            = azurerm_resource_group.rg.location
   service_plan_id     = azurerm_service_plan.kissarekisterisp.id
   https_only          = true
+
 
   site_config {
     always_on = false
