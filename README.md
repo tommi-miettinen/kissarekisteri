@@ -57,10 +57,10 @@ Start the app
 
 #### Setup az cli, authenticate and set the env vars.
 
-1. - Install the Azure CLI tool
-2. - Authenticate using the Azure CLI
-3. - Create a Service Principal
-4. - Set your environment variables
+- Install the Azure CLI tool
+- Authenticate using the Azure CLI
+- Create a Service Principal
+- Set your environment variables
 
 https://developer.hashicorp.com/terraform/tutorials/azure-get-started/azure-build#authenticate-using-the-azure-cli
 
