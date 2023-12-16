@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import userAPI from "../api/userAPI";
 import { useRouter } from "vue-router";
 import Modal from "../components/Modal.vue";
 import { useI18n } from "vue-i18n";
 import { formatDate } from "../utils/formatDate";
+import catShowAPI from "../api/catShowAPI";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -36,12 +36,13 @@ const filteredEvents = computed(() => {
 const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`);
 
 const createCatShow = async () => {
-  await userAPI.createCatShowEvent(newEvent.value);
+  await catShowAPI.createCatShowEvent(newEvent.value);
   await loadEvents();
+  addingEvent.value = false;
 };
 
 const loadEvents = async () => {
-  const response = await userAPI.getEvents();
+  const response = await catShowAPI.getEvents();
   if (!response) return;
   events.value = response;
 };

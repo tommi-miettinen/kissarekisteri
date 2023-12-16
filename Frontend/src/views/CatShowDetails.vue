@@ -1,76 +1,84 @@
 <script lang="ts" setup>
 import { ref, computed } from "vue";
-import userAPI from "../api/userAPI";
 import catAPI from "../api/catAPI";
 import { userStore } from "../store/userStore";
 import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
-import { useQuery } from "@tanstack/vue-query";
+import { useMutation, useQuery } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
 import Modal from "../components/Modal.vue";
+import catShowAPI from "../api/catShowAPI";
 
 const route = useRoute();
 const { t } = useI18n();
 
+const selectedCatIds = ref<number[]>([]);
 const eventId = +route.params.eventId;
-const { data: catshow, refetch } = useQuery({ queryKey: ["catshow"], queryFn: () => userAPI.getEventById(eventId) });
+
+const { data: catShow, refetch } = useQuery({ queryKey: ["catshow"], queryFn: () => catShowAPI.getEventById(eventId) });
+
+const { mutate: joinEvent } = useMutation({
+  mutationFn: () => catShowAPI.joinEvent(eventId, selectedCatIds.value),
+  onSuccess: () => {
+    toast.info("Osallistuminen rekisteröity"), refetch();
+  },
+});
+
+const uploadMutation = useMutation({
+  mutationFn: (file: File) => {
+    return catShowAPI.addCatShowPhoto(eventId, file);
+  },
+  onSuccess: refetch,
+});
+
+const { mutate: leaveEvent } = useMutation({
+  mutationFn: () => catShowAPI.leaveEvent(eventId),
+  onSuccess: () => {
+    toast.info("Osallistuminen peruttu"), refetch();
+  },
+});
+
 const { data: userCats } = useQuery({
   queryKey: ["userCats"],
   queryFn: catAPI.getCats,
 });
-const user = ref(userStore((state) => state.user));
 
-const selectedCatIds = ref<number[]>([]);
-const joiningEvent = ref<boolean>(false);
+const user = userStore.user;
+const joiningEvent = ref(false);
 
-const isUserAnAttendee = computed(
-  () => catshow.value && catshow.value.attendees.some((attendee: any) => attendee.userId === user.value.id)
-);
+const isUserAnAttendee = computed(() => catShow.value && catShow.value.attendees.some((attendee: any) => attendee.userId === user?.id));
 
-const leaveEvent = async () => {
-  await userAPI.leaveEvent(eventId);
-  await refetch();
-  toast.info("Osallistuminen peruttu");
-};
+const handleFileChange = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (!input || !input.files) return;
 
-const joinEvent = async () => {
-  const joined = await userAPI.joinEvent(eventId, selectedCatIds.value);
-  if (!joined) return;
-
-  await refetch();
-  toast.info("Osallistuminen rekisteröity");
+  uploadMutation.mutate(input.files[0]);
 };
 </script>
 
 <template>
   <div class="p-2 w-100 h-100 d-flex flex-column justify-content-center align-items-center p-5">
     <div class="w-50">
-      <div v-if="catshow" class="card">
-        <div class="row g-0">
-          <div class="col-md-4">
-            <img src="https://placekitten.com/300/300" class="img-fluid rounded-start" alt="..." />
-          </div>
-          <div class="col-md-8 d-flex flex-column">
-            <div class="card-body d-flex flex-column">
-              <h5 class="card-title">{{ catshow.name }}</h5>
-              <p class="card-text">
-                {{ catshow.description }}
-              </p>
-              <p class="card-text mt-auto d-flex align-items-center justify-content-between">
-                <span class="badge rounded-pill text-bg-secondary">{{ catshow.location }}</span>
-                <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary" @click="joiningEvent = true">
-                  {{ t("CatShowDetails.joinEvent") }}
-                </button>
-                <button v-else @click="leaveEvent" type="button" class="btn btn-danger">{{ t("CatShowDetails.leaveEvent") }}</button>
-              </p>
-            </div>
-          </div>
+      <div v-if="catShow" class="d-flex rounded overflow-hidden border">
+        <div class="bg-primary" style="width: 300px; height: 300px" />
+        <div class="card-body d-flex flex-column p-4">
+          <h5 class="card-title">{{ catShow.name }}</h5>
+          <p class="card-text">
+            {{ catShow.description }}
+          </p>
+          <p class="card-text mt-auto d-flex align-items-center justify-content-between">
+            <span class="badge rounded-pill text-bg-secondary">{{ catShow.location }}</span>
+            <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary" @click="joiningEvent = true">
+              {{ t("CatShowDetails.joinEvent") }}
+            </button>
+            <button v-else @click="() => leaveEvent()" type="button" class="btn btn-danger">{{ t("CatShowDetails.leaveEvent") }}</button>
+          </p>
         </div>
       </div>
 
-      <div v-if="catshow && catshow.attendees && catshow.attendees.length > 0" class="attendees-list mt-3">
+      <div v-if="catShow && catShow.attendees && catShow.attendees.length > 0" class="attendees-list mt-3">
         <h4>Osallistujat</h4>
-        <div v-for="attendee in catshow.attendeeDetails" :key="attendee.id" class="mb-2">
+        <div v-for="attendee in catShow.attendeeDetails" :key="attendee.id" class="mb-2">
           <div class="fw-bold">{{ `${attendee.givenName}  ${attendee.surname}` }}</div>
           <ul v-if="attendee.cats && attendee.cats.length">
             <li v-for="cat in attendee.cats" :key="cat.id">{{ cat.name }} ({{ cat.breed }})</li>
@@ -78,7 +86,14 @@ const joinEvent = async () => {
         </div>
       </div>
     </div>
+    <button class="btn btn-primary me-auto"><input type="file" @change="handleFileChange" id="catImageInput" /></button>
 
+    <div v-if="catShow" class="gap-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr">
+      <div style="position: relative" class="d-flex flex-column border" v-for="catShowImage in catShow.photos" :key="catShowImage.url">
+        <img :src="catShowImage.url" class="cat-thumbnail w-100" alt="Cat image" />
+        <button class="btn btn-primary position-absolute bottom-0 m-2 z-1">Aseta profiilikuvaksi</button>
+      </div>
+    </div>
     <Modal :modalId="'join-event-modal'" :visible="joiningEvent" @onCancel="joiningEvent = false">
       <div class="d-flex flex-column bg-white w-100 p-4 gap-4 rounded">
         <div v-if="user && userCats && userCats.length > 0">

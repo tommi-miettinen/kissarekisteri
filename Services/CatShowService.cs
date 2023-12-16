@@ -1,15 +1,18 @@
 ﻿using Kissarekisteribackend.Database;
 using Kissarekisteribackend.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Services
 {
-    public class CatShowService(KissarekisteriDbContext dbContext, UserService userService)
+    public class CatShowService(KissarekisteriDbContext dbContext, UserService userService, UploadService uploadService)
     {
         private readonly KissarekisteriDbContext _dbContext = dbContext;
         private readonly UserService _userService = userService;
+        private readonly UploadService _uploadService = uploadService;
 
         public async Task<bool> JoinCatShowAsync(int catShowId, string userId, CatShowCatAttendeeIds catIds)
         {
@@ -50,10 +53,35 @@ namespace Kissarekisteribackend.Services
             return true;
         }
 
+        public async Task<CatShow> UploadCatShowPhoto(int catShowId, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                Console.WriteLine("no file");
+                return null;
+            }
+            var cat = await _dbContext.CatShows.FirstOrDefaultAsync(catShow => catShow.Id == catShowId);
+
+            var uploadedPhoto = await _uploadService.UploadFile(file);
+
+            await _dbContext.CatShowPhotos.AddAsync(new CatShowPhoto
+            {
+                CatShowId = cat.Id,
+                Url = uploadedPhoto.Uri.AbsoluteUri
+            });
+
+            await _dbContext.SaveChangesAsync();
+
+            var catShowWithPhotos = await _dbContext.CatShows.Include(c => c.Photos).FirstOrDefaultAsync(catShow => catShow.Id == catShowId);
+
+            return catShowWithPhotos;
+        }
+
         public async Task<CatShow> GetCatShowByIdAsync(int catShowId)
         {
             var catShow = await _dbContext.CatShows
                 .Include(e => e.Attendees)
+                .Include(e => e.Photos)
                 .FirstOrDefaultAsync(e => e.Id == catShowId);
 
             if (catShow == null) return null;

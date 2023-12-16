@@ -3,6 +3,7 @@ using Kissarekisteribackend.Models;
 using Kissarekisteribackend.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -65,6 +66,15 @@ public class CatShowController(KissarekisteriDbContext dbContext, CatShowService
         var catShows = _dbContext.CatShows.ToList();
         return Json(catShows);
     }
+
+
+    [HttpPost("catshows/{catShowId}/photos")]
+    public async Task<IActionResult> UploadCatShowPhoto(int catShowId, IFormFile file)
+    {
+        var catShow = await _catShowService.UploadCatShowPhoto(catShowId, file);
+        return Json(catShow);
+    }
+
 
     [HttpGet("catshows/{catShowId}")]
     public async Task<IActionResult> GetEvent(int catShowId)

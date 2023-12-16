@@ -13,19 +13,19 @@ import Cropper from "../components/Cropper.vue";
 const router = useRouter();
 const { t } = useI18n();
 
-const user = ref<User>(userStore((state) => state.user));
-
-const userId = computed(() => user.value?.id);
+const user = computed(() => userStore.user);
 
 const { data: cats, refetch: refetchCats } = useQuery({
-  queryKey: ["cats" + userId.value],
-  queryFn: () => userAPI.getCatsByUserId(userId.value),
-  enabled: Boolean(userId.value),
+  queryKey: ["cats" + user.value?.id],
+  queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
+  enabled: Boolean(user.value?.id),
 });
 
 const { mutate } = useMutation({
   mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),
-  onSuccess: () => toast.success("Kissan tiedot lisätty"),
+  onSuccess: () => {
+    toast.success("Kissan tiedot lisätty"), refetchCats();
+  },
 });
 
 /*
@@ -35,7 +35,7 @@ const { mutate: mutateUser } = useMutation({
 });
 */
 
-watch(userId, () => refetchCats());
+watch(user, () => refetchCats());
 
 const newCat = ref<CatPayload>({
   name: "",
@@ -119,18 +119,11 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
           :key="cat.id"
           class="cat d-flex border-bottom p-2 flex align-items-center"
         >
-          <div class="col">
-            <img
-              class="rounded-circle"
-              height="30"
-              width="30"
-              style="object-fit: contain; margin-right: auto"
-              src="https://placekitten.com/300/300"
-              alt="Cat Image"
-            />
-          </div>
-          <div class="col">
-            {{ cat.name }}
+          <div class="col d-flex align-items-center justify-content-start gap-2">
+            <img class="rounded-circle bg-primary" height="30" width="30" style="object-fit: contain" />
+            <span class="text-upper-capitalize">
+              {{ cat.name }}
+            </span>
           </div>
           <div class="col">{{ cat.breed }}</div>
           <div class="col overflow-hidden">{{ cat.birthDate }}</div>
@@ -152,14 +145,7 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
             </div>
           </div>
         </div>
-        <button
-          @click="addingCat = true"
-          data-testid="add-new-cat-btn"
-          type="button"
-          class="btn btn-primary ms-auto mt-2"
-          data-bs-toggle="modal"
-          data-bs-target="#myModal"
-        >
+        <button @click="addingCat = true" data-testid="add-new-cat-btn" type="button" class="btn btn-primary ms-auto mt-2">
           {{ t("Profile.addCat") }}
         </button>
       </div>

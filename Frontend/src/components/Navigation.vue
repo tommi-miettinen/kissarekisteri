@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
-import { userStore, logout } from "../store/userStore";
+import { user, logout } from "../store/userStore";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 
-const user = userStore((state) => state.user);
 const router = useRouter();
 const { t, locale } = useI18n();
 

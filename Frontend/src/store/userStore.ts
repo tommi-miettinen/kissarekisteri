@@ -1,32 +1,33 @@
 import userAPI from "../api/userAPI";
-import create from "vue-zustand";
+import { reactive, computed } from "vue";
 
 interface UserState {
-  user: null | any;
+  user: null | User;
 }
 
-export const userStore = create<UserState>(() => ({
+export const userStore = reactive<UserState>({
   user: null,
-}));
+});
 
 export const setUser = (user: any) => {
-  userStore.setState({ user });
+  userStore.user = user;
 };
 
 export const fetchUser = async () => {
   const user = await userAPI.getCurrentUser();
   user.cats = await userAPI.getCatsByUserId(user.id);
   if (!user) return;
-  userStore.setState({ user });
+
+  userStore.user = user;
 };
 
-export const logout = () => {
-  userStore.setState({ user: null });
-};
+export const logout = () => (userStore.user = null);
 
 export const editUser = async (user: User) => {
   const editedUser = await userAPI.editUser(user);
   if (!editedUser) return;
 
-  userStore.setState({ user: editedUser });
+  userStore.user = editedUser;
 };
+
+export const user = computed(() => userStore.user);

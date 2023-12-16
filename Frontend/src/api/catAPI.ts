@@ -59,9 +59,11 @@ const editCat = async (updatedCat: EditCatPayload) => {
 };
 
 const uploadCatImage = async (catId: number, image: File) => {
+  if (!image) return;
+
   try {
     const formData = new FormData();
-    if (image) formData.append("image", image);
+    formData.append("file", image);
 
     const result = await axios.post(`${baseUrl}/cats/${catId}/photo`, formData);
     return result.data;

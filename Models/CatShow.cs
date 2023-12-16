@@ -23,5 +23,7 @@ namespace Kissarekisteribackend.Models
 
         [NotMapped]
         public List<UserResponse> AttendeeDetails { get; set; }
+
+        public ICollection<CatShowPhoto> Photos { get; set; }
     }
 }

@@ -15,6 +15,7 @@ interface Cat {
   breed: string;
   ownerId: string;
   breederId: string;
+  imageUrl: string;
 }
 
 interface User {
@@ -35,5 +36,6 @@ interface CatPayload {
 }
 
 interface EditCatPayload extends CatPayload {
+  imageUrl?: string;
   id: number;
 }

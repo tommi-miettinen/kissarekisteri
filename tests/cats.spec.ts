@@ -5,7 +5,7 @@ let context: BrowserContext;
 let page: Page;
 
 test.beforeAll(async () => {
-  browser = await chromium.launch({ headless: false, slowMo: 50 });
+  browser = await chromium.launch({ headless: false, slowMo: 200 });
   context = await browser.newContext({ ignoreHTTPSErrors: true });
   page = await context.newPage();
 });
