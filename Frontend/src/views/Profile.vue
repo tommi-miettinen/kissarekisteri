@@ -24,7 +24,7 @@ const { data: cats, refetch: refetchCats } = useQuery({
 });
 
 const { mutate } = useMutation({
-  mutationFn: (newCatPayload: Cat) => catAPI.addCat(newCatPayload),
+  mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),
   onSuccess: () => toast.success("Kissan tiedot lisätty"),
 });
 
@@ -37,22 +37,17 @@ const { mutate: mutateUser } = useMutation({
 
 watch(userId, () => refetchCats());
 
-const newCat = ref<Cat>({
-  id: 0,
+const newCat = ref<CatPayload>({
   name: "",
   birthDate: new Date(),
   breed: "",
-  ownerId: user.value ? user.value.id : "0",
-  breederId: "0",
 });
 
-const updatedCat = ref<Cat>({
+const updatedCat = ref<EditCatPayload>({
   id: 0,
   name: "",
   birthDate: new Date(),
   breed: "",
-  ownerId: "0",
-  breederId: "0",
 });
 
 const editingCat = ref(false);
@@ -61,9 +56,9 @@ const editingAvatar = ref(false);
 const deletingCat = ref(false);
 const deletingCatId = ref();
 
-const addCat = () => mutate(newCat.value);
+const addingCat = ref(false);
 
-const setEditingCat = (bool: boolean) => (editingCat.value = bool);
+const addCat = () => mutate(newCat.value);
 
 const deleteCat = async (catId: number) => {
   const result = await catAPI.deleteCatById(catId);
@@ -83,7 +78,7 @@ const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
 
 const loadCatForEdit = (cat: Cat) => {
   updatedCat.value = cat;
-  setEditingCat(true);
+  editingCat.value = true;
 };
 const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
 </script>
@@ -117,7 +112,13 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
       </div>
       <div class="d-flex flex-column rounded" v-if="cats">
         <h3>{{ t("Profile.cats") }}</h3>
-        <div @click="navigateToCat(cat.id)" v-for="cat in cats" :key="cat.id" class="cat d-flex border-bottom p-2 flex align-items-center">
+        <div
+          data-testid="cat"
+          @click="navigateToCat(cat.id)"
+          v-for="cat in cats"
+          :key="cat.id"
+          class="cat d-flex border-bottom p-2 flex align-items-center"
+        >
           <div class="col">
             <img
               class="rounded-circle"
@@ -134,7 +135,7 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
           <div class="col">{{ cat.breed }}</div>
           <div class="col overflow-hidden">{{ cat.birthDate }}</div>
           <div class="col d-flex gap-2">
-            <div @click.stop class="dropdown d-flex ms-auto dropstart">
+            <div data-testid="cat-options" @click.stop class="dropdown d-flex ms-auto dropstart">
               <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
                   <path
@@ -144,12 +145,15 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
               </button>
               <ul class="dropdown-menu">
                 <li class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
-                <li class="dropdown-item" @click.stop="(deletingCatId = cat.id), (deletingCat = true)">Poista</li>
+                <li data-testid="start-cat-delete" class="dropdown-item" @click.stop="(deletingCatId = cat.id), (deletingCat = true)">
+                  Poista
+                </li>
               </ul>
             </div>
           </div>
         </div>
         <button
+          @click="addingCat = true"
           data-testid="add-new-cat-btn"
           type="button"
           class="btn btn-primary ms-auto mt-2"
@@ -161,33 +165,29 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
       </div>
     </div>
   </div>
-  <div class="modal fade" id="myModal">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-body d-flex flex-column">
-          <div class="mb-3">
-            <label for="catName" class="form-label">Nimi</label>
-            <input data-testid="new-cat-name-input" type="text" class="form-control" id="catName" v-model="newCat.name" />
-          </div>
-          <div class="mb-3">
-            <label for="catBreed" class="form-label">Rotu</label>
-            <input data-testid="new-cat-breed-input" type="text" class="form-control" id="catBreed" v-model="newCat.breed" />
-          </div>
-          <div class="mb-3">
-            <label for="catBirthDate" class="form-label">Syntymäaika</label>
-            <input data-testid="new-cat-birthdate-input" type="date" class="form-control" id="catBirthDate" v-model="newCat.birthDate" />
-          </div>
-          <button data-testid="add-new-cat-btn-save" @click="addCat" class="btn btn-primary ms-auto">Lisää kissa</button>
-        </div>
+  <Modal :modalId="'add-cat-modal'" :visible="addingCat" @onCancel="addingCat = false">
+    <div class="w-100 p-4 d-flex flex-column">
+      <div class="mb-3">
+        <label for="catName" class="form-label">Nimi</label>
+        <input data-testid="new-cat-name-input" type="text" class="form-control" id="catName" v-model="newCat.name" />
       </div>
+      <div class="mb-3">
+        <label for="catBreed" class="form-label">Rotu</label>
+        <input data-testid="new-cat-breed-input" type="text" class="form-control" id="catBreed" v-model="newCat.breed" />
+      </div>
+      <div class="mb-3">
+        <label for="catBirthDate" class="form-label">Syntymäaika</label>
+        <input data-testid="new-cat-birthdate-input" type="date" class="form-control" id="catBirthDate" v-model="newCat.birthDate" />
+      </div>
+      <button data-testid="add-new-cat-btn-save" @click="addCat" class="btn btn-primary ms-auto">Lisää kissa</button>
     </div>
-  </div>
+  </Modal>
   <Modal :modalId="'edit-avatar-modal'" @onCancel="() => setEditingAvatar(false)" :visible="editingAvatar">
     <div class="p-5">
       <Cropper @onCrop="(data:string) => console.log(data)" />
     </div>
   </Modal>
-  <Modal :modalId="'edit-modal'" @onCancel="() => setEditingCat(false)" :visible="editingCat">
+  <Modal :modalId="'edit-modal'" @onCancel="editingCat = false" :visible="editingCat">
     <div class="w-100 p-4 d-flex flex-column">
       <div class="mb-3">
         <label for="catName" class="form-label">Nimi</label>
@@ -205,16 +205,13 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
     </div>
   </Modal>
   <Modal :modalId="'delete-modal'" @onCancel="deletingCat = false" :visible="deletingCat">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button @click="deletingCat = false" type="button" class="btn-close" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Poistetaanko kissan tiedot?</p>
-      </div>
-      <div class="modal-footer">
+    <div class="w-100 p-4 d-flex flex-column">
+      <p>Poistetaanko kissan tiedot?</p>
+      <div class="d-flex gap-2 justify-content-end">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-        <button @click="() => deleteCat(deletingCatId)" type="button" class="btn btn-primary">Poista</button>
+        <button data-testid="confirm-cat-delete" @click="() => deleteCat(deletingCatId)" type="button" class="btn btn-primary">
+          Poista
+        </button>
       </div>
     </div>
   </Modal>

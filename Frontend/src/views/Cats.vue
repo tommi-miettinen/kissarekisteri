@@ -34,7 +34,13 @@ watchEffect(() => {
       <h3>{{ t("Cats.cats") }}</h3>
       <div class="d-flex gap-3 py-3 sticky-top bg-white align-items-center">
         <div class="col">
-          <input class="form-control" type="text" v-model="searchQuery" :placeholder="t('Cats.searchInput')" />
+          <input
+            data-testid="cat-search-input"
+            class="form-control"
+            type="text"
+            v-model="searchQuery"
+            :placeholder="t('Cats.searchInput')"
+          />
         </div>
         <div class="col">{{ t("Cats.breed") }}</div>
         <div class="col">{{ t("Cats.birthDate") }}</div>

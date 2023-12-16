@@ -2,11 +2,11 @@ import axios from "axios";
 
 const baseUrl = import.meta.env.MODE === "development" ? "https://localhost:44316" : "/";
 
-const apiManagementBaseUrl = "https://kissarekisteriapimanagement.azure-api.net";
-
-const addCat = async (cat: Cat) => {
+const addCat = async (cat: CatPayload) => {
   try {
-    const result = await axios.post<Cat>(`${baseUrl}/cats`, cat);
+    const result = await axios.post<Cat>(`${baseUrl}/cats`, cat, {
+      withCredentials: true,
+    });
     return result.data;
   } catch (err) {
     console.log(err);
@@ -49,7 +49,7 @@ const getCatById = async (catId: number) => {
   }
 };
 
-const editCat = async (updatedCat: Cat) => {
+const editCat = async (updatedCat: EditCatPayload) => {
   try {
     const result = await axios.put(`${baseUrl}/cats/${updatedCat.id}`, updatedCat);
     return result.data;
@@ -70,12 +70,6 @@ const uploadCatImage = async (catId: number, image: File) => {
   }
 };
 
-const getCatImages = async () => {
-  const result = await axios.get(`${apiManagementBaseUrl}/images`);
-  console.log(result);
-  return result.data;
-};
-
 export default {
   addCat,
   getCatById,
@@ -83,6 +77,5 @@ export default {
   getCats,
   getCatsByUserId,
   editCat,
-  getCatImages,
   uploadCatImage,
 };

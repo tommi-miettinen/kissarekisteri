@@ -1,7 +1,10 @@
 ﻿using Kissarekisteribackend.Models;
 using Kissarekisteribackend.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
@@ -44,10 +47,21 @@ public class CatController(CatService catService) : Controller
         return Json(cat);
     }
 
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [HttpPost("/cats")]
     public async Task<IActionResult> CreateCat([FromBody] Cat catPayload)
     {
-        var newCat = await _catService.CreateCat(catPayload);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var catToBeInserted = new Cat
+        {
+            Name = catPayload.Name,
+            BirthDate = catPayload.BirthDate,
+            OwnerId = userId,
+            BreederId = userId,
+            Breed = catPayload.Breed,
+
+        };
+        var newCat = await _catService.CreateCat(catToBeInserted);
         return Json(newCat);
     }
 

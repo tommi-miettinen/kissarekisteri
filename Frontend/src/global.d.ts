@@ -27,3 +27,13 @@ interface User {
   isBreeder: boolean;
   cats?: Cat[];
 }
+
+interface CatPayload {
+  name: string;
+  birthDate: Date;
+  breed: string;
+}
+
+interface EditCatPayload extends CatPayload {
+  id: number;
+}

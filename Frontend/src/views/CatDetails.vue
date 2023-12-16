@@ -18,12 +18,6 @@ const currentImage = ref();
 const navigateToBreeder = (breederId: number) => router.push(`/users/${breederId}`);
 const navigateToCatOwner = (ownerId: number) => router.push(`/users/${ownerId}`);
 
-const fetchCatImages = async () => {
-  const result = await catAPI.getCatImages();
-  if (!result) return;
-  catImages.value = result;
-};
-
 const setCurrentImage = (catImage?: any) => {
   if (catImage) currentImage.value = catImage;
   if (!catImage) currentImage.value = null;
@@ -34,13 +28,11 @@ const handleFileChange = async (event: Event) => {
   if (!input || !input.files) return;
 
   await catAPI.uploadCatImage(cat.value.id, input.files[0]);
-  fetchCatImages();
 };
 
 onMounted(async () => {
   const result = await catAPI.getCatById(+route.params.catId);
   if (!result) return;
-  fetchCatImages();
 
   cat.value = result;
 });
