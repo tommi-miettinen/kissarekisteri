@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Kissarekisteribackend.Services;
+namespace Kissarekisteri.Services;
 
 public class UploadService(BlobServiceClient blobServiceClient)
 {

@@ -1,7 +1,9 @@
-﻿using Kissarekisteribackend.Models;
+﻿using Kissarekisteri.Models;
+using Kissarekisteri.RBAC;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
-namespace Kissarekisteribackend.Database;
+namespace Kissarekisteri.Database;
 
 public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> options)
     : DbContext(options)
@@ -12,6 +14,11 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
     public DbSet<CatShowPhoto> CatShowPhotos { get; set; }
     public DbSet<Attendee> Attendees { get; set; }
     public DbSet<CatAttendee> CatAttendees { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<RolePermission> RolePermissions { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,4 +41,63 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .WithOne(p => p.CatShow)
             .HasForeignKey(p => p.CatShowId);
     }
+
+    public void SeedPermissions()
+    {
+        var permissions = PermissionSeed.GetSeedData();
+
+        foreach (var permission in permissions)
+        {
+            if (!Permissions.Any(p => p.Name == permission.Name))
+            {
+                Permissions.Add(permission);
+            }
+        }
+
+        SaveChanges();
+    }
+
+    public void SeedRoles()
+    {
+        var roles = RoleSeed.GetSeedData();
+
+        foreach (var role in roles)
+        {
+            if (!Roles.Any(r => r.Name == role.Name))
+            {
+                Roles.Add(new Role
+                {
+                    Name = role.Name,
+                });
+            }
+        }
+
+        SaveChanges();
+    }
+
+    /* public void SeedRolePermissions()
+    {
+        var roles = RolePermissionSeed.GetSeedData();
+
+        foreach (var role in roles)
+        {
+            var roleEntity = Roles.FirstOrDefault(r => r.Name == role.Name);
+
+            foreach (var permission in role.Permissions)
+            {
+                var permissionEntity = Permissions.FirstOrDefault(p => p.Name == permission.ToString());
+
+                if (!RolePermissions.Any(rp => rp.RoleId == roleEntity.Id && rp.PermissionId == permissionEntity.Id))
+                {
+                    RolePermissions.Add(new RolePermission
+                    {
+                        RoleId = roleEntity.Id,
+                        PermissionId = permissionEntity.Id
+                    });
+                }
+            }
+        }
+
+        SaveChanges();
+    }*/
 };

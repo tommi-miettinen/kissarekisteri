@@ -8,28 +8,27 @@ import { useQuery, useMutation } from "@tanstack/vue-query";
 const router = useRouter();
 const route = useRoute();
 
-const { data: cat, refetch } = useQuery({ queryKey: [+route.params.catId], queryFn: () => catAPI.getCatById(+route.params.catId) });
+const { data: cat, refetch } = useQuery({
+  queryKey: [+route.params.catId],
+  queryFn: () => catAPI.getCatById(+route.params.catId),
+});
 
 const uploadMutation = useMutation({
-  mutationFn: (file: File) => {
-    return catAPI.uploadCatImage(cat.value.id, file);
-  },
+  mutationFn: (file: File) => catAPI.uploadCatImage(cat.value.id, file),
   onSuccess: refetch,
 });
 
 const catMutation = useMutation({
-  mutationFn: (imageUrl: string) => catAPI.editCat({ ...cat.value, imageUrl: imageUrl }),
+  mutationFn: (imageUrl: string) => catAPI.editCat({ ...cat.value, imageUrl }),
   onSuccess: refetch,
 });
 
 const currentImage = ref();
 
-const navigateToBreeder = (breederId: number) => router.push(`/users/${breederId}`);
-const navigateToCatOwner = (ownerId: number) => router.push(`/users/${ownerId}`);
+const navigateToUser = (userId: number) => router.push(`/users/${userId}`);
 
 const setCurrentImage = (catImage?: any) => {
-  if (catImage) currentImage.value = catImage;
-  if (!catImage) currentImage.value = null;
+  currentImage.value = catImage || null;
 };
 
 const handleFileChange = async (event: Event) => {
@@ -54,12 +53,14 @@ const handleFileChange = async (event: Event) => {
             <p class="card-text">
               <span class="badge rounded-pill text-bg-secondary">{{ cat.breed }}</span>
             </p>
-            <button @click="() => navigateToBreeder(cat.breederId)" class="btn btn-secondary ms-auto">Omistaja</button>
-            <button @click="() => navigateToCatOwner(cat.ownerId)" class="btn btn-secondary ms-2">Kasvattaja</button>
+            <button @click="() => navigateToUser(cat.breederId)" class="btn btn-secondary ms-auto">Omistaja</button>
+            <button @click="() => navigateToUser(cat.ownerId)" class="btn btn-secondary ms-2">Kasvattaja</button>
           </div>
         </div>
       </div>
-      <button class="btn btn-primary me-auto"><input type="file" @change="handleFileChange" id="catImageInput" /></button>
+      <button class="btn btn-primary me-auto">
+        <input type="file" @change="handleFileChange" id="catImageInput" />
+      </button>
       <div class="gap-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr">
         <div style="position: relative" class="d-flex flex-column border" v-for="catImage in cat.photos" :key="catImage.url">
           <img :src="catImage.url" @click="() => setCurrentImage(catImage)" class="cat-thumbnail w-100" alt="Cat image" />

@@ -1,5 +1,5 @@
-﻿using Kissarekisteribackend.Models;
-using Kissarekisteribackend.Services;
+﻿using Kissarekisteri.Models;
+using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

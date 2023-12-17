@@ -1,4 +1,4 @@
-﻿namespace Kissarekisteribackend.Models
+﻿namespace Kissarekisteri.Models
 {
     public class CatAttendee
     {

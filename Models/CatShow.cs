@@ -1,9 +1,9 @@
-﻿using Kissarekisteribackend.Services;
+﻿using Kissarekisteri.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Kissarekisteribackend.Models
+namespace Kissarekisteri.Models
 {
     public class CatShow
     {

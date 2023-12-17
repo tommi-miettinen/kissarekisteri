@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Kissarekisteribackend.Models
+namespace Kissarekisteri.Models
 {
     public class Cat
     {

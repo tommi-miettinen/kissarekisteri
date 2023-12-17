@@ -1,7 +1,7 @@
 ﻿using Azure.Identity;
 using Azure.Storage.Blobs;
-using Kissarekisteribackend.Database;
-using Kissarekisteribackend.Services;
+using Kissarekisteri.Database;
+using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -76,7 +76,7 @@ builder.Services.Configure<OpenIdConnectOptions>(
 
 builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSQL"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"));
 });
 
 builder.Services
@@ -97,8 +97,11 @@ if (app.Environment.IsDevelopment())
     {
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<KissarekisteriDbContext>();
-        // context.Database.EnsureDeleted();
+        context.Database.EnsureDeleted();
         context.Database.EnsureCreated();
+        context.SeedPermissions();
+        context.SeedRoles();
+        //  context.SeedRolePermissions();
     }
 }
 app.UseCors();

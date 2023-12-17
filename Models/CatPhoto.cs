@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Kissarekisteribackend.Models
+namespace Kissarekisteri.Models
 {
     public class CatPhoto
     {

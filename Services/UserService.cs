@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Kissarekisteri.Database;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Graph;
+using Microsoft.Graph.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Kissarekisteribackend.Services;
+namespace Kissarekisteri.Services;
 
 
 public class UserResponse
@@ -17,10 +19,11 @@ public class UserResponse
     public string AvatarUrl { get; set; }
 }
 
-public class UserService(GraphServiceClient graphClient, UploadService uploadService)
+public class UserService(GraphServiceClient graphClient, UploadService uploadService, KissarekisteriDbContext dbContext)
 {
     private readonly GraphServiceClient _graphClient = graphClient;
     private readonly UploadService _uploadService = uploadService;
+    private readonly KissarekisteriDbContext _dbContext = dbContext;
 
     public async Task<List<UserResponse>> GetUsers()
     {
@@ -83,6 +86,58 @@ public class UserService(GraphServiceClient graphClient, UploadService uploadSer
         };
 
         return response;
+    }
+
+    public async Task<User> CreateUser()
+    {
+        try
+        {
+            string extensionAppId = "a1caf0508ec746569ef7e0fe9a263127";
+            string avatarUrl = $"extension_{extensionAppId}_avatarUrl";
+
+            var user = await _graphClient.Users.PostAsync(new User
+            {
+                AccountEnabled = true,
+                MailNickname = "testuser",
+                GivenName = "Test",
+                Surname = "User",
+                DisplayName = "Test User",
+                PasswordProfile = new()
+                {
+                    Password = "Test1234",
+                    ForceChangePasswordNextSignIn = false,
+                },
+                Identities =
+                [
+                    new()
+                    {
+                        SignInType = "emailAddress",
+                        Issuer = "kissarekisteri.onmicrosoft.com",
+                        IssuerAssignedId = "test@example.com"
+
+                    }
+                ],
+                PasswordPolicies = "DisablePasswordExpiration",
+            });
+
+            _dbContext.UserRoles.Add(
+                new Models.UserRole
+                {
+                    UserId = user.Id,
+                    RoleId = 1
+                }
+                );
+
+
+            return user;
+        }
+        catch (Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(ex.Message);
+            Console.ResetColor();
+            return null;
+        }
     }
 
     public async Task<UserResponse> GetUserById(string userId)

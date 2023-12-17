@@ -1,4 +1,4 @@
-﻿using Kissarekisteribackend.Services;
+﻿using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 
 
-namespace Kissarekisteribackend.Controllers;
+namespace Kissarekisteri.Controllers;
 
 public class UserController(UserService userService) : Controller
 {
@@ -60,6 +60,14 @@ public class UserController(UserService userService) : Controller
         var user = await _userService.GetUserById(userId);
         return Json(user);
     }
+
+    [HttpPost("users")]
+    public async Task<IActionResult> CreateUser()
+    {
+        var user = await _userService.CreateUser();
+        return Json(user);
+    }
+
 
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [HttpPost("avatar")]

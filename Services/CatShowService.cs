@@ -1,12 +1,12 @@
-﻿using Kissarekisteribackend.Database;
-using Kissarekisteribackend.Models;
+﻿using Kissarekisteri.Database;
+using Kissarekisteri.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Kissarekisteribackend.Services
+namespace Kissarekisteri.Services
 {
     public class CatShowService(KissarekisteriDbContext dbContext, UserService userService, UploadService uploadService)
     {

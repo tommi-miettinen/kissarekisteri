@@ -1,10 +1,11 @@
 ﻿namespace Kissarekisteri.Models
 {
-    public class Attendee
+    public class UserRole
     {
         public int Id { get; set; }
-        public int EventId { get; set; }
-        public CatShow CatShow { get; set; }
+
         public string UserId { get; set; }
+        public int RoleId { get; set; }
+        public Role Role { get; set; }
     }
 }

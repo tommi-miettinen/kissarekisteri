@@ -1,6 +1,6 @@
-﻿using Kissarekisteribackend.Database;
-using Kissarekisteribackend.Models;
-using Kissarekisteribackend.Services;
+﻿using Kissarekisteri.Database;
+using Kissarekisteri.Models;
+using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,14 +11,19 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
-public class CatShowController(KissarekisteriDbContext dbContext, CatShowService catShowService) : Controller
+
+public class CatShowController(KissarekisteriDbContext dbContext, CatShowService catShowService)
+    : Controller
 {
     private readonly KissarekisteriDbContext _dbContext = dbContext;
     private readonly CatShowService _catShowService = catShowService;
 
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [HttpPost("catshows/{catShowId}/join")]
-    public async Task<IActionResult> JoinCatShow(int catShowId, [FromBody] CatShowCatAttendeeIds catIds)
+    public async Task<IActionResult> JoinCatShow(
+        int catShowId,
+        [FromBody] CatShowCatAttendeeIds catIds
+    )
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         await _catShowService.JoinCatShowAsync(catShowId, userId, catIds);
@@ -38,14 +43,18 @@ public class CatShowController(KissarekisteriDbContext dbContext, CatShowService
             return NotFound("Cat show not found");
         }
 
-        var attendee = await _dbContext.Attendees.FirstOrDefaultAsync(a => a.UserId == userId && a.EventId == catShowId);
+        var attendee = await _dbContext.Attendees.FirstOrDefaultAsync(
+            a => a.UserId == userId && a.EventId == catShowId
+        );
         if (attendee != null)
         {
             _dbContext.Attendees.Remove(attendee);
             await _dbContext.SaveChangesAsync();
         }
 
-        var catAttendees = await _dbContext.CatAttendees.Where(ca => ca.EventId == catShowId && ca.Cat.OwnerId == userId).ToListAsync();
+        var catAttendees = await _dbContext.CatAttendees
+            .Where(ca => ca.EventId == catShowId && ca.Cat.OwnerId == userId)
+            .ToListAsync();
 
         foreach (var catAttendee in catAttendees)
         {
@@ -67,7 +76,6 @@ public class CatShowController(KissarekisteriDbContext dbContext, CatShowService
         return Json(catShows);
     }
 
-
     [HttpPost("catshows/{catShowId}/photos")]
     public async Task<IActionResult> UploadCatShowPhoto(int catShowId, IFormFile file)
     {
@@ -75,11 +83,9 @@ public class CatShowController(KissarekisteriDbContext dbContext, CatShowService
         return Json(catShow);
     }
 
-
     [HttpGet("catshows/{catShowId}")]
     public async Task<IActionResult> GetEvent(int catShowId)
     {
-
         var catShow = await _catShowService.GetCatShowByIdAsync(catShowId);
         return Json(catShow);
     }
@@ -98,4 +104,3 @@ public class CatShowController(KissarekisteriDbContext dbContext, CatShowService
         return Json(newCatShow);
     }
 }
-

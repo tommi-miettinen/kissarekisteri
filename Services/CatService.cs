@@ -1,5 +1,6 @@
-﻿using Kissarekisteribackend.Database;
-using Kissarekisteribackend.Models;
+﻿using Kissarekisteri.Database;
+using Kissarekisteri.Models;
+using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Kissarekisteribackend.Services;
+namespace Kissarekisteri.Services;
 
 public class CatService(KissarekisteriDbContext dbContext, UploadService uploadService)
 {
@@ -25,15 +26,15 @@ public class CatService(KissarekisteriDbContext dbContext, UploadService uploadS
 
         var uploadedPhoto = await _uploadService.UploadFile(file);
 
-        await _dbContext.CatPhotos.AddAsync(new CatPhoto
-        {
-            CatId = cat.Id,
-            Url = uploadedPhoto.Uri.AbsoluteUri
-        });
+        await _dbContext.CatPhotos.AddAsync(
+            new CatPhoto { CatId = cat.Id, Url = uploadedPhoto.Uri.AbsoluteUri }
+        );
 
         await _dbContext.SaveChangesAsync();
 
-        var catWithPhotos = await _dbContext.Cats.Include(c => c.Photos).FirstOrDefaultAsync(cat => cat.Id == catId);
+        var catWithPhotos = await _dbContext.Cats
+            .Include(c => c.Photos)
+            .FirstOrDefaultAsync(cat => cat.Id == catId);
 
         return catWithPhotos;
     }
@@ -55,9 +56,12 @@ public class CatService(KissarekisteriDbContext dbContext, UploadService uploadS
         await _dbContext.SaveChangesAsync();
         return cat;
     }
+
     public async Task<Cat> GetCatByIdAsync(int catId)
     {
-        return await _dbContext.Cats.Include(c => c.Photos).FirstOrDefaultAsync(cat => cat.Id == catId);
+        return await _dbContext.Cats
+            .Include(c => c.Photos)
+            .FirstOrDefaultAsync(cat => cat.Id == catId);
     }
 
     public async Task<List<Cat>> GetCatsAsync()
@@ -92,5 +96,3 @@ public class CatService(KissarekisteriDbContext dbContext, UploadService uploadS
         return cats;
     }
 }
-
-
