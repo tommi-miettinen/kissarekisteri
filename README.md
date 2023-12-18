@@ -114,3 +114,91 @@ provider "azuread" {}
 - Navigate to Azure AdB2C / App registrations / {name of auth app}
 - Select "Api permissions" from the sidebar
 - Grant Admin consent for {name of auth app}
+
+# Kissarekisteri Role-Based Access Control
+
+## Components
+
+### Roles
+
+```C#
+public class Role
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public ICollection<UserRole> UserRoles { get; set; }
+}
+```
+
+### Permissions
+
+```C#
+public class Permission
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+}
+```
+
+### Role permissions
+
+A lookup table for checking what permissions a role grants
+
+```C#
+    public class RolePermission
+    {
+        public int Id { get; set; }
+
+        public string RoleName { get; set; }
+        public int RoleId { get; set; }
+        public string PermissionName { get; set; }
+        public int PermissionId { get; set; }
+
+        public Role Role { get; set; }
+        public Permission Permission { get; set; }
+    }
+```
+
+### User roles
+
+A lookup table for checking what roles the user has assigned
+
+```C#
+    public class UserRole
+    {
+        public int Id { get; set; }
+        public string UserId { get; set; }
+        public int RoleId { get; set; }
+        public Role Role { get; set; }
+    }
+```
+
+## Lookup flow
+- Checking what roles the user has assigned
+- Looking up Role permissions what permissions the role grants
+- Does the permission allow for the action
+
+## Lookup implementation
+
+```C#
+ public async Task<List<Permission>> GetPermissions(string userId)
+ {
+     var userRoles = await _dbContext.UserRoles
+         .Where(userRoles => userRoles.UserId == userId)
+         .ToListAsync();
+     var userRoleIds = userRoles.Select(ur => ur.RoleId).ToList();
+
+     var rolePermissions = await _dbContext.RolePermissions
+         .Where(rolePermission => userRoleIds.Contains(rolePermission.RoleId))
+         .ToListAsync();
+
+     var permissionIds = rolePermissions.Select(rolePermission => rolePermission.PermissionId)
+         .ToList();
+
+     var permissions = await _dbContext.Permissions
+         .Where(permission => permissionIds.Contains(permission.Id))
+         .ToListAsync();
+
+     return permissions;
+ }
+```
