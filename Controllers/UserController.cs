@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -39,14 +40,14 @@ public class UserController(UserService userService) : Controller
 
 
     [HttpGet("users/{userId}")]
-    public async Task<IActionResult> GetUser([FromRoute] string userId)
+    public async Task<ActionResult<UserResponse>> GetUser([FromRoute] string userId)
     {
         var user = await _userService.GetUserById(userId);
         return Json(user);
     }
 
     [HttpGet("users")]
-    public async Task<IActionResult> GetUsers()
+    public async Task<ActionResult<List<UserResponse>>> GetUsers()
     {
         var users = await _userService.GetUsers();
         return Json(users);
@@ -54,7 +55,7 @@ public class UserController(UserService userService) : Controller
 
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [HttpGet("me")]
-    public async Task<IActionResult> GetCurrentUser()
+    public async Task<ActionResult<UserResponse>> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await _userService.GetUserById(userId);
@@ -62,7 +63,7 @@ public class UserController(UserService userService) : Controller
     }
 
     [HttpPost("users")]
-    public async Task<IActionResult> CreateUser()
+    public async Task<ActionResult<UserResponse>> CreateUser()
     {
         var user = await _userService.CreateUser();
         return Json(user);
@@ -71,7 +72,7 @@ public class UserController(UserService userService) : Controller
 
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [HttpPost("avatar")]
-    public async Task<IActionResult> UploadUserAvatar(IFormFile file)
+    public async Task<ActionResult<UserResponse>> UploadUserAvatar(IFormFile file)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await _userService.UploadUserPhotoAsync(userId, file);

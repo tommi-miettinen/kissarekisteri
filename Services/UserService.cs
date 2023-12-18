@@ -17,13 +17,20 @@ public class UserResponse
     public string GivenName { get; set; }
     public string Surname { get; set; }
     public string AvatarUrl { get; set; }
+    public List<Kissarekisteri.Models.Permission> Permissions { get; set; }
 }
 
-public class UserService(GraphServiceClient graphClient, UploadService uploadService, KissarekisteriDbContext dbContext)
+public class UserService(
+    GraphServiceClient graphClient,
+    UploadService uploadService,
+    KissarekisteriDbContext dbContext,
+    RBACService rbacService
+    )
 {
     private readonly GraphServiceClient _graphClient = graphClient;
     private readonly UploadService _uploadService = uploadService;
     private readonly KissarekisteriDbContext _dbContext = dbContext;
+    private readonly RBACService _rbacService = rbacService;
 
     public async Task<List<UserResponse>> GetUsers()
     {
@@ -159,7 +166,8 @@ public class UserService(GraphServiceClient graphClient, UploadService uploadSer
                 Id = user.Id,
                 DisplayName = user.DisplayName,
                 Surname = user.Surname,
-                AvatarUrl = user.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null
+                AvatarUrl = user.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null,
+                Permissions = await _rbacService.GetPermissions(user.Id)
             };
 
             return response;

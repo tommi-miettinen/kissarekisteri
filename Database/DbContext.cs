@@ -75,7 +75,7 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
         SaveChanges();
     }
 
-    /* public void SeedRolePermissions()
+    public void SeedRolePermissions()
     {
         var roles = RolePermissionSeed.GetSeedData();
 
@@ -92,6 +92,8 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
                     RolePermissions.Add(new RolePermission
                     {
                         RoleId = roleEntity.Id,
+                        RoleName = roleEntity.Name,
+                        PermissionName = permissionEntity.Name,
                         PermissionId = permissionEntity.Id
                     });
                 }
@@ -99,5 +101,5 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
         }
 
         SaveChanges();
-    }*/
+    }
 };

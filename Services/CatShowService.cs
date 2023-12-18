@@ -8,7 +8,11 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteri.Services
 {
-    public class CatShowService(KissarekisteriDbContext dbContext, UserService userService, UploadService uploadService)
+    public class CatShowService(
+        KissarekisteriDbContext dbContext,
+        UserService userService,
+        UploadService uploadService
+        )
     {
         private readonly KissarekisteriDbContext _dbContext = dbContext;
         private readonly UserService _userService = userService;

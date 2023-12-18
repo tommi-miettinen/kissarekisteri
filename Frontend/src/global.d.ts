@@ -8,6 +8,11 @@ interface CatShowEvent {
   attendees?: User[];
 }
 
+interface Permission {
+  id: number;
+  name: string;
+}
+
 interface Cat {
   id: number;
   name: string;
@@ -27,6 +32,7 @@ interface User {
   surname: string;
   isBreeder: boolean;
   cats?: Cat[];
+  permissions: Permission[];
 }
 
 interface CatPayload {

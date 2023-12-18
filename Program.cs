@@ -13,6 +13,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
+using System;
+using System.IO;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +51,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UploadService>();
 builder.Services.AddScoped<CatService>();
 builder.Services.AddScoped<CatShowService>();
+builder.Services.AddScoped<RBACService>();
 builder.Services.AddMicrosoftIdentityWebAppAuthentication(
     config,
     Microsoft.Identity.Web.Constants.AzureAdB2C
@@ -87,21 +91,28 @@ builder.Services
     });
 
 builder.Services.AddControllers();
+builder.Services.AddSwaggerGen(options =>
+{
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
     app.UseDeveloperExceptionPage();
     using (var scope = app.Services.CreateScope())
     {
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<KissarekisteriDbContext>();
-        context.Database.EnsureDeleted();
+        //   context.Database.EnsureDeleted();
         context.Database.EnsureCreated();
         context.SeedPermissions();
         context.SeedRoles();
-        //  context.SeedRolePermissions();
+        context.SeedRolePermissions();
     }
 }
 app.UseCors();

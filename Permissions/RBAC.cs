@@ -44,7 +44,7 @@ namespace Kissarekisteri.RBAC
     public class RoleSeedData
     {
         public string Name { get; set; }
-        public List<PermissionType> Permissions { get; set; }
+        public List<PermissionType> Permissions { get; set; } = new List<PermissionType>();
     }
 
     public static class RolePermissionSeed

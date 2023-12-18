@@ -5,6 +5,7 @@ import Modal from "../components/Modal.vue";
 import { useI18n } from "vue-i18n";
 import { formatDate } from "../utils/formatDate";
 import catShowAPI from "../api/catShowAPI";
+import { userStore } from "../store/userStore";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -18,6 +19,8 @@ const newEvent = ref({
   startDate: "",
   endDate: "",
 });
+
+const user = computed(() => userStore.user);
 
 const addingEvent = ref(false);
 
@@ -58,7 +61,12 @@ onMounted(async () => await loadEvents());
           <input type="text" class="form-control" v-model="searchQuery" :placeholder="t('CatShowList.searchInput')" />
         </div>
         <div class="col d-flex">
-          <button @click="addingEvent = true" type="button" class="btn btn-primary ms-auto">
+          <button
+            v-if="user?.permissions.some((p) => p.name === 'CreateEvent')"
+            @click="addingEvent = true"
+            type="button"
+            class="btn btn-primary ms-auto"
+          >
             {{ t("CatShowList.addCatShow") }}
           </button>
         </div>

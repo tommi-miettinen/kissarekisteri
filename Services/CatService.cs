@@ -1,6 +1,6 @@
 ﻿using Kissarekisteri.Database;
+using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
-using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -39,7 +39,7 @@ public class CatService(KissarekisteriDbContext dbContext, UploadService uploadS
         return catWithPhotos;
     }
 
-    public async Task<Cat> UpdateCatByIdAsync(int catId, Cat catPayload)
+    public async Task<Cat> UpdateCatByIdAsync(int catId, CatRequest catPayload)
     {
         var cat = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == catId);
 

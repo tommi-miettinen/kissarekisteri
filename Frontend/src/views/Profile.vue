@@ -58,7 +58,10 @@ const deletingCatId = ref();
 
 const addingCat = ref(false);
 
-const addCat = () => mutate(newCat.value);
+const addCat = () => {
+  mutate(newCat.value);
+  addingCat.value = false;
+};
 
 const deleteCat = async (catId: number) => {
   const result = await catAPI.deleteCatById(catId);
