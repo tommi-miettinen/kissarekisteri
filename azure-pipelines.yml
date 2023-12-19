@@ -8,6 +8,7 @@ trigger:
 
 pool:
   vmImage: 'windows-latest'
+  demands: Limit -equals DisAbleParallel 
 
 variables:
   solution: '**/*.sln'
@@ -29,6 +30,7 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: VSTest@2
+
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
