@@ -1,7 +1,5 @@
-﻿using Kissarekisteri.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Kissarekisteri.Models
 {
@@ -19,11 +17,9 @@ namespace Kissarekisteri.Models
 
         public DateTime EndDate { get; set; }
 
-        public virtual List<Attendee> Attendees { get; set; }
+        public List<Attendee> Attendees { get; set; }
+        public List<CatShowPhoto> Photos { get; set; }
 
-        [NotMapped]
-        public List<UserResponse> AttendeeDetails { get; set; }
-
-        public ICollection<CatShowPhoto> Photos { get; set; }
+        public List<CatShowResult> Results { get; set; }
     }
 }

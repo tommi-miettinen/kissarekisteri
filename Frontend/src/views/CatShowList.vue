@@ -20,6 +20,7 @@ const newEvent = ref({
   endDate: "",
 });
 
+//@ts-ignore
 const user = computed(() => userStore.user);
 
 const addingEvent = ref(false);
@@ -53,25 +54,20 @@ const loadEvents = async () => {
 onMounted(async () => await loadEvents());
 </script>
 <template>
-  <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center justify-content-center">
-    <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
+  <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center">
+    <div class="p-4 p-sm-5 rounded col-12 col-lg-8 d-flex flex-column overflow-auto">
       <h3>{{ t("CatShowList.catShows") }}</h3>
       <div class="d-flex gap-4 py-3 sticky-top bg-white align-items-center">
         <div class="col-12 col-md-8 col-xxl-4">
           <input type="text" class="form-control" v-model="searchQuery" :placeholder="t('CatShowList.searchInput')" />
         </div>
         <div class="col d-flex">
-          <button
-            v-if="user?.permissions.some((p) => p.name === 'CreateEvent')"
-            @click="addingEvent = true"
-            type="button"
-            class="btn btn-primary ms-auto"
-          >
-            {{ t("CatShowList.addCatShow") }}
+          <button @click="addingEvent = true" type="button" class="btn btn-primary ms-auto px-5">
+            {{ t("CatShowList.addCatShow") }} +
           </button>
         </div>
       </div>
-      <div class="d-flex flex-column overflow-auto">
+      <div class="d-flex flex-column overflow-auto" style="height: 100%">
         <div
           @click="() => navigateToEvent(event.id!)"
           v-for="event in filteredEvents"
@@ -92,13 +88,13 @@ onMounted(async () => await loadEvents());
   <Modal :modalId="'event-modal'" @onCancel="addingEvent = false" :visible="addingEvent">
     <div class="modal-body d-flex flex-column w-100">
       <div class="input-group mb-3">
-        <input type="text" class="form-control" v-model="newEvent.name" placeholder="Event Name" />
+        <input type="text" class="form-control" v-model="newEvent.name" :placeholder="t('CatShowList.eventNameInput')" />
       </div>
       <div class="input-group mb-3">
-        <input type="text" class="form-control" v-model="newEvent.description" placeholder="Event Description" />
+        <input type="text" class="form-control" v-model="newEvent.description" :placeholder="t('CatShowList.eventDescriptionInput')" />
       </div>
       <div class="input-group mb-3">
-        <input type="text" class="form-control" v-model="newEvent.location" placeholder="Event Location" />
+        <input type="text" class="form-control" v-model="newEvent.location" :placeholder="t('CatShowList.eventLocationInput')" />
       </div>
       <div class="row mb-3 g-2">
         <div class="col-8">
@@ -113,7 +109,7 @@ onMounted(async () => await loadEvents());
         <input type="date" class="form-control" v-model="newEvent.endDate" placeholder="End Date" />
         <input type="time" class="form-control" v-model="newEvent.endDate" placeholder="End Date" />
       </div>
-      <button @click="createCatShow" type="button" class="btn btn-primary ms-auto">Luo tapahtuma</button>
+      <button @click="createCatShow" type="button" class="btn btn-primary ms-auto px-5">Luo tapahtuma +</button>
     </div>
   </Modal>
 </template>

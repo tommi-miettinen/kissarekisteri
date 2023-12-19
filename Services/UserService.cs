@@ -1,4 +1,5 @@
 ﻿using Kissarekisteri.Database;
+using Kissarekisteri.DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
@@ -8,17 +9,6 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace Kissarekisteri.Services;
-
-
-public class UserResponse
-{
-    public string Id { get; set; }
-    public string DisplayName { get; set; }
-    public string GivenName { get; set; }
-    public string Surname { get; set; }
-    public string AvatarUrl { get; set; }
-    public List<Kissarekisteri.Models.Permission> Permissions { get; set; }
-}
 
 public class UserService(
     GraphServiceClient graphClient,

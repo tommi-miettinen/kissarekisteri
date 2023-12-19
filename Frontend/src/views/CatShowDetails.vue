@@ -1,24 +1,42 @@
 <script lang="ts" setup>
 import { ref, computed } from "vue";
-import catAPI from "../api/catAPI";
+import userAPI from "../api/userAPI";
 import { userStore } from "../store/userStore";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
 import Modal from "../components/Modal.vue";
 import catShowAPI from "../api/catShowAPI";
+//@ts-ignore doesnt have types
+import FsLightbox from "fslightbox-vue/v3";
 
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
 
 const selectedCatIds = ref<number[]>([]);
 const eventId = +route.params.eventId;
 
-const { data: catShow, refetch } = useQuery({ queryKey: ["catshow"], queryFn: () => catShowAPI.getEventById(eventId) });
+const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
+
+const { data: catShow, refetch, isLoading } = useQuery({ queryKey: ["catshow"], queryFn: () => catShowAPI.getEventById(eventId) });
 
 const { mutate: joinEvent } = useMutation({
   mutationFn: () => catShowAPI.joinEvent(eventId, selectedCatIds.value),
+  onSuccess: () => {
+    toast.info("Osallistuminen rekisteröity"), refetch();
+  },
+});
+
+interface Payload {
+  catId: number;
+  place: number;
+  breed: string;
+}
+
+const updatePlacingMutation = useMutation({
+  mutationFn: (payload: Payload) => catShowAPI.assignCatPlacing(eventId, payload),
   onSuccess: () => {
     toast.info("Osallistuminen rekisteröity"), refetch();
   },
@@ -40,7 +58,7 @@ const { mutate: leaveEvent } = useMutation({
 
 const { data: userCats } = useQuery({
   queryKey: ["userCats"],
-  queryFn: catAPI.getCats,
+  queryFn: () => userAPI.getCatsByUserId(userStore.user?.id as string),
 });
 
 const user = userStore.user;
@@ -54,46 +72,171 @@ const handleFileChange = async (event: Event) => {
 
   uploadMutation.mutate(input.files[0]);
 };
+
+const toggler = ref(false);
+const selectedImage = ref(0);
+
+const lightboxPhotos = computed(() => {
+  if (catShow.value?.photos) {
+    return catShow.value.photos.map((photo: any) => photo.url);
+  }
+  return [];
+});
+
+const catsGroupedByBreed = computed(() => {
+  if (catShow.value?.attendees) {
+    const groupedCats = catShow.value.attendees.flatMap((attendee: any) =>
+      attendee.catAttendees.map((catAttendee: { cat: { breed: string } }) => catAttendee.cat)
+    );
+
+    const groupedCatsByBreed = groupedCats.reduce((acc: any, cat: any) => {
+      if (!acc[cat.breed]) {
+        acc[cat.breed] = [];
+      }
+      acc[cat.breed].push(cat);
+      return acc;
+    }, {});
+
+    return groupedCatsByBreed;
+  }
+  return [];
+});
+
+const inputRef = ref();
+
+const triggerFileInput = () => {
+  console.log(inputRef.value);
+  inputRef.value?.click();
+};
 </script>
 
 <template>
-  <div class="p-2 w-100 h-100 d-flex flex-column justify-content-center align-items-center p-5">
-    <div class="w-50">
-      <div v-if="catShow" class="d-flex rounded overflow-hidden border">
-        <div class="bg-primary" style="width: 300px; height: 300px" />
-        <div class="card-body d-flex flex-column p-4">
-          <h5 class="card-title">{{ catShow.name }}</h5>
-          <p class="card-text">
+  <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <div v-if="!isLoading" class="p-2 w-100 h-100 d-flex flex-column align-items-center p-sm-5">
+    <div class="col-12 col-sm-8 p-sm-5 d-flex flex-column gap-5">
+      <div class="d-flex gap-4" style="height: 300px">
+        <div class="border image-container rounded-4" style="position: relative; min-width: 400px; overflow: hidden">
+          <img
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
+            src="https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg"
+          />
+        </div>
+        <div class="d-flex flex-column p-2" style="width: 100%">
+          <h3>{{ catShow.name }}</h3>
+          <p>
             {{ catShow.description }}
           </p>
-          <p class="card-text mt-auto d-flex align-items-center justify-content-between">
-            <span class="badge rounded-pill text-bg-secondary">{{ catShow.location }}</span>
-            <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary" @click="joiningEvent = true">
+          <span>{{ catShow.location }}</span>
+          <div class="mt-auto ms-auto">
+            <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary px-5" @click="joiningEvent = true">
               {{ t("CatShowDetails.joinEvent") }}
             </button>
-            <button v-else @click="() => leaveEvent()" type="button" class="btn btn-danger">{{ t("CatShowDetails.leaveEvent") }}</button>
-          </p>
+            <button v-else @click="() => leaveEvent()" type="button" class="btn btn-danger px-5">
+              {{ t("CatShowDetails.leaveEvent") }}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div v-if="catShow && catShow.attendees && catShow.attendees.length > 0" class="attendees-list mt-3">
-        <h4>Osallistujat</h4>
-        <div v-for="attendee in catShow.attendeeDetails" :key="attendee.id" class="mb-2">
-          <div class="fw-bold">{{ `${attendee.givenName}  ${attendee.surname}` }}</div>
-          <ul v-if="attendee.cats && attendee.cats.length">
-            <li v-for="cat in attendee.cats" :key="cat.id">{{ cat.name }} ({{ cat.breed }})</li>
-          </ul>
+      <div class="attendees-list mt-3 d-flex flex-column gap-5">
+        <div v-for="(cats, breed) in catsGroupedByBreed" :key="breed">
+          <h4>{{ breed }}</h4>
+
+          <div
+            @click="() => navigateToCat(cat.id)"
+            v-for="cat in cats"
+            :key="cat.id"
+            class="cat d-flex border-bottom gap-3 p-2 align-items-center"
+          >
+            <div class="d-flex align-items-center justify-content-start gap-2">
+              <img
+                :src="'https://kissarekisteritf.blob.core.windows.net/images/186f7fd4-ec2b-4f7a-950a-33b80a9e0d27.png'"
+                class="rounded-circle"
+                height="30"
+                width="30"
+                style="object-fit: fill"
+              />
+              <span class="text-upper-capitalize">
+                {{ cat.name }}
+              </span>
+            </div>
+            <div @click.stop class="dropdown d-flex ms-auto dropstart">
+              <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
+                  <path
+                    d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
+                  />
+                </svg>
+              </button>
+              <ul class="dropdown-menu">
+                <li
+                  @click="
+                    updatePlacingMutation.mutate({
+                      catId: cat.id,
+                      place: 1,
+                      breed: cat.breed,
+                    })
+                  "
+                  class="dropdown-item"
+                >
+                  Ensimmäinen
+                </li>
+                <li
+                  @click="
+                    updatePlacingMutation.mutate({
+                      catId: cat.id,
+                      place: 2,
+                      breed: cat.breed,
+                    })
+                  "
+                  class="dropdown-item"
+                >
+                  Toinen
+                </li>
+                <li
+                  @click="
+                    updatePlacingMutation.mutate({
+                      catId: cat.id,
+                      place: 3,
+                      breed: cat.breed,
+                    })
+                  "
+                  class="dropdown-item"
+                >
+                  Kolmas
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <button class="btn btn-primary me-auto"><input type="file" @change="handleFileChange" id="catImageInput" /></button>
-
-    <div v-if="catShow" class="gap-2" style="display: grid; grid-template-columns: 1fr 1fr 1fr">
-      <div style="position: relative" class="d-flex flex-column border" v-for="catShowImage in catShow.photos" :key="catShowImage.url">
-        <img :src="catShowImage.url" class="cat-thumbnail w-100" alt="Cat image" />
-        <button class="btn btn-primary position-absolute bottom-0 m-2 z-1">Aseta profiilikuvaksi</button>
+      <div v-if="catShow" class="w-100 m-auto d-flex flex-column">
+        <div v-if="catShow" class="image-gallery gap-2">
+          <div
+            @click="(selectedImage = index), (toggler = !toggler)"
+            v-for="(catShowImage, index) in catShow.photos"
+            :key="catShowImage.id"
+            class="border image-container rounded-4"
+            style="position: relative; width: 100%; overflow: hidden"
+          >
+            <div style="width: 100%; padding-top: 100%; position: relative"></div>
+            <img
+              :src="catShowImage.url"
+              alt="Cat image"
+              class="image thumbnail"
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
+            />
+          </div>
+        </div>
       </div>
+      <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto">
+        <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
+        Lisää kuva +
+      </button>
     </div>
+    <FsLightbox :key="selectedImage" :toggler="toggler" :sources="lightboxPhotos" :slide="selectedImage + 1" />
     <Modal :modalId="'join-event-modal'" :visible="joiningEvent" @onCancel="joiningEvent = false">
       <div class="d-flex flex-column bg-white w-100 p-4 gap-4 rounded">
         <div v-if="user && userCats && userCats.length > 0">
@@ -111,3 +254,27 @@ const handleFileChange = async (event: Event) => {
     </Modal>
   </div>
 </template>
+
+<style>
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media screen and (max-width: 768px) {
+  .image-gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.btn-border {
+  border: 1px solid #000;
+}
+.btn-border:hover {
+  background-color: #f8f9fa;
+}
+.thumbnail:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}
+</style>

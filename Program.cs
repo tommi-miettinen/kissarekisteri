@@ -78,6 +78,7 @@ builder.Services.Configure<OpenIdConnectOptions>(
     }
 );
 
+
 builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"));
@@ -89,6 +90,8 @@ builder.Services
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(options =>
@@ -108,7 +111,7 @@ if (app.Environment.IsDevelopment())
     {
         var services = scope.ServiceProvider;
         var context = services.GetRequiredService<KissarekisteriDbContext>();
-        //   context.Database.EnsureDeleted();
+        // context.Database.EnsureDeleted();
         context.Database.EnsureCreated();
         context.SeedPermissions();
         context.SeedRoles();

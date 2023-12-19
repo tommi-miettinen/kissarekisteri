@@ -35,7 +35,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center justify-content-center">
+  <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center">
     <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
       <h3>{{ t("Users.members") }}</h3>
       <div class="d-flex py-3 sticky-top bg-white align-items-center">

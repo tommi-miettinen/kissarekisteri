@@ -1,18 +1,18 @@
-﻿using Kissarekisteri.DTOs;
+﻿using Kissarekisteri.Models;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Kissarekisteri.Models
+namespace Kissarekisteri.DTOs
 {
-    public class Attendee
+    public class AttendeeDTO
     {
         public int Id { get; set; }
         public required int EventId { get; set; }
         public CatShow CatShow { get; set; }
         public required string UserId { get; set; }
 
-        [NotMapped]
         public UserResponse User { get; set; }
         public List<CatAttendee> CatAttendees { get; set; }
     }
+
 }
+

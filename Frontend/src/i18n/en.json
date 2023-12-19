@@ -25,7 +25,10 @@
   "CatShowList": {
     "catShows": "Cat shows",
     "searchInput": "Search cat shows...",
-    "addCatShow": "Add cat show"
+    "addCatShow": "Add cat show",
+    "eventNameInput": "Event name",
+    "eventDescriptionInput": "Event description",
+    "eventLocationInput": "Event location"
   },
   "CatShowDetails": {
     "joinEvent": "Join event",

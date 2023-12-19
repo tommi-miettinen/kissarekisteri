@@ -26,7 +26,10 @@
   "CatShowList": {
     "catShows": "Näyttelyt",
     "searchInput": "Etsi näyttelyistä...",
-    "addCatShow": "Lisää näyttely"
+    "addCatShow": "Lisää näyttely",
+    "eventNameInput": "Tapahtuman nimi",
+    "eventDescriptionInput": "Tapahtuman kuvaus",
+    "eventLocationInput": "Tapahtuman sijainti"
   },
   "CatShowDetails": {
     "joinEvent": "Liity tapahtumaan",

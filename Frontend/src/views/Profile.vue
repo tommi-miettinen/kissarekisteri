@@ -87,7 +87,7 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
 </script>
 
 <template>
-  <div class="w-100 h-100 d-flex justify-content-center align-items-center p-5">
+  <div class="w-100 h-100 d-flex justify-content-center p-5">
     <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
       <div class="d-flex flex-column" v-if="user">
         <div class="d-flex align-items-center gap-2 mb-4">
@@ -148,8 +148,8 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
             </div>
           </div>
         </div>
-        <button @click="addingCat = true" data-testid="add-new-cat-btn" type="button" class="btn btn-primary ms-auto mt-2">
-          {{ t("Profile.addCat") }}
+        <button @click="addingCat = true" data-testid="add-new-cat-btn" type="button" class="btn btn-primary ms-auto mt-2 px-5">
+          {{ t("Profile.addCat") }} +
         </button>
       </div>
     </div>
@@ -168,7 +168,7 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
         <label for="catBirthDate" class="form-label">Syntymäaika</label>
         <input data-testid="new-cat-birthdate-input" type="date" class="form-control" id="catBirthDate" v-model="newCat.birthDate" />
       </div>
-      <button data-testid="add-new-cat-btn-save" @click="addCat" class="btn btn-primary ms-auto">Lisää kissa</button>
+      <button data-testid="add-new-cat-btn-save" @click="addCat" class="btn btn-primary ms-auto px-5">Lisää kissa +</button>
     </div>
   </Modal>
   <Modal :modalId="'edit-avatar-modal'" @onCancel="() => setEditingAvatar(false)" :visible="editingAvatar">

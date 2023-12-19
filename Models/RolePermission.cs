@@ -1,5 +1,8 @@
-﻿namespace Kissarekisteri.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Kissarekisteri.Models
 {
+    [Index(nameof(RoleName), nameof(PermissionName), IsUnique = true)]
     public class RolePermission
     {
         public int Id { get; set; }

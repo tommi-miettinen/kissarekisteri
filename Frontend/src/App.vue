@@ -10,9 +10,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="d-flex flex-column align-items-center w-100 h-100">
+  <div style="height: 100vh" class="d-flex flex-column align-items-center">
     <Navigation />
+
     <Toaster richColors closeButton />
-    <RouterView />
+    <div class="d-flex flex-column overflow-auto w-100 h-100">
+      <RouterView />
+    </div>
   </div>
 </template>

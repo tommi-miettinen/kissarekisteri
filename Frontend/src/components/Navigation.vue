@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { computed, ref } from "vue";
 import { user, logout } from "../store/userStore";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 
+const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 
@@ -19,8 +20,8 @@ const logoutFromApp = () => {
 </script>
 
 <template>
-  <nav class="border w-100 p-2 sticky-top bg-white">
-    <ul class="nav align-items-center px-2" style="color: black">
+  <nav class="border w-100 p-2 bg-white">
+    <ul class="nav align-items-center px-2 gap-1" style="color: black">
       <div v-if="user" class="dropdown">
         <div class="rounded-circle" type="button" data-bs-toggle="dropdown">
           <img
@@ -47,16 +48,25 @@ const logoutFromApp = () => {
         </ul>
       </div>
       <a data-testid="login-btn" v-if="!user" href="https://localhost:44316/login" class="btn btn-primary">{{ t("Navigation.login") }}</a>
-      <li class="nav-item">
+      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path === '/catshows' }">
         <router-link style="color: black" class="nav-link" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
       </li>
-      <li class="nav-item">
+      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path === '/cats' }">
         <router-link style="color: black" class="nav-link" to="/cats">{{ t("Navigation.cats") }}</router-link>
       </li>
-      <li class="nav-item">
+      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path === '/users' }">
         <router-link style="color: black" class="nav-link" to="/users">{{ t("Navigation.members") }}</router-link>
       </li>
       <a style="cursor: pointer" @click="handleLocaleClick" class="ms-auto">{{ localeString }}</a>
     </ul>
   </nav>
 </template>
+
+<style>
+.nav-item:hover {
+  background-color: #f3f4f6;
+}
+.nav-item-active {
+  background-color: #f3f4f6;
+}
+</style>

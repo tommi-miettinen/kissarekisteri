@@ -1,4 +1,5 @@
-﻿using Kissarekisteri.Database;
+﻿using AutoMapper;
+using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
 using Microsoft.AspNetCore.Http;
@@ -10,10 +11,11 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteri.Services;
 
-public class CatService(KissarekisteriDbContext dbContext, UploadService uploadService)
+public class CatService(KissarekisteriDbContext dbContext, UploadService uploadService, IMapper mapper)
 {
     private readonly KissarekisteriDbContext _dbContext = dbContext;
     private readonly UploadService _uploadService = uploadService;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Cat> UploadCatPhoto(int catId, IFormFile file)
     {

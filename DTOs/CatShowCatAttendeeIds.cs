@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace Kissarekisteri.Models
+namespace Kissarekisteri.DTOs
 {
     public class CatShowCatAttendeeIds
     {
-        public List<int> catIds { get; set; }
+        public required List<int> CatIds { get; set; }
     }
 }

@@ -29,7 +29,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center justify-content-center">
+  <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center">
     <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
       <h3>{{ t("Cats.cats") }}</h3>
       <div class="d-flex gap-3 py-3 sticky-top bg-white align-items-center">
@@ -58,7 +58,13 @@ watchEffect(() => {
           class="cat border-bottom gap-3 p-3 align-items-center"
         >
           <div class="d-flex align-items-center justify-content-start gap-2">
-            <img class="rounded-circle bg-primary" height="30" width="30" style="object-fit: contain" />
+            <img
+              :src="'https://kissarekisteritf.blob.core.windows.net/images/186f7fd4-ec2b-4f7a-950a-33b80a9e0d27.png'"
+              class="rounded-circle"
+              height="30"
+              width="30"
+              style="object-fit: fill"
+            />
             <span class="text-upper-capitalize">
               {{ cat.name }}
             </span>

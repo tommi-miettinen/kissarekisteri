@@ -1,21 +1,19 @@
-﻿using Kissarekisteri.Database;
+﻿using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
 
-public class CatShowController(KissarekisteriDbContext dbContext, CatShowService catShowService)
+public class CatShowController(CatShowService catShowService)
     : Controller
 {
-    private readonly KissarekisteriDbContext _dbContext = dbContext;
     private readonly CatShowService _catShowService = catShowService;
 
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
@@ -36,71 +34,49 @@ public class CatShowController(KissarekisteriDbContext dbContext, CatShowService
     public async Task<IActionResult> LeaveCatShow(int catShowId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-        var catShow = await _dbContext.CatShows.FirstOrDefaultAsync(e => e.Id == catShowId);
-        if (catShow == null)
-        {
-            return NotFound("Cat show not found");
-        }
-
-        var attendee = await _dbContext.Attendees.FirstOrDefaultAsync(
-            a => a.UserId == userId && a.EventId == catShowId
-        );
-        if (attendee != null)
-        {
-            _dbContext.Attendees.Remove(attendee);
-            await _dbContext.SaveChangesAsync();
-        }
-
-        var catAttendees = await _dbContext.CatAttendees
-            .Where(ca => ca.EventId == catShowId && ca.Cat.OwnerId == userId)
-            .ToListAsync();
-
-        foreach (var catAttendee in catAttendees)
-        {
-            _dbContext.CatAttendees.Remove(catAttendee);
-        }
-
-        if (catAttendees.Count > 0)
-        {
-            await _dbContext.SaveChangesAsync();
-        }
+        await _catShowService.LeaveCatShowAsync(catShowId, userId);
 
         return Ok("Left cat show successfully");
     }
 
     [HttpGet("catshows")]
-    public IActionResult GetEvents()
+    public async Task<ActionResult<List<CatShow>>> GetEvents()
     {
-        var catShows = _dbContext.CatShows.ToList();
+        var catShows = await _catShowService.GetCatShows();
         return Json(catShows);
     }
 
     [HttpPost("catshows/{catShowId}/photos")]
-    public async Task<IActionResult> UploadCatShowPhoto(int catShowId, IFormFile file)
+    public async Task<ActionResult<CatShow>> UploadCatShowPhoto(int catShowId, IFormFile file)
     {
         var catShow = await _catShowService.UploadCatShowPhoto(catShowId, file);
         return Json(catShow);
     }
 
     [HttpGet("catshows/{catShowId}")]
-    public async Task<IActionResult> GetEvent(int catShowId)
+    public async Task<ActionResult<CatShow>> GetEvent(int catShowId)
     {
         var catShow = await _catShowService.GetCatShowByIdAsync(catShowId);
         return Json(catShow);
     }
 
+    [HttpPost("catshows/{catShowId}/place")]
+    public async Task<ActionResult<CatShowResult>> AssignCatPlacing(int catShowId, [FromBody] CatShowResultDTO resultPayload)
+    {
+        var result = await _catShowService.AssignCatPlacing(catShowId, resultPayload);
+        return result;
+    }
+
     [HttpPost("catshows")]
-    public IActionResult CreateEvent([FromBody] CatShow newCatShow)
+    public async Task<ActionResult<CatShow>> CreateEvent([FromBody] CatShow newCatShow)
     {
         if (newCatShow == null)
         {
             return BadRequest("Invalid event data");
         }
 
-        _dbContext.CatShows.Add(newCatShow);
-        _dbContext.SaveChanges();
+        var catShow = await _catShowService.CreateCatShow(newCatShow);
 
-        return Json(newCatShow);
+        return Json(catShow);
     }
 }

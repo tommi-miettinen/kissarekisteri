@@ -1,4 +1,5 @@
 ﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
@@ -25,8 +26,15 @@ public class UploadService(BlobServiceClient blobServiceClient)
 
         using (var stream = file.OpenReadStream())
         {
-            await blobClient.UploadAsync(stream);
+            await blobClient.UploadAsync(stream, new BlobUploadOptions
+            {
+                HttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = "image/jpeg"
+                }
+            });
         }
+
         return blobClient;
     }
 }

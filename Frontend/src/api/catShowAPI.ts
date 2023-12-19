@@ -50,6 +50,17 @@ const leaveEvent = async (eventId: number) => {
   }
 };
 
+interface Payload {
+  catId: number;
+  place: number;
+  breed: string;
+}
+
+const assignCatPlacing = async (eventId: number, payload: Payload) => {
+  const result = await axios.post(`${baseUrl}/catshows/${eventId}/place`, payload);
+  return result.data;
+};
+
 const addCatShowPhoto = async (eventId: number, image: File) => {
   if (!image) return;
 
@@ -71,4 +82,5 @@ export default {
   getEventById,
   joinEvent,
   leaveEvent,
+  assignCatPlacing,
 };

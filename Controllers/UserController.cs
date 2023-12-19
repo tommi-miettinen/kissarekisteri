@@ -1,4 +1,5 @@
-﻿using Kissarekisteri.Services;
+﻿using Kissarekisteri.DTOs;
+using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -53,6 +54,11 @@ public class UserController(UserService userService) : Controller
         return Json(users);
     }
 
+    /// <summary>
+    /// Endpoint for getting the currently logged in user.
+    /// </summary>
+    /// <remarks>Needs a logged in user</remarks>
+    /// <returns>The logged in user</returns>
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [HttpGet("me")]
     public async Task<ActionResult<UserResponse>> GetCurrentUser()
@@ -69,7 +75,11 @@ public class UserController(UserService userService) : Controller
         return Json(user);
     }
 
-
+    /// <summary>
+    /// Endpoint for uploading a user avatar.
+    /// </summary>
+    /// <param name="file"></param>
+    /// <returns></returns>
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
     [HttpPost("avatar")]
     public async Task<ActionResult<UserResponse>> UploadUserAvatar(IFormFile file)

@@ -11,6 +11,7 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
     public DbSet<Cat> Cats { get; set; }
     public DbSet<CatPhoto> CatPhotos { get; set; }
     public DbSet<CatShow> CatShows { get; set; }
+    public DbSet<CatShowResult> CatShowResults { get; set; }
     public DbSet<CatShowPhoto> CatShowPhotos { get; set; }
     public DbSet<Attendee> Attendees { get; set; }
     public DbSet<CatAttendee> CatAttendees { get; set; }
@@ -18,7 +19,6 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,6 +40,18 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .HasMany(c => c.Photos)
             .WithOne(p => p.CatShow)
             .HasForeignKey(p => p.CatShowId);
+
+        modelBuilder
+            .Entity<CatShow>()
+            .HasMany(c => c.Results)
+            .WithOne(r => r.CatShow)
+            .HasForeignKey(r => r.CatShowId);
+
+        modelBuilder
+            .Entity<Attendee>()
+            .HasMany(Attendee => Attendee.CatAttendees)
+            .WithOne(CatAttendee => CatAttendee.Attendee)
+            .HasForeignKey(CatAttendee => CatAttendee.AttendeeId);
     }
 
     public void SeedPermissions()
@@ -65,10 +77,7 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
         {
             if (!Roles.Any(r => r.Name == role.Name))
             {
-                Roles.Add(new Role
-                {
-                    Name = role.Name,
-                });
+                Roles.Add(new Role { Name = role.Name, });
             }
         }
 
@@ -85,17 +94,25 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
 
             foreach (var permission in role.Permissions)
             {
-                var permissionEntity = Permissions.FirstOrDefault(p => p.Name == permission.ToString());
+                var permissionEntity = Permissions.FirstOrDefault(
+                    p => p.Name == permission.ToString()
+                );
 
-                if (!RolePermissions.Any(rp => rp.RoleId == roleEntity.Id && rp.PermissionId == permissionEntity.Id))
+                if (
+                    !RolePermissions.Any(
+                        rp => rp.RoleId == roleEntity.Id && rp.PermissionId == permissionEntity.Id
+                    )
+                )
                 {
-                    RolePermissions.Add(new RolePermission
-                    {
-                        RoleId = roleEntity.Id,
-                        RoleName = roleEntity.Name,
-                        PermissionName = permissionEntity.Name,
-                        PermissionId = permissionEntity.Id
-                    });
+                    RolePermissions.Add(
+                        new RolePermission
+                        {
+                            RoleId = roleEntity.Id,
+                            RoleName = roleEntity.Name,
+                            PermissionName = permissionEntity.Name,
+                            PermissionId = permissionEntity.Id
+                        }
+                    );
                 }
             }
         }

@@ -10,10 +10,16 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
+
 public class CatController(CatService catService) : Controller
 {
     private readonly CatService _catService = catService;
 
+    /// <summary>
+    /// Retrieves all cats.
+    /// </summary>
+    /// <returns>A list of cats</returns>
+    /// <response media="application/json" code="200">Returns the list of cats</response>
     [HttpGet("/cats")]
     public async Task<ActionResult<List<Cat>>> GetCats()
     {
@@ -41,7 +47,7 @@ public class CatController(CatService catService) : Controller
 
     /// <summary>
     /// Gets all cats owned by a user.
-    /// <summary>
+    /// </summary>
     /// <param name="userId">The ID of the user</param>
     /// <returns>The cats owned by the user</returns>
     [HttpGet("/users/{userId}/cats")]
@@ -54,20 +60,9 @@ public class CatController(CatService catService) : Controller
     /// <summary>
     /// Uploads a photo for a specific cat identified by its ID.
     /// </summary>
-    /// <remarks>
-    /// This method accepts a photo file as form data. The photo is then associated 
-    /// with the cat having the specified ID. It's important that the file is sent 
-    /// as part of a multipart/form-data request with the input name set to "file".
-    /// </remarks>
-    /// <param name="catId">
-    /// The unique identifier of the cat for which the photo is being uploaded. This 
-    /// ID is used to locate the cat in the database.
-    /// </param>
-    /// <param name="file">
-    /// The photo file to upload. This should be a form file provided as part of the 
-    /// request body. The file format can be restricted based on requirements (e.g., 
-    /// JPEG, PNG).
-    /// </param>
+
+    /// <param name="catId">The ID of the cat to update.</param>
+    /// <param name="file"></param>
     /// <returns>
     /// Returns an ActionResult containing the updated Cat object. The Cat object 
     /// will include the details of the uploaded photo if the operation is successful. 
