@@ -202,3 +202,56 @@ A lookup table for checking what roles the user has assigned
      return permissions;
  }
 ```
+
+## Input Validation
+The ModelValidationFilter ensures that all incoming data to controller actions is validated against the model's Data Annotations. If validation fails, it automatically returns a BadRequest response with the validation errors.
+
+Filters/ModelValidationFilter.cs
+
+```C#
+public class ModelValidationFilter : ActionFilterAttribute
+{
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        if (!context.ModelState.IsValid)
+        {
+            context.Result = new BadRequestObjectResult(context.ModelState);
+        }
+    }
+}
+```
+
+Applied to all controllers in Program.cs
+```C#
+builder.Services
+    .AddControllers(options =>
+    {
+        options.Filters.Add(new ModelValidationFilter());
+    });
+```
+
+### Example Scenario 
+
+Model with Data Annotations
+
+```C#
+public class SampleModel
+{
+    [Required]
+    public string Name { get; set; }
+
+    [Range(1, 100)]
+    public int Age { get; set; }
+}
+```
+
+Controller Action
+
+```C#
+[HttpPost]
+public IActionResult CreateSample(SampleModel model)
+{
+}
+```
+
+Outcome: If CreateSample receives data that doesn't comply with SampleModel validations (e.g., missing Name), ModelValidationFilter intercepts and returns a BadRequest with details of the validation errors.
