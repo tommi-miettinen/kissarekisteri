@@ -35,6 +35,11 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .WithOne(p => p.Cat)
             .HasForeignKey(p => p.CatId);
 
+        modelBuilder.Entity<Cat>()
+            .HasMany(c => c.Results)
+            .WithOne(r => r.Cat)
+            .HasForeignKey(r => r.CatId);
+
         modelBuilder
             .Entity<CatShow>()
             .HasMany(c => c.Photos)

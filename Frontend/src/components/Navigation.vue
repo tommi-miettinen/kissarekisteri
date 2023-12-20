@@ -48,13 +48,13 @@ const logoutFromApp = () => {
         </ul>
       </div>
       <a data-testid="login-btn" v-if="!user" href="https://localhost:44316/login" class="btn btn-primary">{{ t("Navigation.login") }}</a>
-      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path === '/catshows' }">
+      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path.includes('catshows') }">
         <router-link style="color: black" class="nav-link" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
       </li>
-      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path === '/cats' }">
+      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path === '/cats' || route.path.startsWith('/cats/') }">
         <router-link style="color: black" class="nav-link" to="/cats">{{ t("Navigation.cats") }}</router-link>
       </li>
-      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path === '/users' }">
+      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path.includes('users') }">
         <router-link style="color: black" class="nav-link" to="/users">{{ t("Navigation.members") }}</router-link>
       </li>
       <a style="cursor: pointer" @click="handleLocaleClick" class="ms-auto">{{ localeString }}</a>

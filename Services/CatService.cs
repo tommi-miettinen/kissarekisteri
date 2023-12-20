@@ -11,10 +11,16 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteri.Services;
 
-public class CatService(KissarekisteriDbContext dbContext, UploadService uploadService, IMapper mapper)
+public class CatService(
+    KissarekisteriDbContext dbContext,
+    UploadService uploadService,
+    IMapper mapper,
+    UserService userService
+    )
 {
     private readonly KissarekisteriDbContext _dbContext = dbContext;
     private readonly UploadService _uploadService = uploadService;
+    private readonly UserService _userService = userService;
     private readonly IMapper _mapper = mapper;
 
     public async Task<Cat> UploadCatPhoto(int catId, IFormFile file)
@@ -61,9 +67,15 @@ public class CatService(KissarekisteriDbContext dbContext, UploadService uploadS
 
     public async Task<Cat> GetCatByIdAsync(int catId)
     {
-        return await _dbContext.Cats
-            .Include(c => c.Photos)
-            .FirstOrDefaultAsync(cat => cat.Id == catId);
+        var cat = await _dbContext.Cats
+              .Include(c => c.Photos)
+              .Include(c => c.Results).ThenInclude(Results => Results.CatShow)
+              .FirstOrDefaultAsync(cat => cat.Id == catId);
+
+        cat.Owner = await _userService.GetUserById(cat.OwnerId);
+        cat.Breeder = await _userService.GetUserById(cat.BreederId);
+
+        return cat;
     }
 
     public async Task<List<Cat>> GetCatsAsync()

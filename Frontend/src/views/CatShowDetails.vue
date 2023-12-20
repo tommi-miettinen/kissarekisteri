@@ -133,7 +133,7 @@ const triggerFileInput = () => {
             <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary px-5" @click="joiningEvent = true">
               {{ t("CatShowDetails.joinEvent") }}
             </button>
-            <button v-else @click="() => leaveEvent()" type="button" class="btn btn-danger px-5">
+            <button v-else @click="() => leaveEvent()" type="button" class="btn btn-danger rounded-3 py-2 px-5">
               {{ t("CatShowDetails.leaveEvent") }}
             </button>
           </div>
@@ -215,7 +215,7 @@ const triggerFileInput = () => {
       <div v-if="catShow" class="w-100 m-auto d-flex flex-column">
         <div v-if="catShow" class="image-gallery gap-2">
           <div
-            @click="(selectedImage = index), (toggler = !toggler)"
+            @click="console.log('click'), (selectedImage = index), (toggler = !toggler)"
             v-for="(catShowImage, index) in catShow.photos"
             :key="catShowImage.id"
             class="border image-container rounded-4"
@@ -236,7 +236,7 @@ const triggerFileInput = () => {
         Lisää kuva +
       </button>
     </div>
-    <FsLightbox :key="selectedImage" :toggler="toggler" :sources="lightboxPhotos" :slide="selectedImage + 1" />
+    <FsLightbox :key="lightboxPhotos.length" :toggler="toggler" :sources="lightboxPhotos" :slide="selectedImage + 1" />
     <Modal :modalId="'join-event-modal'" :visible="joiningEvent" @onCancel="joiningEvent = false">
       <div class="d-flex flex-column bg-white w-100 p-4 gap-4 rounded">
         <div v-if="user && userCats && userCats.length > 0">
@@ -249,7 +249,7 @@ const triggerFileInput = () => {
           </div>
         </div>
         <div v-else>No cats available.</div>
-        <button @click="() => joinEvent()" type="button" class="btn btn-primary" data-bs-dismiss="modal">Osallistu</button>
+        <button @click="() => joinEvent()" type="button" class="btn btn-primary">Osallistu</button>
       </div>
     </Modal>
   </div>

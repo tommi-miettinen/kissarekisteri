@@ -29,6 +29,19 @@ interface Cat {
   ownerId: string;
   breederId: string;
   imageUrl: string;
+  photos: { id: string; url: string }[];
+  results: CatShowResult[];
+  owner: User;
+  breeder: User;
+}
+
+interface CatShowResult {
+  id: number;
+  catShowId: number;
+  catId: number;
+  breed: string;
+  place: number;
+  catShow: CatShowEvent;
 }
 
 interface User {
@@ -51,5 +64,5 @@ interface CatPayload {
 
 interface EditCatPayload extends CatPayload {
   imageUrl?: string;
-  id: number;
+  id?: number;
 }

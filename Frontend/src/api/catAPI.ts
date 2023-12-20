@@ -33,7 +33,7 @@ const getCats = async () => {
 
 const getCatsByUserId = async (userId: string) => {
   try {
-    const result = await axios.get(`${baseUrl}/users/${userId}/cats`);
+    const result = await axios.get<Cat>(`${baseUrl}/users/${userId}/cats`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -42,7 +42,7 @@ const getCatsByUserId = async (userId: string) => {
 
 const getCatById = async (catId: number) => {
   try {
-    const result = await axios.get(`${baseUrl}/cats/${catId}`);
+    const result = await axios.get<Cat>(`${baseUrl}/cats/${catId}`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -51,7 +51,7 @@ const getCatById = async (catId: number) => {
 
 const editCat = async (updatedCat: EditCatPayload) => {
   try {
-    const result = await axios.put(`${baseUrl}/cats/${updatedCat.id}`, updatedCat);
+    const result = await axios.put<Cat>(`${baseUrl}/cats/${updatedCat.id}`, updatedCat);
     return result.data;
   } catch (err) {
     console.log(err);

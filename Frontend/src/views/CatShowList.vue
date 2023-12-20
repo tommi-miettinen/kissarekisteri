@@ -61,13 +61,8 @@ onMounted(async () => await loadEvents());
         <div class="col-12 col-md-8 col-xxl-4">
           <input type="text" class="form-control" v-model="searchQuery" :placeholder="t('CatShowList.searchInput')" />
         </div>
-        <div class="col d-flex">
-          <button @click="addingEvent = true" type="button" class="btn btn-primary ms-auto px-5">
-            {{ t("CatShowList.addCatShow") }} +
-          </button>
-        </div>
       </div>
-      <div class="d-flex flex-column overflow-auto" style="height: 100%">
+      <div class="d-flex flex-column overflow-auto" style="height: 500px">
         <div
           @click="() => navigateToEvent(event.id!)"
           v-for="event in filteredEvents"
@@ -83,6 +78,9 @@ onMounted(async () => await loadEvents());
           </div>
         </div>
       </div>
+      <button @click="addingEvent = true" type="button" class="btn btn-primary ms-auto px-5 mt-2">
+        {{ t("CatShowList.addCatShow") }} +
+      </button>
     </div>
   </div>
   <Modal :modalId="'event-modal'" @onCancel="addingEvent = false" :visible="addingEvent">

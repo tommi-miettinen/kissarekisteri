@@ -115,36 +115,38 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
       </div>
       <div class="d-flex flex-column rounded" v-if="cats">
         <h3>{{ t("Profile.cats") }}</h3>
-        <div
-          data-testid="cat"
-          @click="navigateToCat(cat.id)"
-          v-for="cat in cats"
-          :key="cat.id"
-          class="cat d-flex border-bottom p-2 flex align-items-center"
-        >
-          <div class="col d-flex align-items-center justify-content-start gap-2">
-            <img class="rounded-circle bg-primary" height="30" width="30" style="object-fit: contain" />
-            <span class="text-upper-capitalize">
-              {{ cat.name }}
-            </span>
-          </div>
-          <div class="col">{{ cat.breed }}</div>
-          <div class="col overflow-hidden">{{ cat.birthDate }}</div>
-          <div class="col d-flex gap-2">
-            <div data-testid="cat-options" @click.stop class="dropdown d-flex ms-auto dropstart">
-              <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                  <path
-                    d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                  />
-                </svg>
-              </button>
-              <ul class="dropdown-menu">
-                <li class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
-                <li data-testid="start-cat-delete" class="dropdown-item" @click.stop="(deletingCatId = cat.id), (deletingCat = true)">
-                  Poista
-                </li>
-              </ul>
+        <div class="overflow-auto" style="height: 500px">
+          <div
+            data-testid="cat"
+            @click="navigateToCat(cat.id)"
+            v-for="cat in cats"
+            :key="cat.id"
+            class="cat d-flex border-bottom p-2 flex align-items-center"
+          >
+            <div class="col d-flex align-items-center justify-content-start gap-2">
+              <img class="rounded-circle bg-primary" height="30" width="30" style="object-fit: contain" />
+              <span class="text-upper-capitalize">
+                {{ cat.name }}
+              </span>
+            </div>
+            <div class="col">{{ cat.breed }}</div>
+            <div class="col overflow-hidden">{{ cat.birthDate }}</div>
+            <div class="col d-flex gap-2">
+              <div data-testid="cat-options" @click.stop class="dropdown d-flex ms-auto dropstart">
+                <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
+                    <path
+                      d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
+                    />
+                  </svg>
+                </button>
+                <ul class="dropdown-menu">
+                  <li class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
+                  <li data-testid="start-cat-delete" class="dropdown-item" @click.stop="(deletingCatId = cat.id), (deletingCat = true)">
+                    Poista
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
