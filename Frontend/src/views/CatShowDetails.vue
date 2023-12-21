@@ -10,6 +10,7 @@ import Modal from "../components/Modal.vue";
 import catShowAPI from "../api/catShowAPI";
 //@ts-ignore doesnt have types
 import FsLightbox from "fslightbox-vue/v3";
+import CatListItem from "../components/CatListItem.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -144,24 +145,8 @@ const triggerFileInput = () => {
         <div v-for="(cats, breed) in catsGroupedByBreed" :key="breed">
           <h4>{{ breed }}</h4>
 
-          <div
-            @click="() => navigateToCat(cat.id)"
-            v-for="cat in cats"
-            :key="cat.id"
-            class="cat d-flex border-bottom gap-3 p-2 align-items-center"
-          >
-            <div class="d-flex align-items-center justify-content-start gap-2">
-              <img
-                :src="'https://kissarekisteritf.blob.core.windows.net/images/186f7fd4-ec2b-4f7a-950a-33b80a9e0d27.png'"
-                class="rounded-circle"
-                height="30"
-                width="30"
-                style="object-fit: fill"
-              />
-              <span class="text-upper-capitalize">
-                {{ cat.name }}
-              </span>
-            </div>
+          <div v-if="cats" v-for="cat in cats">
+            <CatListItem :cat="cat" />
             <div @click.stop class="dropdown d-flex ms-auto dropstart">
               <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">

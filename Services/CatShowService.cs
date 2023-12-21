@@ -132,14 +132,15 @@ namespace Kissarekisteri.Services
             if (catShow == null) return null;
 
 
-            foreach (var attendee in catShow.Attendees)
+            catShow.Attendees.ForEach(async attendee =>
             {
                 var user = await _userService.GetUserById(attendee.UserId);
                 if (user != null)
                 {
                     attendee.User = user;
                 }
-            }
+
+            });
 
             return catShow;
         }

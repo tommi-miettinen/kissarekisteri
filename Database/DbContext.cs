@@ -19,6 +19,8 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
+    public DbSet<CatBreed> CatBreeds { get; set; }
+    public DbSet<CatParent> CatParents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,10 +37,18 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .WithOne(p => p.Cat)
             .HasForeignKey(p => p.CatId);
 
-        modelBuilder.Entity<Cat>()
+        modelBuilder
+            .Entity<Cat>()
             .HasMany(c => c.Results)
             .WithOne(r => r.Cat)
             .HasForeignKey(r => r.CatId);
+
+        modelBuilder
+            .Entity<Cat>()
+            .HasMany(c => c.CatParents)
+            .WithOne(cp => cp.ChildCat)
+            .HasForeignKey(cp => cp.ParentCatId);
+
 
         modelBuilder
             .Entity<CatShow>()
@@ -57,6 +67,21 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .HasMany(Attendee => Attendee.CatAttendees)
             .WithOne(CatAttendee => CatAttendee.Attendee)
             .HasForeignKey(CatAttendee => CatAttendee.AttendeeId);
+    }
+
+    public void SeedCatBreeds()
+    {
+        var catBreeds = CatBreedSeed.GetSeedData();
+
+        foreach (var catBreed in catBreeds)
+        {
+            if (!CatBreeds.Any(cb => cb.Name == catBreed.Name))
+            {
+                CatBreeds.Add(catBreed);
+            }
+        }
+
+        SaveChanges();
     }
 
     public void SeedPermissions()

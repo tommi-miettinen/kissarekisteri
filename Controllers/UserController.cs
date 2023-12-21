@@ -34,7 +34,7 @@ public class UserController(UserService userService) : Controller
 
     [Authorize]
     [HttpGet("login")]
-    public async Task<IActionResult> Login()
+    public IActionResult Login()
     {
         return Ok("ok");
     }

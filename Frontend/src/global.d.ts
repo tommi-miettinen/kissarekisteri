@@ -22,6 +22,7 @@ interface Permission {
 }
 
 interface Cat {
+  sex: "female" | "male";
   id: number;
   name: string;
   birthDate: Date;
@@ -57,6 +58,7 @@ interface User {
 }
 
 interface CatPayload {
+  sex: "female" | "male";
   name: string;
   birthDate: Date;
   breed: string;

@@ -9,6 +9,7 @@ import catAPI from "../api/catAPI";
 import { useQuery, useMutation } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
 import Cropper from "../components/Cropper.vue";
+import CatListItem from "../components/CatListItem.vue";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -21,11 +22,27 @@ const { data: cats, refetch: refetchCats } = useQuery({
   enabled: Boolean(user.value?.id),
 });
 
+const { data: motherCats, refetch: refetchMotherCats } = useQuery({
+  queryKey: ["cats" + user.value?.id],
+  queryFn: () => catAPI.getCats(motherCatQuery.value),
+});
+
 const { mutate } = useMutation({
   mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),
   onSuccess: () => {
     toast.success("Kissan tiedot lisätty"), refetchCats();
   },
+});
+
+const motherCatQuery = ref("");
+
+const {
+  data: catBreeds,
+  refetch: refetchCatBreeds,
+  isLoading,
+} = useQuery({
+  queryKey: ["catBreeds"],
+  queryFn: () => catAPI.getCatBreeds(),
 });
 
 /*
@@ -41,6 +58,7 @@ const newCat = ref<CatPayload>({
   name: "",
   birthDate: new Date(),
   breed: "",
+  sex: "female",
 });
 
 const updatedCat = ref<EditCatPayload>({
@@ -48,6 +66,7 @@ const updatedCat = ref<EditCatPayload>({
   name: "",
   birthDate: new Date(),
   breed: "",
+  sex: "female",
 });
 
 const editingCat = ref(false);
@@ -77,13 +96,22 @@ const editCat = async () => {
   await catAPI.editCat(updatedCat.value);
 };
 
-const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
-
 const loadCatForEdit = (cat: Cat) => {
   updatedCat.value = cat;
   editingCat.value = true;
 };
 const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
+
+let debounceTimeout: NodeJS.Timeout;
+
+const debounceAction = (delay: number, callback: any) => {
+  clearTimeout(debounceTimeout);
+  debounceTimeout = setTimeout(callback, delay);
+};
+
+watch(motherCatQuery, () => {
+  debounceAction(300, () => console.log(motherCatQuery.value));
+});
 </script>
 
 <template>
@@ -116,37 +144,22 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
       <div class="d-flex flex-column rounded" v-if="cats">
         <h3>{{ t("Profile.cats") }}</h3>
         <div class="overflow-auto" style="height: 500px">
-          <div
-            data-testid="cat"
-            @click="navigateToCat(cat.id)"
-            v-for="cat in cats"
-            :key="cat.id"
-            class="cat d-flex border-bottom p-2 flex align-items-center"
-          >
-            <div class="col d-flex align-items-center justify-content-start gap-2">
-              <img class="rounded-circle bg-primary" height="30" width="30" style="object-fit: contain" />
-              <span class="text-upper-capitalize">
-                {{ cat.name }}
-              </span>
-            </div>
-            <div class="col">{{ cat.breed }}</div>
-            <div class="col overflow-hidden">{{ cat.birthDate }}</div>
-            <div class="col d-flex gap-2">
-              <div data-testid="cat-options" @click.stop class="dropdown d-flex ms-auto dropstart">
-                <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                    <path
-                      d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                    />
-                  </svg>
-                </button>
-                <ul class="dropdown-menu">
-                  <li class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
-                  <li data-testid="start-cat-delete" class="dropdown-item" @click.stop="(deletingCatId = cat.id), (deletingCat = true)">
-                    Poista
-                  </li>
-                </ul>
-              </div>
+          <div class="d-flex align-items-center" v-for="cat in cats" :key="cat.id">
+            <CatListItem :cat="cat" />
+            <div data-testid="cat-options" @click.stop class="dropdown d-flex ms-auto dropstart">
+              <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
+                  <path
+                    d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
+                  />
+                </svg>
+              </button>
+              <ul class="dropdown-menu">
+                <li class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
+                <li data-testid="start-cat-delete" class="dropdown-item" @click.stop="(deletingCatId = cat.id), (deletingCat = true)">
+                  Poista
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -163,13 +176,38 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
         <input data-testid="new-cat-name-input" type="text" class="form-control" id="catName" v-model="newCat.name" />
       </div>
       <div class="mb-3">
-        <label for="catBreed" class="form-label">Rotu</label>
-        <input data-testid="new-cat-breed-input" type="text" class="form-control" id="catBreed" v-model="newCat.breed" />
+        <label for="catSex" class="form-label">Rotu</label>
+        <select v-model="newCat.breed" class="form-select" id="catSex" aria-label="Cat sex">
+          <option>Valitse sukupuoli</option>
+          <option v-for="breed in catBreeds" :key="breed.id" :value="breed.name">
+            {{ breed.name }}
+          </option>
+        </select>
       </div>
       <div class="mb-3">
         <label for="catBirthDate" class="form-label">Syntymäaika</label>
         <input data-testid="new-cat-birthdate-input" type="date" class="form-control" id="catBirthDate" v-model="newCat.birthDate" />
       </div>
+
+      <div class="mb-3">
+        <label for="catSex" class="form-label">Sukupuoli</label>
+        <select data-testid="new-cat-sex-select" class="form-select" id="catSex" v-model="newCat.sex" aria-label="Cat sex">
+          <option>Valitse sukupuoli</option>
+          <option selected value="Female">Naaras</option>
+          <option value="Male">Uros</option>
+        </select>
+      </div>
+
+      <div class="mb-3 position-relative">
+        <label for="exampleDataList" class="form-label">Datalist example</label>
+        <input v-model="motherCatQuery" class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." />
+        <div class="bg-white p-2 gap-2 d-flex flex-column border rounded-2 border-top-0 position-absolute w-100">
+          <div>kissa</div>
+          <div>kissa</div>
+          <div>kissa</div>
+        </div>
+      </div>
+
       <button data-testid="add-new-cat-btn-save" @click="addCat" class="btn btn-primary ms-auto px-5">Lisää kissa +</button>
     </div>
   </Modal>
@@ -192,6 +230,12 @@ const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
         <label for="catBirthDate" class="form-label">Syntymäaika</label>
         <input type="date" class="form-control" id="catBirthDate" v-model="updatedCat.birthDate" />
       </div>
+      <select class="form-select" aria-label="Default select example">
+        <option selected>Open this select menu</option>
+        <option value="1">One</option>
+        <option value="2">Two</option>
+        <option value="3">Three</option>
+      </select>
       <button @click="editCat" class="btn btn-primary ms-auto">Tallenna</button>
     </div>
   </Modal>

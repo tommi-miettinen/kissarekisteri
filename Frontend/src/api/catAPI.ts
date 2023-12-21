@@ -22,9 +22,9 @@ const deleteCatById = async (catId: number): Promise<true | undefined> => {
   }
 };
 
-const getCats = async () => {
+const getCats = async (query: string) => {
   try {
-    const result = await axios.get<Cat[]>(`${baseUrl}/cats`);
+    const result = await axios.get<Cat[]>(`${baseUrl}/cats?${query}`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -72,6 +72,16 @@ const uploadCatImage = async (catId: number, image: File) => {
   }
 };
 
+interface CatBreed {
+  id: number;
+  name: string;
+}
+
+const getCatBreeds = async () => {
+  const result = await axios.get<CatBreed[]>(`${baseUrl}/cats/breeds`);
+  return result.data;
+};
+
 export default {
   addCat,
   getCatById,
@@ -80,4 +90,5 @@ export default {
   getCatsByUserId,
   editCat,
   uploadCatImage,
+  getCatBreeds,
 };

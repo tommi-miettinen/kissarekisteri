@@ -16,7 +16,7 @@ public class CatService(
     UploadService uploadService,
     IMapper mapper,
     UserService userService
-    )
+)
 {
     private readonly KissarekisteriDbContext _dbContext = dbContext;
     private readonly UploadService _uploadService = uploadService;
@@ -68,9 +68,10 @@ public class CatService(
     public async Task<Cat> GetCatByIdAsync(int catId)
     {
         var cat = await _dbContext.Cats
-              .Include(c => c.Photos)
-              .Include(c => c.Results).ThenInclude(Results => Results.CatShow)
-              .FirstOrDefaultAsync(cat => cat.Id == catId);
+            .Include(c => c.Photos)
+            .Include(c => c.Results)
+            .ThenInclude(Results => Results.CatShow)
+            .FirstOrDefaultAsync(cat => cat.Id == catId);
 
         cat.Owner = await _userService.GetUserById(cat.OwnerId);
         cat.Breeder = await _userService.GetUserById(cat.BreederId);
@@ -78,10 +79,21 @@ public class CatService(
         return cat;
     }
 
-    public async Task<List<Cat>> GetCatsAsync()
+    public async Task<List<Cat>> GetCatsAsync(string query, int? limit)
     {
-        var cats = await _dbContext.Cats.Include(c => c.Photos).ToListAsync();
-        return cats;
+        var filteredCats = await _dbContext.Cats
+            .Include(c => c.Photos)
+            .Where(c => c.Name.Contains(query))
+            .Take(limit ?? int.MaxValue)
+            .ToListAsync();
+
+        return filteredCats;
+    }
+
+    public async Task<List<CatBreed>> GetBreedsAsync()
+    {
+        var breeds = await _dbContext.CatBreeds.ToListAsync();
+        return breeds;
     }
 
     public async Task DeleteCatByIdAsync(int catId)
@@ -91,17 +103,49 @@ public class CatService(
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<Cat> CreateCat(Cat newCat)
+    public async Task<Cat> CreateCat(CatRequest newCatRequest)
     {
-        if (newCat == null)
+        if (newCatRequest == null)
         {
             return null;
         }
 
-        await _dbContext.Cats.AddAsync(newCat);
+        var cat = new Cat
+        {
+            Name = newCatRequest.Name,
+            BirthDate = newCatRequest.BirthDate,
+            Breed = newCatRequest.Breed,
+            Sex = newCatRequest.Sex,
+            OwnerId = newCatRequest.OwnerId,
+            BreederId = newCatRequest.BreederId
+        };
+
+        await _dbContext.Cats.AddAsync(cat);
         await _dbContext.SaveChangesAsync();
 
-        return newCat;
+        if (newCatRequest.MotherId.HasValue)
+        {
+            var motherRelation = new CatParent
+            {
+                ParentCatId = newCatRequest.MotherId.Value,
+                ChildCatId = cat.Id
+            };
+            _dbContext.CatParents.Add(motherRelation);
+        }
+
+        if (newCatRequest.FatherId.HasValue)
+        {
+            var fatherRelation = new CatParent
+            {
+                ParentCatId = newCatRequest.FatherId.Value,
+                ChildCatId = cat.Id
+            };
+            _dbContext.CatParents.Add(fatherRelation);
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        return cat;
     }
 
     public async Task<List<Cat>> GetCatByUserIdAsync(string userId)

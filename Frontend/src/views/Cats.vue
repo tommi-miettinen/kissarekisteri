@@ -1,12 +1,10 @@
 <script lang="ts" setup>
 import { ref, watchEffect } from "vue";
 import catAPI from "../api/catAPI";
-import { useRouter } from "vue-router";
 import { useQuery } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
-import { formatDateNoHours } from "../utils/formatDate";
+import CatListItem from "../components/CatListItem.vue";
 
-const router = useRouter();
 const { t } = useI18n();
 
 const { data, isLoading } = useQuery({
@@ -16,8 +14,6 @@ const { data, isLoading } = useQuery({
 
 const filteredCats = ref<Cat[]>([]);
 const searchQuery = ref("");
-
-const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
 
 watchEffect(() => {
   if (!searchQuery.value) {
@@ -56,35 +52,7 @@ watchEffect(() => {
         <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <div
-          v-else
-          v-for="cat in filteredCats"
-          :key="cat.id"
-          @click="() => navigateToCat(cat.id)"
-          class="cat border-bottom gap-3 p-3 align-items-center"
-        >
-          <div class="d-flex align-items-center justify-content-start gap-2">
-            <img
-              :src="'https://kissarekisteritf.blob.core.windows.net/images/186f7fd4-ec2b-4f7a-950a-33b80a9e0d27.png'"
-              class="rounded-circle"
-              height="30"
-              width="30"
-              style="object-fit: fill"
-            />
-            <span class="text-upper-capitalize">
-              {{ cat.name }}
-            </span>
-          </div>
-
-          <div class="">{{ cat.breed }}</div>
-          <div class="overflow-hidden gap-2 align-items-center d-flex justify-content-between">
-            <span>{{
-              //@ts-ignore
-              formatDateNoHours(cat.birthDate)
-            }}</span>
-            <span class="badge rounded-pill text-bg-primary">{{ "Myytävänä" }}</span>
-          </div>
-        </div>
+        <CatListItem v-else v-for="cat in filteredCats" :cat="cat" />
       </div>
     </div>
   </div>

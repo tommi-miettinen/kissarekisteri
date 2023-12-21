@@ -1,6 +1,7 @@
 ﻿using Azure.Identity;
 using Azure.Storage.Blobs;
 using Kissarekisteri.Database;
+using Kissarekisteri.Filters;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -78,14 +79,16 @@ builder.Services.Configure<OpenIdConnectOptions>(
     }
 );
 
-
 builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"));
 });
 
 builder.Services
-    .AddControllers()
+    .AddControllers(options =>
+    {
+        options.Filters.Add(new ModelValidationFilter());
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -104,20 +107,27 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+
     app.UseDeveloperExceptionPage();
     using (var scope = app.Services.CreateScope())
     {
-        var services = scope.ServiceProvider;
-        var context = services.GetRequiredService<KissarekisteriDbContext>();
-        // context.Database.EnsureDeleted();
+        var context = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
+        /*
+        context.Database.EnsureDeleted();
         context.Database.EnsureCreated();
-        context.SeedPermissions();
-        context.SeedRoles();
-        context.SeedRolePermissions();
+           context.SeedCatBreeds();
+           context.SeedPermissions();
+           context.SeedRoles();
+           context.SeedRolePermissions();
+           */
     }
 }
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SupportedSubmitMethods([]);
+});
 app.UseCors();
 app.UseHttpsRedirection();
 app.UseDefaultFiles();

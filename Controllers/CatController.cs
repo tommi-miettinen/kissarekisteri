@@ -21,10 +21,22 @@ public class CatController(CatService catService) : Controller
     /// <returns>A list of cats</returns>
     /// <response media="application/json" code="200">Returns the list of cats</response>
     [HttpGet("/cats")]
-    public async Task<ActionResult<List<Cat>>> GetCats()
+    public async Task<ActionResult<string>> GetCats([FromQuery] string name, [FromQuery] int limit)
     {
-        var cats = await _catService.GetCatsAsync();
+        var cats = await _catService.GetCatsAsync(name, limit);
         return Json(cats);
+    }
+
+    /// <summary>
+    /// Retrieves all cat breeds
+    /// </summary>
+    /// <returns>A list of breeds</returns>
+    /// <response media="application/json" code="200">Returns the list of breeds</response>
+    [HttpGet("/cats/breeds")]
+    public async Task<ActionResult<List<CatBreed>>> GetBreeds()
+    {
+        var breeds = await _catService.GetBreedsAsync();
+        return Json(breeds);
     }
 
     /// <summary>
@@ -64,8 +76,8 @@ public class CatController(CatService catService) : Controller
     /// <param name="catId">The ID of the cat to update.</param>
     /// <param name="file"></param>
     /// <returns>
-    /// Returns an ActionResult containing the updated Cat object. The Cat object 
-    /// will include the details of the uploaded photo if the operation is successful. 
+    /// Returns an ActionResult containing the updated Cat object. The Cat object
+    /// will include the details of the uploaded photo if the operation is successful.
     /// In case of errors, appropriate HTTP status codes and error messages are returned.
     /// </returns>
     /// <example>
@@ -102,16 +114,11 @@ public class CatController(CatService catService) : Controller
     public async Task<ActionResult<Cat>> CreateCat([FromBody] CatRequest catPayload)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var catToBeInserted = new Cat
-        {
-            Name = catPayload.Name,
-            BirthDate = catPayload.BirthDate,
-            OwnerId = userId,
-            BreederId = userId,
-            Breed = catPayload.Breed,
 
-        };
-        var newCat = await _catService.CreateCat(catToBeInserted);
+        catPayload.OwnerId = userId;
+        catPayload.BreederId = userId;
+
+        var newCat = await _catService.CreateCat(catPayload);
         return Json(newCat);
     }
 
@@ -127,4 +134,3 @@ public class CatController(CatService catService) : Controller
         return NoContent();
     }
 }
-
