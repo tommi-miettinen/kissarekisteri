@@ -9,6 +9,8 @@ namespace Kissarekisteri.Models
         public int ParentCatId { get; set; }
 
         public Cat ParentCat { get; set; }
+
+        public Cat Cat { get; set; }
         public int ChildCatId { get; set; }
         public Cat ChildCat { get; set; }
         public string ParentType { get; set; }

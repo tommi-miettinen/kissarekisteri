@@ -2,7 +2,6 @@ import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import App from "./App.vue";
-import Profile from "./views/Profile.vue";
 import CatShowList from "./views/CatShowList.vue";
 import CatShowDetails from "./views/CatShowDetails.vue";
 import Cats from "./views/Cats.vue";
@@ -17,7 +16,6 @@ import "./index.scss";
 const app = createApp(App);
 
 const routes = [
-  { path: "/profile", component: Profile },
   { path: "/catshows", component: CatShowList },
   { path: "/catshows/:eventId", component: CatShowDetails },
   { path: "/cats", component: Cats },

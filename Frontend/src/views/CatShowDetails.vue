@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 import userAPI from "../api/userAPI";
 import { userStore } from "../store/userStore";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
 import { useMutation, useQuery } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
@@ -12,14 +12,15 @@ import catShowAPI from "../api/catShowAPI";
 import FsLightbox from "fslightbox-vue/v3";
 import CatListItem from "../components/CatListItem.vue";
 
+interface CatsGroupedByBreed {
+  [breed: string]: Cat[];
+}
+
 const route = useRoute();
-const router = useRouter();
 const { t } = useI18n();
 
 const selectedCatIds = ref<number[]>([]);
 const eventId = +route.params.eventId;
-
-const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
 
 const { data: catShow, refetch, isLoading } = useQuery({ queryKey: ["catshow"], queryFn: () => catShowAPI.getEventById(eventId) });
 
@@ -47,7 +48,7 @@ const uploadMutation = useMutation({
   mutationFn: (file: File) => {
     return catShowAPI.addCatShowPhoto(eventId, file);
   },
-  onSuccess: refetch,
+  onSuccess: () => refetch(),
 });
 
 const { mutate: leaveEvent } = useMutation({
@@ -65,7 +66,7 @@ const { data: userCats } = useQuery({
 const user = userStore.user;
 const joiningEvent = ref(false);
 
-const isUserAnAttendee = computed(() => catShow.value && catShow.value.attendees.some((attendee: any) => attendee.userId === user?.id));
+const isUserAnAttendee = computed(() => catShow.value && catShow.value.attendees?.some((attendee: any) => attendee.userId === user?.id));
 
 const handleFileChange = async (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -84,13 +85,11 @@ const lightboxPhotos = computed(() => {
   return [];
 });
 
-const catsGroupedByBreed = computed(() => {
+const catsGroupedByBreed = computed<CatsGroupedByBreed>(() => {
   if (catShow.value?.attendees) {
-    const groupedCats = catShow.value.attendees.flatMap((attendee: any) =>
-      attendee.catAttendees.map((catAttendee: { cat: { breed: string } }) => catAttendee.cat)
-    );
+    const groupedCats = catShow.value.attendees.flatMap((attendee) => attendee.catAttendees.map((catAttendee) => catAttendee.cat));
 
-    const groupedCatsByBreed = groupedCats.reduce((acc: any, cat: any) => {
+    const groupedCatsByBreed = groupedCats.reduce((acc: CatsGroupedByBreed, cat) => {
       if (!acc[cat.breed]) {
         acc[cat.breed] = [];
       }
@@ -100,14 +99,20 @@ const catsGroupedByBreed = computed(() => {
 
     return groupedCatsByBreed;
   }
-  return [];
+  return {};
 });
 
 const inputRef = ref();
+const triggerFileInput = () => inputRef.value?.click();
 
-const triggerFileInput = () => {
-  console.log(inputRef.value);
-  inputRef.value?.click();
+const getMedalColor = (place: number) => {
+  if (place === 1) {
+    return "#fee101";
+  } else if (place === 2) {
+    return "#d7d7d7";
+  } else if (place === 3) {
+    return "#cd7f32";
+  }
 };
 </script>
 
@@ -115,7 +120,7 @@ const triggerFileInput = () => {
   <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
-  <div v-if="!isLoading" class="p-2 w-100 h-100 d-flex flex-column align-items-center p-sm-5">
+  <div v-if="catShow" class="p-2 w-100 h-100 d-flex flex-column align-items-center p-sm-5">
     <div class="col-12 col-sm-8 p-sm-5 d-flex flex-column gap-5">
       <div class="d-flex gap-4" style="height: 300px">
         <div class="border image-container rounded-4" style="position: relative; min-width: 400px; overflow: hidden">
@@ -145,7 +150,14 @@ const triggerFileInput = () => {
         <div v-for="(cats, breed) in catsGroupedByBreed" :key="breed">
           <h4>{{ breed }}</h4>
 
-          <div v-if="cats" v-for="cat in cats">
+          <div class="d-flex align-items-center" v-if="cats" v-for="cat in cats">
+            <div
+              :style="{ backgroundColor: getMedalColor(cat.results.find((result) => result.catShowId === eventId).place) }"
+              v-if="cat.results"
+              class="badge rounded-pill fw-bold text-black"
+            >
+              #{{ cat.results.find((result) => result.catShowId === eventId).place }}
+            </div>
             <CatListItem :cat="cat" />
             <div @click.stop class="dropdown d-flex ms-auto dropstart">
               <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">

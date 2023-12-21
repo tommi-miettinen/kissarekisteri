@@ -13,7 +13,7 @@ interface Attendee {
   id: number;
   userId: string;
   user: User;
-  catAttendees: Cat[];
+  catAttendees: { cat: Cat }[];
 }
 
 interface Permission {
@@ -22,7 +22,7 @@ interface Permission {
 }
 
 interface Cat {
-  sex: "female" | "male";
+  sex: string;
   id: number;
   name: string;
   birthDate: Date;
@@ -32,6 +32,7 @@ interface Cat {
   imageUrl: string;
   photos: { id: string; url: string }[];
   results: CatShowResult[];
+  catParents: { cat: Cat }[];
   owner: User;
   breeder: User;
 }
@@ -58,10 +59,12 @@ interface User {
 }
 
 interface CatPayload {
-  sex: "female" | "male";
+  sex: string;
   name: string;
   birthDate: Date;
   breed: string;
+  fatherId?: number;
+  motherId?: number;
 }
 
 interface EditCatPayload extends CatPayload {

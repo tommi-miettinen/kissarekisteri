@@ -17,7 +17,7 @@ const getEvents = async (): Promise<CatShowEvent[] | undefined> => {
 
 const getEventById = async (eventId: number) => {
   try {
-    const result = await axios.get(`${baseUrl}/catshows/${eventId}`);
+    const result = await axios.get<CatShowEvent>(`${baseUrl}/catshows/${eventId}`);
     return result.data;
   } catch (err) {
     console.log(err);

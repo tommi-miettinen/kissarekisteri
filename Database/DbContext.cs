@@ -46,7 +46,7 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
         modelBuilder
             .Entity<Cat>()
             .HasMany(c => c.CatParents)
-            .WithOne(cp => cp.ChildCat)
+            .WithOne(cp => cp.Cat)
             .HasForeignKey(cp => cp.ParentCatId);
 
 

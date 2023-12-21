@@ -9,7 +9,7 @@ const { t } = useI18n();
 
 const { data, isLoading } = useQuery({
   queryKey: ["cats"],
-  queryFn: catAPI.getCats,
+  queryFn: () => catAPI.getCats(),
 });
 
 const filteredCats = ref<Cat[]>([]);

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import catAPI from "../api/catAPI";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery, useMutation } from "@tanstack/vue-query";
@@ -7,6 +7,7 @@ import { useQuery, useMutation } from "@tanstack/vue-query";
 import FsLightbox from "fslightbox-vue/v3";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import CatListItem from "../components/CatListItem.vue";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -18,15 +19,13 @@ const { data: cat, refetch } = useQuery({
 });
 
 const uploadMutation = useMutation({
-  //@ts-ignore
-  mutationFn: (file: File) => catAPI.uploadCatImage(cat.value.id, file),
-  onSuccess: refetch,
+  mutationFn: (file: File) => catAPI.uploadCatImage(cat.value!.id, file),
+  onSuccess: () => refetch(),
 });
 
 const catMutation = useMutation({
-  //@ts-ignore
-  mutationFn: (imageUrl: string) => catAPI.editCat({ ...cat.value, imageUrl }),
-  onSuccess: refetch,
+  mutationFn: (imageUrl: string) => catAPI.editCat({ ...cat.value!, imageUrl }),
+  onSuccess: () => refetch(),
 });
 
 const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
@@ -41,10 +40,7 @@ const handleFileChange = async (event: Event) => {
 
 const inputRef = ref();
 
-const triggerFileInput = () => {
-  console.log(inputRef.value);
-  inputRef.value?.click();
-};
+const triggerFileInput = () => inputRef.value?.click();
 
 const toggler = ref(false);
 const selectedImage = ref(0);
@@ -55,10 +51,22 @@ const catPhotos = computed(() => {
 });
 
 const avatarLoadError = ref(false);
+
+watch(route, () => refetch());
+
+const getMedalColor = (place: number) => {
+  if (place === 1) {
+    return "#fee101";
+  } else if (place === 2) {
+    return "#d7d7d7";
+  } else if (place === 3) {
+    return "#cd7f32";
+  }
+};
 </script>
 
 <template>
-  <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4">
+  <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4 p-5">
     <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8 gap-5 d-flex flex-column">
       <div class="d-flex flex-column flex-sm-row gap-4" style="min-height: 300px">
         <div class="border image-container rounded-4" style="position: relative; min-width: 400px; overflow: hidden">
@@ -73,6 +81,11 @@ const avatarLoadError = ref(false);
         </div>
       </div>
 
+      <div v-if="cat.catParents.length > 0">
+        <h5>Vanhemmat</h5>
+        <CatListItem v-if="cat.catParents" v-for="parent in cat.catParents" :cat="parent.cat" />
+      </div>
+
       <div>
         <h5>Sijoitukset</h5>
         <div
@@ -81,7 +94,7 @@ const avatarLoadError = ref(false);
           class="user p-3 d-flex border-bottom p-2 flex align-items-center"
         >
           <div class="d-flex align-items-center gap-2">
-            <span class="badge rounded-pill text-bg-primary">{{ result.place }}</span>
+            <span :style="{ backgroundColor: getMedalColor(result.place) }" class="badge rounded-pill text-black">#{{ result.place }}</span>
             <span class="mb-1">{{ result.catShow.name }}</span>
           </div>
         </div>

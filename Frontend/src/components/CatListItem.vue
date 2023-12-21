@@ -4,7 +4,7 @@ import { formatDateNoHours } from "../utils/formatDate";
 
 import { useRouter } from "vue-router";
 
-const props = defineProps({
+defineProps({
   cat: {
     type: Object as () => Cat,
     required: true,

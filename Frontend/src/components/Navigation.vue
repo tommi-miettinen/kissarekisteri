@@ -43,7 +43,7 @@ const logoutFromApp = () => {
           </div>
         </div>
         <ul class="dropdown-menu">
-          <router-link class="dropdown-item" to="/profile">{{ t("Navigation.profile") }}</router-link>
+          <router-link class="dropdown-item" :to="`/users/${user.id}`">{{ t("Navigation.profile") }}</router-link>
           <li @click="logoutFromApp" class="dropdown-item">{{ t("Navigation.logout") }}</li>
         </ul>
       </div>

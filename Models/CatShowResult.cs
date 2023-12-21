@@ -16,6 +16,7 @@ namespace Kissarekisteri.Models
         public int Id { get; set; }
         public required int CatShowId { get; set; }
         public CatShow CatShow { get; set; }
+
         public required int CatId { get; set; }
         public required string Breed { get; set; }
         [JsonIgnore]

@@ -1,4 +1,5 @@
 ﻿using Kissarekisteri.DTOs;
+using Kissarekisteri.Models;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,9 +14,8 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteri.Controllers;
 
-public class UserController(UserService userService) : Controller
+public class UserController(UserService userService, CatService catService) : Controller
 {
-    private readonly UserService _userService = userService;
 
     [HttpGet("signout")]
     public IActionResult Logout()
@@ -43,14 +43,14 @@ public class UserController(UserService userService) : Controller
     [HttpGet("users/{userId}")]
     public async Task<ActionResult<UserResponse>> GetUser([FromRoute] string userId)
     {
-        var user = await _userService.GetUserById(userId);
+        var user = await userService.GetUserById(userId);
         return Json(user);
     }
 
     [HttpGet("users")]
     public async Task<ActionResult<List<UserResponse>>> GetUsers()
     {
-        var users = await _userService.GetUsers();
+        var users = await userService.GetUsers();
         return Json(users);
     }
 
@@ -64,14 +64,14 @@ public class UserController(UserService userService) : Controller
     public async Task<ActionResult<UserResponse>> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = await _userService.GetUserById(userId);
+        var user = await userService.GetUserById(userId);
         return Json(user);
     }
 
     [HttpPost("users")]
     public async Task<ActionResult<UserResponse>> CreateUser()
     {
-        var user = await _userService.CreateUser();
+        var user = await userService.CreateUser();
         return Json(user);
     }
 
@@ -85,8 +85,20 @@ public class UserController(UserService userService) : Controller
     public async Task<ActionResult<UserResponse>> UploadUserAvatar(IFormFile file)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var user = await _userService.UploadUserPhotoAsync(userId, file);
+        var user = await userService.UploadUserPhotoAsync(userId, file);
         return Json(user);
+    }
+
+    /// <summary>
+    /// Gets all cats owned by a user.
+    /// </summary>
+    /// <param name="userId">The ID of the user</param>
+    /// <returns>The cats owned by the user</returns>
+    [HttpGet("/users/{userId}/cats")]
+    public async Task<ActionResult<Cat>> GetCatsByUserId(string userId)
+    {
+        var catsByUserId = await catService.GetCatByUserIdAsync(userId);
+        return Json(catsByUserId);
     }
 }
 

@@ -75,17 +75,38 @@ public class CatService(
 
         cat.Owner = await _userService.GetUserById(cat.OwnerId);
         cat.Breeder = await _userService.GetUserById(cat.BreederId);
+        cat.CatParents = await _dbContext.CatParents
+            .Include(cp => cp.Cat)
+            .Where(cp => cp.ChildCatId == cat.Id)
+            .ToListAsync();
 
         return cat;
     }
 
-    public async Task<List<Cat>> GetCatsAsync(string query, int? limit)
+    public async Task<List<Cat>> GetCatsAsync(string? name, int? limit)
     {
-        var filteredCats = await _dbContext.Cats
+        var queryableCats = _dbContext.Cats
             .Include(c => c.Photos)
-            .Where(c => c.Name.Contains(query))
-            .Take(limit ?? int.MaxValue)
-            .ToListAsync();
+            .AsQueryable();
+
+        if (!string.IsNullOrEmpty(name))
+        {
+            queryableCats = queryableCats.Where(c => c.Name.Contains(name));
+        }
+        if (limit.HasValue)
+        {
+            queryableCats = queryableCats.Take(limit.Value);
+        }
+
+        var filteredCats = await queryableCats.ToListAsync();
+
+        foreach (Cat cat in filteredCats)
+        {
+            cat.CatParents = await _dbContext.CatParents
+                .Include(cp => cp.ChildCat)
+                .Where(cp => cp.ChildCatId == cat.Id)
+                .ToListAsync();
+        }
 
         return filteredCats;
     }

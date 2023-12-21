@@ -21,7 +21,7 @@ public class CatController(CatService catService) : Controller
     /// <returns>A list of cats</returns>
     /// <response media="application/json" code="200">Returns the list of cats</response>
     [HttpGet("/cats")]
-    public async Task<ActionResult<string>> GetCats([FromQuery] string name, [FromQuery] int limit)
+    public async Task<ActionResult<string>> GetCats([FromQuery] string? name, [FromQuery] int? limit)
     {
         var cats = await _catService.GetCatsAsync(name, limit);
         return Json(cats);
@@ -57,17 +57,6 @@ public class CatController(CatService catService) : Controller
         return Json(cat);
     }
 
-    /// <summary>
-    /// Gets all cats owned by a user.
-    /// </summary>
-    /// <param name="userId">The ID of the user</param>
-    /// <returns>The cats owned by the user</returns>
-    [HttpGet("/users/{userId}/cats")]
-    public async Task<ActionResult<Cat>> GetCatsByUserId(string userId)
-    {
-        var catsByUserId = await _catService.GetCatByUserIdAsync(userId);
-        return Json(catsByUserId);
-    }
 
     /// <summary>
     /// Uploads a photo for a specific cat identified by its ID.
