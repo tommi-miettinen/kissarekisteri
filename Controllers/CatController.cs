@@ -16,14 +16,20 @@ public class CatController(CatService catService) : Controller
     private readonly CatService _catService = catService;
 
     /// <summary>
-    /// Retrieves all cats.
+    /// Retrieves all cats with optional filters.
     /// </summary>
+    /// <remarks>
+    /// Use the queryParameters to filter the results. You can specify 
+    /// name, breed, limit, and include options. The 'include' parameter 
+    /// allows including additional data like parents and results.
+    /// </remarks>
+    /// <param name="queryParameters">Optional query parameters for filtering the results</param>
     /// <returns>A list of cats</returns>
     /// <response media="application/json" code="200">Returns the list of cats</response>
     [HttpGet("/cats")]
-    public async Task<ActionResult<string>> GetCats([FromQuery] string? name, [FromQuery] int? limit)
+    public async Task<ActionResult<List<Cat>>> GetCats([FromQuery] CatQueryParamsDTO queryParameters)
     {
-        var cats = await _catService.GetCatsAsync(name, limit);
+        var cats = await _catService.GetCatsAsync(queryParameters);
         return Json(cats);
     }
 

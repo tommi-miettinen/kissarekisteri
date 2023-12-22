@@ -24,7 +24,7 @@ const deleteCatById = async (catId: number): Promise<true | undefined> => {
 
 const getCats = async (query?: string) => {
   try {
-    const result = await axios.get<Cat[]>(`${baseUrl}/cats?${query}`);
+    const result = await axios.get<Cat[]>(`${baseUrl}/cats?${query || ""}`);
     return result.data;
   } catch (err) {
     console.log(err);

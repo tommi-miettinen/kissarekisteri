@@ -10,62 +10,13 @@ import { useI18n } from "vue-i18n";
 import Cropper from "../components/Cropper.vue";
 import CatListItem from "../components/CatListItem.vue";
 import { useRoute } from "vue-router";
+import { watchEffect } from "vue";
 
 const { t } = useI18n();
 const route = useRoute();
 
-//@ts-ignore
-const loggedInUser = computed(() => userStore.user);
-
-const { data: user } = useQuery({
-  queryKey: ["user" + route.params.userId],
-  queryFn: () => userAPI.getUserById(route.params.userId as string),
-});
-
-const userIsLoggedInUser = computed(() => {
-  if (user.value && loggedInUser.value) return user.value.id === loggedInUser.value.id;
-  return false;
-});
-
-const { data: cats, refetch: refetchCats } = useQuery({
-  queryKey: ["cats" + user.value?.id],
-  queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
-  enabled: Boolean(user.value?.id),
-});
-
-const { data: motherCats, refetch: refetchMotherCats } = useQuery({
-  queryKey: ["mothercats" + user.value?.id],
-  queryFn: () => catAPI.getCats(`name=${motherCatQuery.value}&limit=5`),
-});
-
-const { data: fatherCats, refetch: refetchFatherCats } = useQuery({
-  queryKey: ["fathercats" + user.value?.id],
-  queryFn: () => catAPI.getCats(`name=${fatherCatQuery.value}&limit=5`),
-});
-
-const { mutate } = useMutation({
-  mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),
-  onSuccess: () => {
-    toast.success("Kissan tiedot lisätty"), refetchCats();
-  },
-});
-
 const motherCatQuery = ref("");
 const fatherCatQuery = ref("");
-
-const { data: catBreeds } = useQuery({
-  queryKey: ["catBreeds"],
-  queryFn: () => catAPI.getCatBreeds(),
-});
-
-/*
-const { mutate: mutateUser } = useMutation({
-  mutationFn: (userPayload: User) => editUser(userPayload),
-  onSuccess: () => toast.info("Tiedot tallennettu"),
-});
-*/
-
-watch(user, () => refetchCats());
 
 const newCat = ref<CatPayload>({
   name: "",
@@ -86,13 +37,61 @@ const updatedCat = ref<EditCatPayload>({
 
 const editingCat = ref(false);
 const editingAvatar = ref(false);
-
 const deletingCat = ref(false);
 const deletingCatId = ref();
-
 const addingCat = ref(false);
 const showMotherCatSuggestions = ref(false);
 const showFatherCatSuggestions = ref(false);
+const avatarLoadError = ref(false);
+
+const loggedInUser = computed(() => userStore.user);
+
+const { data: user } = useQuery({
+  queryKey: ["user" + route.params.userId],
+  queryFn: () => userAPI.getUserById(route.params.userId as string),
+});
+
+const userIsLoggedInUser = computed(() => {
+  if (user.value && loggedInUser.value) return user.value.id === loggedInUser.value.id;
+  return false;
+});
+
+const { data: cats, refetch: refetchCats } = useQuery({
+  queryKey: ["cats" + user.value?.id],
+  queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
+  enabled: Boolean(user.value?.id),
+});
+
+const { data: motherCats, refetch: refetchMotherCats } = useQuery({
+  queryKey: [motherCatQuery.value],
+  queryFn: () => catAPI.getCats(`name=${motherCatQuery.value}&breed=${newCat.value.breed}&limit=3`),
+});
+
+const { data: fatherCats, refetch: refetchFatherCats } = useQuery({
+  queryKey: ["fathercats" + user.value?.id],
+  queryFn: () => catAPI.getCats(`name=${fatherCatQuery.value}&breed=${newCat.value.breed}&limit=3`),
+});
+
+const { mutate } = useMutation({
+  mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),
+  onSuccess: () => {
+    toast.success("Kissan tiedot lisätty"), refetchCats();
+  },
+});
+
+const { data: catBreeds } = useQuery({
+  queryKey: ["catBreeds"],
+  queryFn: () => catAPI.getCatBreeds(),
+});
+
+/*
+const { mutate: mutateUser } = useMutation({
+  mutationFn: (userPayload: User) => editUser(userPayload),
+  onSuccess: () => toast.info("Tiedot tallennettu"),
+});
+*/
+
+watch(user, () => refetchCats());
 
 const addCat = () => {
   mutate(newCat.value);
@@ -107,8 +106,6 @@ const deleteCat = async (catId: number) => {
   deletingCat.value = false;
 };
 
-const avatarLoadError = ref(false);
-
 const editCat = async () => {
   await catAPI.editCat(updatedCat.value);
 };
@@ -117,34 +114,31 @@ const loadCatForEdit = (cat: Cat) => {
   updatedCat.value = cat;
   editingCat.value = true;
 };
-const setEditingAvatar = (bool: boolean) => (editingAvatar.value = bool);
 
-const debounce = (callback: any, delay = 300) => {
-  let timeout: NodeJS.Timeout;
-  return (...args: any) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => callback(...args), delay);
-  };
-};
+let motherCatTimeout: NodeJS.Timeout;
+let fatherCatTimeout: NodeJS.Timeout;
 
-watch(
-  motherCatQuery,
-  () => {
-    if (motherCatQuery.value.length < 3) return;
-    showMotherCatSuggestions.value = true;
-    debounce(() => refetchMotherCats());
-  },
-  { immediate: true }
-);
-watch(
-  fatherCatQuery,
-  () => {
-    if (fatherCatQuery.value.length < 3) return;
-    showFatherCatSuggestions.value = true;
-    debounce(() => refetchFatherCats());
-  },
-  { immediate: true }
-);
+watchEffect(() => {
+  if (motherCatQuery.value.length < 2) {
+    showMotherCatSuggestions.value = false;
+    return;
+  }
+
+  showMotherCatSuggestions.value = true;
+  clearTimeout(motherCatTimeout);
+  motherCatTimeout = setTimeout(() => refetchMotherCats(), 300);
+});
+
+watchEffect(() => {
+  if (fatherCatQuery.value.length < 2) {
+    showFatherCatSuggestions.value = false;
+    return;
+  }
+
+  showFatherCatSuggestions.value = true;
+  clearTimeout(fatherCatTimeout);
+  fatherCatTimeout = setTimeout(() => refetchFatherCats(), 300);
+});
 
 const handleFatherCatClick = (cat: Cat) => {
   newCat.value.fatherId = cat.id;
@@ -164,7 +158,7 @@ const handleMotherCatClick = (cat: Cat) => {
     <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
       <div class="d-flex flex-column" v-if="user">
         <div class="d-flex align-items-center gap-2 mb-4">
-          <div class="d-flex align-items-center" @click="() => setEditingAvatar(!editingAvatar)">
+          <div class="d-flex align-items-center" @click="editingAvatar = false">
             <img
               v-if="user.avatarUrl && !avatarLoadError"
               class="rounded-circle"
@@ -251,27 +245,31 @@ const handleMotherCatClick = (cat: Cat) => {
         <label for="exampleDataList" class="form-label">Kissan äiti</label>
         <input v-model="motherCatQuery" class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." />
         <div
-          v-if="showMotherCatSuggestions"
+          v-if="showMotherCatSuggestions && motherCats && motherCats.length > 0"
           class="z-2 bg-white p-2 gap-2 d-flex flex-column border rounded-2 border-top-0 position-absolute w-100"
         >
-          <div @click="() => handleMotherCatClick(cat)" v-for="cat in motherCats">{{ cat.name }}</div>
+          <div :key="cat.id" class="p-2 rounded-3 hover-bg" @click="() => handleMotherCatClick(cat)" v-for="cat in motherCats">
+            {{ cat.name }}
+          </div>
         </div>
       </div>
       <div class="mb-3 position-relative">
         <label for="exampleDataList" class="form-label">Kissan isä</label>
         <input v-model="fatherCatQuery" class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." />
         <div
-          v-if="showFatherCatSuggestions"
+          v-if="showFatherCatSuggestions && fatherCats && fatherCats.length > 0"
           class="z-2 bg-white p-2 gap-2 d-flex flex-column border rounded-2 border-top-0 position-absolute w-100"
         >
-          <div @click="() => handleFatherCatClick(cat)" v-for="cat in fatherCats">{{ cat.name }}</div>
+          <div :key="cat.id" class="p-2 rounded-3 hover-bg" @click="() => handleFatherCatClick(cat)" v-for="cat in fatherCats">
+            {{ cat.name }}
+          </div>
         </div>
       </div>
 
       <button data-testid="add-new-cat-btn-save" @click="addCat" class="btn btn-primary ms-auto px-5">Lisää kissa +</button>
     </div>
   </Modal>
-  <Modal :modalId="'edit-avatar-modal'" @onCancel="() => setEditingAvatar(false)" :visible="editingAvatar">
+  <Modal :modalId="'edit-avatar-modal'" @onCancel="editingAvatar = false" :visible="editingAvatar">
     <div class="p-5">
       <Cropper @onCrop="(data:string) => console.log(data)" />
     </div>
@@ -311,3 +309,10 @@ const handleMotherCatClick = (cat: Cat) => {
     </div>
   </Modal>
 </template>
+
+<style>
+.hover-bg:hover {
+  cursor: pointer;
+  background-color: #f3f4f6;
+}
+</style>

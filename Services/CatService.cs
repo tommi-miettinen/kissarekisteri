@@ -78,24 +78,29 @@ public class CatService(
         cat.CatParents = await _dbContext.CatParents
             .Include(cp => cp.Cat)
             .Where(cp => cp.ChildCatId == cat.Id)
-            .ToListAsync();
-
+        .ToListAsync();
         return cat;
     }
 
-    public async Task<List<Cat>> GetCatsAsync(string? name, int? limit)
+    public async Task<List<Cat>> GetCatsAsync(CatQueryParamsDTO queryParams)
     {
         var queryableCats = _dbContext.Cats
             .Include(c => c.Photos)
             .AsQueryable();
 
-        if (!string.IsNullOrEmpty(name))
+        if (!string.IsNullOrEmpty(queryParams.Name))
         {
-            queryableCats = queryableCats.Where(c => c.Name.Contains(name));
+            queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
         }
-        if (limit.HasValue)
+
+        if (!string.IsNullOrEmpty(queryParams.Breed))
         {
-            queryableCats = queryableCats.Take(limit.Value);
+            queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
+        }
+
+        if (queryParams.Limit.HasValue)
+        {
+            queryableCats = queryableCats.Take(queryParams.Limit.Value);
         }
 
         var filteredCats = await queryableCats.ToListAsync();
