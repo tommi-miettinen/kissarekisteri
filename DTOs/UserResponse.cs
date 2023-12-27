@@ -9,6 +9,8 @@ namespace Kissarekisteri.DTOs
         public string GivenName { get; set; }
         public string Surname { get; set; }
         public string AvatarUrl { get; set; }
+
+        public string Email { get; set; }
         public List<Models.Permission> Permissions { get; set; }
     }
 }

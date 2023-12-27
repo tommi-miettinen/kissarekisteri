@@ -6,6 +6,10 @@
 @import "bootstrap/scss/utilities";
 @import "bootstrap/scss/utilities/api";
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 $utilities: map-merge(
   $utilities,
   (

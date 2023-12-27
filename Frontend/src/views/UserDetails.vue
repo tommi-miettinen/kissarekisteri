@@ -20,9 +20,9 @@ const fatherCatQuery = ref("");
 
 const newCat = ref<CatPayload>({
   name: "",
-  birthDate: new Date(),
+  birthDate: null,
   breed: "",
-  sex: "female",
+  sex: "Female",
   fatherId: undefined,
   motherId: undefined,
 });
@@ -30,9 +30,9 @@ const newCat = ref<CatPayload>({
 const updatedCat = ref<EditCatPayload>({
   id: 0,
   name: "",
-  birthDate: new Date(),
+  birthDate: null,
   breed: "",
-  sex: "female",
+  sex: "Female",
 });
 
 const editingCat = ref(false);
@@ -76,6 +76,10 @@ const { mutate } = useMutation({
   mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),
   onSuccess: () => {
     toast.success("Kissan tiedot lisätty"), refetchCats();
+  },
+  onError: (error) => {
+    //@ts-ignore
+    toast.error(error.response.data.message || "Jokin meni vikaan.");
   },
 });
 
@@ -151,6 +155,15 @@ const handleMotherCatClick = (cat: Cat) => {
   motherCatQuery.value = cat.name;
   nextTick(() => (showMotherCatSuggestions.value = false));
 };
+
+const isFormValid = computed(() => {
+  return (
+    newCat.value.name.trim() !== "" &&
+    newCat.value.breed.trim() !== "" &&
+    newCat.value.birthDate &&
+    (newCat.value.sex === "Female" || newCat.value.sex === "Male")
+  );
+});
 </script>
 
 <template>
@@ -236,7 +249,7 @@ const handleMotherCatClick = (cat: Cat) => {
       <div class="mb-3">
         <label for="catSex" class="form-label">Sukupuoli</label>
         <select data-testid="new-cat-sex-select" class="form-select" id="catSex" v-model="newCat.sex" aria-label="Cat sex">
-          <option selected value="Female">Naaras</option>
+          <option value="Female">Naaras</option>
           <option value="Male">Uros</option>
         </select>
       </div>
@@ -266,7 +279,9 @@ const handleMotherCatClick = (cat: Cat) => {
         </div>
       </div>
 
-      <button data-testid="add-new-cat-btn-save" @click="addCat" class="btn btn-primary ms-auto px-5">Lisää kissa +</button>
+      <button :disabled="!isFormValid" data-testid="add-new-cat-btn-save" @click="addCat" class="btn btn-primary ms-auto px-5">
+        Lisää kissa +
+      </button>
     </div>
   </Modal>
   <Modal :modalId="'edit-avatar-modal'" @onCancel="editingAvatar = false" :visible="editingAvatar">

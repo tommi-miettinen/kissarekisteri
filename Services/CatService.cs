@@ -75,42 +75,72 @@ public class CatService(
 
         cat.Owner = await _userService.GetUserById(cat.OwnerId);
         cat.Breeder = await _userService.GetUserById(cat.BreederId);
-        cat.CatParents = await _dbContext.CatParents
-            .Include(cp => cp.Cat)
-            .Where(cp => cp.ChildCatId == cat.Id)
+        cat.CatParents = [];
+        cat.Kittens = [];
+
+        var catParents = await _dbContext.CatRelations
+        .Where(cp => cp.ChildCatId == cat.Id)
         .ToListAsync();
+
+
+        foreach (CatRelation parent in catParents)
+        {
+            var catParent = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == parent.ParentCatId);
+            cat.CatParents.Add(catParent);
+        }
+
+        var kittens = await _dbContext.CatRelations.Where(cp => cp.ParentCatId == cat.Id).ToListAsync();
+
+        foreach (CatRelation kitten in kittens)
+        {
+            var catKitten = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == kitten.ChildCatId);
+            cat.Kittens.Add(catKitten);
+        }
+
+
         return cat;
     }
 
-    public async Task<List<Cat>> GetCatsAsync(CatQueryParamsDTO queryParams)
+    public async Task<List<Cat>> GetCatsAsync(CatQueryParamsDTO queryParams = null)
     {
         var queryableCats = _dbContext.Cats
             .Include(c => c.Photos)
             .AsQueryable();
 
-        if (!string.IsNullOrEmpty(queryParams.Name))
+        if (queryParams != null)
         {
-            queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
-        }
+            if (!string.IsNullOrEmpty(queryParams.Name))
+            {
+                queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
+            }
 
-        if (!string.IsNullOrEmpty(queryParams.Breed))
-        {
-            queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
-        }
+            if (!string.IsNullOrEmpty(queryParams.Breed))
+            {
+                queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
+            }
 
-        if (queryParams.Limit.HasValue)
-        {
-            queryableCats = queryableCats.Take(queryParams.Limit.Value);
+            if (queryParams.Limit.HasValue)
+            {
+                queryableCats = queryableCats.Take(queryParams.Limit.Value);
+            }
         }
 
         var filteredCats = await queryableCats.ToListAsync();
 
         foreach (Cat cat in filteredCats)
         {
-            cat.CatParents = await _dbContext.CatParents
-                .Include(cp => cp.ChildCat)
-                .Where(cp => cp.ChildCatId == cat.Id)
-                .ToListAsync();
+            var parents = await _dbContext.CatRelations
+         .Where(cp => cp.ChildCatId == cat.Id)
+         .ToListAsync();
+
+            cat.CatParents = [];
+
+            foreach (CatRelation parent in parents)
+            {
+                var catParent = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == parent.ParentCatId);
+                cat.CatParents.Add(catParent);
+            }
+
         }
 
         return filteredCats;
@@ -143,7 +173,8 @@ public class CatService(
             Breed = newCatRequest.Breed,
             Sex = newCatRequest.Sex,
             OwnerId = newCatRequest.OwnerId,
-            BreederId = newCatRequest.BreederId
+            BreederId = newCatRequest.BreederId,
+            ImageUrl = newCatRequest.ImageUrl
         };
 
         await _dbContext.Cats.AddAsync(cat);
@@ -151,22 +182,22 @@ public class CatService(
 
         if (newCatRequest.MotherId.HasValue)
         {
-            var motherRelation = new CatParent
+            var motherRelation = new CatRelation
             {
                 ParentCatId = newCatRequest.MotherId.Value,
                 ChildCatId = cat.Id
             };
-            _dbContext.CatParents.Add(motherRelation);
+            _dbContext.CatRelations.Add(motherRelation);
         }
 
         if (newCatRequest.FatherId.HasValue)
         {
-            var fatherRelation = new CatParent
+            var fatherRelation = new CatRelation
             {
                 ParentCatId = newCatRequest.FatherId.Value,
                 ChildCatId = cat.Id
             };
-            _dbContext.CatParents.Add(fatherRelation);
+            _dbContext.CatRelations.Add(fatherRelation);
         }
 
         await _dbContext.SaveChangesAsync();

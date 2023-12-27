@@ -32,7 +32,8 @@ interface Cat {
   imageUrl: string;
   photos: { id: string; url: string }[];
   results: CatShowResult[];
-  catParents: { cat: Cat }[];
+  catParents: Cat[];
+  kittens: Cat[];
   owner: User;
   breeder: User;
 }
@@ -61,7 +62,7 @@ interface User {
 interface CatPayload {
   sex: string;
   name: string;
-  birthDate: Date;
+  birthDate: Date | null;
   breed: string;
   fatherId?: number;
   motherId?: number;

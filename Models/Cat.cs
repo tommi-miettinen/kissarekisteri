@@ -23,7 +23,8 @@ namespace Kissarekisteri.Models
         public UserResponse Breeder { get; set; }
         public string ImageUrl { get; set; }
 
-        public List<CatParent> CatParents { get; set; }
+        public List<Cat> CatParents { get; set; }
+        public List<Cat> Kittens { get; set; }
         public List<CatShowResult> Results { get; set; }
         public List<CatPhoto> Photos { get; set; }
 

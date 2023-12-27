@@ -84,29 +84,44 @@ onMounted(async () => await loadEvents());
     </div>
   </div>
   <Modal :modalId="'event-modal'" @onCancel="addingEvent = false" :visible="addingEvent">
-    <div class="modal-body d-flex flex-column w-100">
-      <div class="input-group mb-3">
-        <input type="text" class="form-control" v-model="newEvent.name" :placeholder="t('CatShowList.eventNameInput')" />
-      </div>
-      <div class="input-group mb-3">
-        <input type="text" class="form-control" v-model="newEvent.description" :placeholder="t('CatShowList.eventDescriptionInput')" />
-      </div>
-      <div class="input-group mb-3">
-        <input type="text" class="form-control" v-model="newEvent.location" :placeholder="t('CatShowList.eventLocationInput')" />
-      </div>
-      <div class="row mb-3 g-2">
-        <div class="col-8">
-          <input type="date" class="form-control" v-model="newEvent.startDate" placeholder="Start Date" />
-        </div>
-        <div class="col-4">
-          <input type="time" class="form-control" v-model="newEvent.endDate" placeholder="End Date" />
-        </div>
+    <div class="d-flex flex-column w-100 p-4 gap-4">
+      <div>
+        <label for="event-name" class="form-label cursor-pointer">{{ t("CatShowList.eventNameInput") }}</label>
+        <input id="event-name" type="text" class="form-control" v-model="newEvent.name" :placeholder="t('CatShowList.eventNameInput')" />
       </div>
 
-      <div class="input-group mb-3">
-        <input type="date" class="form-control" v-model="newEvent.endDate" placeholder="End Date" />
-        <input type="time" class="form-control" v-model="newEvent.endDate" placeholder="End Date" />
+      <div>
+        <label for="event-description" class="form-label cursor-pointer">{{ t("CatShowList.eventDescriptionInput") }}</label>
+        <input
+          id="event-description"
+          type="text"
+          class="form-control"
+          v-model="newEvent.description"
+          :placeholder="t('CatShowList.eventDescriptionInput')"
+        />
       </div>
+
+      <div>
+        <label for="event-location" class="form-label cursor-pointer">{{ t("CatShowList.eventLocationInput") }}</label>
+        <input
+          id="event-location"
+          type="text"
+          class="form-control"
+          v-model="newEvent.location"
+          :placeholder="t('CatShowList.eventLocationInput')"
+        />
+      </div>
+
+      <div>
+        <label for="start-date" class="form-label cursor-pointer">Start Date</label>
+        <input id="start-date" type="date" class="form-control" v-model="newEvent.startDate" />
+      </div>
+
+      <div>
+        <label for="end-date" class="form-label cursor-pointer">End Date</label>
+        <input id="end-date" type="date" class="form-control" v-model="newEvent.endDate" />
+      </div>
+
       <button @click="createCatShow" type="button" class="btn btn-primary ms-auto px-5">Luo tapahtuma +</button>
     </div>
   </Modal>

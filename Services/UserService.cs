@@ -14,13 +14,13 @@ public class UserService(
     GraphServiceClient graphClient,
     UploadService uploadService,
     KissarekisteriDbContext dbContext,
-    RBACService rbacService
+    PermissionService rbacService
     )
 {
     private readonly GraphServiceClient _graphClient = graphClient;
     private readonly UploadService _uploadService = uploadService;
     private readonly KissarekisteriDbContext _dbContext = dbContext;
-    private readonly RBACService _rbacService = rbacService;
+    private readonly PermissionService _rbacService = rbacService;
 
     public async Task<List<UserResponse>> GetUsers()
     {
@@ -31,7 +31,14 @@ public class UserService(
 
             var users = await _graphClient.Users.GetAsync(requestConfiguration =>
             {
-                requestConfiguration.QueryParameters.Select = new string[] { "givenName", "surname", "id", "displayName", avatarUrl };
+                requestConfiguration.QueryParameters.Select = new string[]
+                {
+                    "givenName",
+                    "surname",
+                    "id",
+                    "displayName",
+                    "identities",
+                    avatarUrl };
 
             });
 
@@ -41,6 +48,7 @@ public class UserService(
                 Id = u.Id,
                 DisplayName = u.DisplayName,
                 Surname = u.Surname,
+                Email = u.Identities.FirstOrDefault().IssuerAssignedId,
                 AvatarUrl = u.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null
             }).ToList();
 
@@ -85,7 +93,7 @@ public class UserService(
         return response;
     }
 
-    public async Task<User> CreateUser()
+    public async Task<User> CreateUser(UserCreatePayloadDTO userPayload)
     {
         try
         {
@@ -95,13 +103,13 @@ public class UserService(
             var user = await _graphClient.Users.PostAsync(new User
             {
                 AccountEnabled = true,
-                MailNickname = "testuser",
-                GivenName = "Test",
-                Surname = "User",
-                DisplayName = "Test User",
+                MailNickname = userPayload.MailNickname,
+                GivenName = userPayload.GivenName,
+                Surname = userPayload.Surname,
+                DisplayName = userPayload.DisplayName,
                 PasswordProfile = new()
                 {
-                    Password = "Test1234",
+                    Password = userPayload.Password,
                     ForceChangePasswordNextSignIn = false,
                 },
                 Identities =
@@ -110,7 +118,7 @@ public class UserService(
                     {
                         SignInType = "emailAddress",
                         Issuer = "kissarekisteri.onmicrosoft.com",
-                        IssuerAssignedId = "test@example.com"
+                        IssuerAssignedId = userPayload.Email
 
                     }
                 ],
@@ -147,7 +155,7 @@ public class UserService(
             var user = await _graphClient.Users[userId].GetAsync(requestConfiguration =>
             {
                 requestConfiguration.QueryParameters.Select =
-                new string[] { "givenName", "surname", "id", "displayName", avatarUrl };
+                new string[] { "givenName", "surname", "id", "displayName", "identities", avatarUrl };
             });
 
             var response = new UserResponse
@@ -156,6 +164,7 @@ public class UserService(
                 Id = user.Id,
                 DisplayName = user.DisplayName,
                 Surname = user.Surname,
+                Email = user.Identities.FirstOrDefault().IssuerAssignedId,
                 AvatarUrl = user.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null,
                 Permissions = await _rbacService.GetPermissions(user.Id)
             };

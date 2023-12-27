@@ -20,7 +20,7 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<CatBreed> CatBreeds { get; set; }
-    public DbSet<CatParent> CatParents { get; set; }
+    public DbSet<CatRelation> CatRelations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,12 +42,6 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .HasMany(c => c.Results)
             .WithOne(r => r.Cat)
             .HasForeignKey(r => r.CatId);
-
-        modelBuilder
-            .Entity<Cat>()
-            .HasMany(c => c.CatParents)
-            .WithOne(cp => cp.Cat)
-            .HasForeignKey(cp => cp.ParentCatId);
 
 
         modelBuilder

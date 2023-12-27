@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteri.Services
 {
-    public class RBACService(KissarekisteriDbContext dbContext)
+    public class PermissionService(KissarekisteriDbContext dbContext)
     {
         private readonly KissarekisteriDbContext _dbContext = dbContext;
 

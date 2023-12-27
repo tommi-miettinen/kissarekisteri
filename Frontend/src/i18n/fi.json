@@ -22,7 +22,18 @@
     "breed": "Rotu",
     "birthDate": "Syntymäaika"
   },
-
+  "CatDetails": {
+    "parents": "Vanhemmat",
+    "placings": "Sijoitukset",
+    "kittens": "Pennut",
+    "birthDate": "Birth date",
+    "owner": "Omistaja",
+    "breeder": "Kasvattaja",
+    "editCat": "Edit cat",
+    "deleteCat": "Delete cat",
+    "setAsProfilePicture": "Aseta profiilikuvaksi",
+    "uploadImage": "Lisää kuva"
+  },
   "CatShowList": {
     "catShows": "Näyttelyt",
     "searchInput": "Etsi näyttelyistä...",

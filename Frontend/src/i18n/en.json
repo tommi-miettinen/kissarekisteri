@@ -22,6 +22,18 @@
     "breed": "Breed",
     "birthDate": "Birth date"
   },
+  "CatDetails": {
+    "parents": "Parents",
+    "placings": "Placings",
+    "kittens": "Kittens",
+    "birthDate": "Birth date",
+    "owner": "Owner",
+    "breeder": "Breeder",
+    "editCat": "Edit cat",
+    "deleteCat": "Delete cat",
+    "setAsProfilePicture": "Set as profile picture",
+    "uploadImage": "Upload image"
+  },
   "CatShowList": {
     "catShows": "Cat shows",
     "searchInput": "Search cat shows...",

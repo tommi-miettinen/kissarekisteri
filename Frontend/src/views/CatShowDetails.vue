@@ -66,7 +66,7 @@ const { data: userCats } = useQuery({
 const user = userStore.user;
 const joiningEvent = ref(false);
 
-const isUserAnAttendee = computed(() => catShow.value && catShow.value.attendees?.some((attendee: any) => attendee.userId === user?.id));
+const isUserAnAttendee = computed(() => catShow.value && catShow.value.attendees?.some((attendee) => attendee.userId === user?.id));
 
 const handleFileChange = async (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -80,12 +80,12 @@ const selectedImage = ref(0);
 
 const lightboxPhotos = computed(() => {
   if (catShow.value?.photos) {
-    return catShow.value.photos.map((photo: any) => photo.url);
+    return catShow.value.photos.map((photo) => photo.url);
   }
   return [];
 });
 
-const catsGroupedByBreed = computed<CatsGroupedByBreed>(() => {
+const catsGroupedByBreed = computed(() => {
   if (catShow.value?.attendees) {
     const groupedCats = catShow.value.attendees.flatMap((attendee) => attendee.catAttendees.map((catAttendee) => catAttendee.cat));
 
@@ -152,11 +152,11 @@ const getMedalColor = (place: number) => {
 
           <div class="d-flex align-items-center" v-if="cats" v-for="cat in cats">
             <div
-              :style="{ backgroundColor: getMedalColor(cat.results.find((result) => result.catShowId === eventId).place) }"
+              :style="{ backgroundColor: getMedalColor(cat.results.find((result) => result.catShowId === eventId)?.place || 0) }"
               v-if="cat.results"
               class="badge rounded-pill fw-bold text-black"
             >
-              #{{ cat.results.find((result) => result.catShowId === eventId).place }}
+              #{{ cat.results.find((result) => result.catShowId === eventId)?.place }}
             </div>
             <CatListItem :cat="cat" />
             <div @click.stop class="dropdown d-flex ms-auto dropstart">

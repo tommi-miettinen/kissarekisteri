@@ -14,7 +14,11 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteri.Controllers;
 
-public class UserController(UserService userService, CatService catService) : Controller
+public class UserController(
+    UserService userService,
+    CatService catService,
+    SeedService seedService
+    ) : Controller
 {
 
     [HttpGet("signout")]
@@ -54,6 +58,15 @@ public class UserController(UserService userService, CatService catService) : Co
         return Json(users);
     }
 
+    [HttpPost("seed")]
+    public async Task<ActionResult<List<UserResponse>>> SeedUsers()
+    {
+        var users = await seedService.SeedUsers();
+        var cats = await seedService.SeedCats();
+        await seedService.SeedCatShows();
+        return Json(users);
+    }
+
     /// <summary>
     /// Endpoint for getting the currently logged in user.
     /// </summary>
@@ -71,7 +84,10 @@ public class UserController(UserService userService, CatService catService) : Co
     [HttpPost("users")]
     public async Task<ActionResult<UserResponse>> CreateUser()
     {
-        var user = await userService.CreateUser();
+        var user = await userService.CreateUser(new UserCreatePayloadDTO
+        {
+
+        });
         return Json(user);
     }
 

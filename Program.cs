@@ -52,7 +52,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UploadService>();
 builder.Services.AddScoped<CatService>();
 builder.Services.AddScoped<CatShowService>();
-builder.Services.AddScoped<RBACService>();
+builder.Services.AddScoped<PermissionService>();
+builder.Services.AddScoped<SeedService>();
 builder.Services.AddMicrosoftIdentityWebAppAuthentication(
     config,
     Microsoft.Identity.Web.Constants.AzureAdB2C
@@ -112,14 +113,15 @@ if (app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
-        /*
-        context.Database.EnsureDeleted();
-        context.Database.EnsureCreated();
+
+        /*  
+           context.Database.EnsureDeleted();
+           context.Database.EnsureCreated();
            context.SeedCatBreeds();
            context.SeedPermissions();
            context.SeedRoles();
            context.SeedRolePermissions();
-           */
+        */
     }
 }
 

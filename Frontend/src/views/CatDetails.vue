@@ -14,7 +14,7 @@ const router = useRouter();
 const route = useRoute();
 
 const { data: cat, refetch } = useQuery({
-  queryKey: [+route.params.catId],
+  queryKey: [route.params.catId],
   queryFn: () => catAPI.getCatById(+route.params.catId),
 });
 
@@ -39,16 +39,12 @@ const handleFileChange = async (event: Event) => {
 };
 
 const inputRef = ref();
-
 const triggerFileInput = () => inputRef.value?.click();
 
 const toggler = ref(false);
 const selectedImage = ref(0);
 
-const catPhotos = computed(() => {
-  if (!cat.value) return [];
-  return cat.value.photos.map((photo: any) => photo.url);
-});
+const catPhotos = computed(() => (cat.value ? cat.value.photos.map((photo) => photo.url) : []));
 
 const avatarLoadError = ref(false);
 
@@ -81,13 +77,8 @@ const getMedalColor = (place: number) => {
         </div>
       </div>
 
-      <div v-if="cat.catParents.length > 0">
-        <h5>Vanhemmat</h5>
-        <CatListItem v-if="cat.catParents" v-for="parent in cat.catParents" :cat="parent.cat" />
-      </div>
-
-      <div>
-        <h5>Sijoitukset</h5>
+      <div v-if="cat.results.length > 0">
+        <h5>{{ t("CatDetails.placings") }}</h5>
         <div
           v-for="result in cat.results"
           @click="() => navigateToCatShow(result.catShowId)"
@@ -100,8 +91,18 @@ const getMedalColor = (place: number) => {
         </div>
       </div>
 
+      <div v-if="cat.catParents.length > 0">
+        <h5>{{ t("CatDetails.parents") }}</h5>
+        <CatListItem v-if="cat.catParents" v-for="parent in cat.catParents" :cat="parent" />
+      </div>
+
+      <div v-if="cat.kittens && cat.kittens.length > 0">
+        <h5>{{ t("CatDetails.kittens") }}</h5>
+        <CatListItem v-if="cat.kittens" v-for="kitten in cat.kittens" :cat="kitten" />
+      </div>
+
       <div>
-        <h5>Omistaja</h5>
+        <h5>{{ t("CatDetails.owner") }}</h5>
         <div @click="() => navigateToUser(cat!.owner.id)" class="user p-3 d-flex border-bottom p-2 flex align-items-center">
           <div class="col d-flex align-items-center gap-2 col-8">
             <img
@@ -127,7 +128,7 @@ const getMedalColor = (place: number) => {
         </div>
       </div>
       <div>
-        <h5>Kasvattaja</h5>
+        <h5>{{ t("CatDetails.breeder") }}</h5>
         <div @click="() => navigateToUser(cat!.breeder.id)" class="user p-3 d-flex border-bottom p-2 flex align-items-center">
           <div class="col d-flex align-items-center gap-2 col-8">
             <img
@@ -155,7 +156,7 @@ const getMedalColor = (place: number) => {
       <div class="d-flex flex-column gap-2">
         <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto">
           <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
-          Lisää kuva +
+          {{ t("CatDetails.uploadImage") }} +
         </button>
         <div v-if="cat.photos" class="image-gallery gap-2">
           <div
@@ -177,7 +178,7 @@ const getMedalColor = (place: number) => {
               @click.stop="catMutation.mutate(catImage.url)"
               class="rounded-3 btn btn-light rounded-3 py-2 position-absolute z-2 bottom-0 m-2"
             >
-              Aseta profiilikuvaksi
+              {{ t("CatDetails.setAsProfilePicture") }}
             </button>
           </div>
         </div>
