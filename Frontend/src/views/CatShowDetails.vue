@@ -223,27 +223,3 @@ const triggerFileInput = () => inputRef.value?.click();
     </Modal>
   </div>
 </template>
-
-<style>
-.image-gallery {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-}
-
-@media screen and (max-width: 768px) {
-  .image-gallery {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.btn-border {
-  border: 1px solid #000;
-}
-.btn-border:hover {
-  background-color: #f8f9fa;
-}
-.thumbnail:hover {
-  cursor: pointer;
-  opacity: 0.8;
-}
-</style>

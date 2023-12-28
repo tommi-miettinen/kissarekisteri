@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import { ref, watchEffect } from "vue";
 import userAPI from "../api/userAPI";
-import { useRouter } from "vue-router";
+import UserListItem from "../components/UserListItem.vue";
 import { useQuery } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
 
-const router = useRouter();
 const { t } = useI18n();
 
 const { data, isLoading } = useQuery({
@@ -15,9 +14,6 @@ const { data, isLoading } = useQuery({
 
 const filteredUsers = ref<User[]>([]);
 const searchQuery = ref("");
-const avatarLoadError = ref(false);
-
-const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
 
 watchEffect(() => {
   const query = searchQuery.value.replace(/\s+/g, "");
@@ -40,52 +36,15 @@ watchEffect(() => {
       <h3>{{ t("Users.members") }}</h3>
       <div class="d-flex py-3 sticky-top bg-white align-items-center">
         <div class="col-12 col-md-8 col-xxl-4">
-          <input class="form-control" type="text" v-model="searchQuery" :placeholder="t('Users.searchInput')" />
+          <input class="form-control" type="text" v-model="searchQuery" :placeholder="t('Users.searchInput')" aria-label="Search Users" />
         </div>
       </div>
-
       <div class="d-flex flex-column overflow-auto">
         <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <div
-          v-else
-          v-for="user in filteredUsers"
-          :key="user.id"
-          @click="() => navigateToUser(user.id)"
-          class="user p-3 d-flex border-bottom p-2 flex align-items-center"
-        >
-          <div class="col d-flex align-items-center gap-2 col-8">
-            <img
-              v-if="user.avatarUrl && !avatarLoadError"
-              class="rounded-circle"
-              height="32"
-              width="32"
-              style="object-fit: fill"
-              :src="user.avatarUrl"
-              alt="User avatar"
-              :onerror="(avatarLoadError = true)"
-            />
-            <div
-              style="width: 32px; height: 32px; font-size: 14px"
-              class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
-              v-else
-            >
-              {{ user.givenName[0] + user.surname[0] }}
-            </div>
-            <div>{{ `${user.givenName}  ${user.surname}` }}</div>
-          </div>
-          <div class="col"></div>
-          <span class="badge rounded-pill text-bg-primary">{{ user.isBreeder ? t("Users.breeder") : t("Users.breeder") }}</span>
-        </div>
+        <UserListItem :key="user.id" :user="user" v-for="user in data" />
       </div>
     </div>
   </div>
 </template>
-
-<style>
-.user:hover {
-  cursor: pointer;
-  background-color: #f3f4f6;
-}
-</style>

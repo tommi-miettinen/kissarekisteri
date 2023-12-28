@@ -17,13 +17,15 @@ const logoutFromApp = () => {
   logout();
   router.push("/");
 };
+
+const avatarRef = ref<HTMLDivElement>();
 </script>
 
 <template>
   <nav class="border w-100 p-2 bg-white">
     <ul class="nav align-items-center px-2 gap-1" style="color: black">
-      <div v-if="user" class="dropdown">
-        <div class="rounded-circle" type="button" data-bs-toggle="dropdown">
+      <div tabindex="0" role="button" @keyup.enter="() => avatarRef?.click()" v-if="user" class="dropdown">
+        <div ref="avatarRef" class="rounded-circle" type="button" data-bs-toggle="dropdown">
           <img
             v-if="user.avatarUrl && !avatarLoadError"
             class="rounded-circle"

@@ -10,6 +10,48 @@
   cursor: pointer;
 }
 
+.hover-bg:hover {
+  cursor: pointer;
+  background-color: #f3f4f6;
+}
+
+.btn-light:hover {
+  background-color: #f3f4f6;
+}
+.image-container .btn {
+  visibility: hidden;
+}
+
+.image-container:hover .btn {
+  visibility: visible;
+}
+.cat-thumbnail:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media screen and (max-width: 768px) {
+  .image-gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.btn-border {
+  border: 1px solid #000;
+}
+.btn-border:hover {
+  background-color: #f8f9fa;
+}
+.thumbnail:hover {
+  cursor: pointer;
+  opacity: 0.8;
+}
+
 $utilities: map-merge(
   $utilities,
   (

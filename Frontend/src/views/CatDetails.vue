@@ -9,6 +9,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
+import UserListItem from "../components/UserListItem.vue";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -33,7 +34,6 @@ const catMutation = useMutation({
   onSuccess: () => refetch(),
 });
 
-const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
 const navigateToCatShow = (catShowId: number) => router.push(`/catshows/${catShowId}`);
 
 const handleFileChange = async (event: Event) => {
@@ -50,8 +50,6 @@ const toggler = ref(false);
 const selectedImage = ref(0);
 
 const catPhotos = computed(() => (cat.value ? cat.value.photos.map((photo) => photo.url) : []));
-
-const avatarLoadError = ref(false);
 
 watch(route, () => refetch());
 </script>
@@ -79,7 +77,7 @@ watch(route, () => refetch());
         <div
           v-for="result in cat.results"
           @click="() => navigateToCatShow(result.catShowId)"
-          class="user p-3 d-flex border-bottom p-2 flex align-items-center"
+          class="hover-bg p-3 d-flex border-bottom p-2 flex align-items-center"
         >
           <div class="d-flex align-items-center gap-2">
             <span :style="{ backgroundColor: getMedalColor(result.place) }" class="badge rounded-pill text-black">#{{ result.place }}</span>
@@ -100,55 +98,11 @@ watch(route, () => refetch());
 
       <div>
         <h5>{{ t("CatDetails.owner") }}</h5>
-        <div @click="() => navigateToUser(cat!.owner.id)" class="user p-3 d-flex border-bottom p-2 flex align-items-center">
-          <div class="col d-flex align-items-center gap-2 col-8">
-            <img
-              v-if="cat.owner.avatarUrl && !avatarLoadError"
-              class="rounded-circle"
-              height="32"
-              width="32"
-              style="object-fit: fill"
-              :src="cat.owner.avatarUrl"
-              alt="User avatar"
-              :onerror="(avatarLoadError = true)"
-            />
-            <div
-              style="width: 32px; height: 32px; font-size: 14px"
-              class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
-            >
-              {{ cat.owner.givenName[0] + cat.owner.surname[0] }}
-            </div>
-            <div>{{ `${cat.owner.givenName}  ${cat.owner.surname}` }}</div>
-          </div>
-          <div class="col"></div>
-          <span class="badge rounded-pill text-bg-primary">{{ cat.owner.isBreeder ? t("Users.breeder") : t("Users.breeder") }}</span>
-        </div>
+        <UserListItem :user="cat.owner" />
       </div>
       <div>
         <h5>{{ t("CatDetails.breeder") }}</h5>
-        <div @click="() => navigateToUser(cat!.breeder.id)" class="user p-3 d-flex border-bottom p-2 flex align-items-center">
-          <div class="col d-flex align-items-center gap-2 col-8">
-            <img
-              v-if="cat.breeder.avatarUrl && !avatarLoadError"
-              class="rounded-circle"
-              height="32"
-              width="32"
-              style="object-fit: fill"
-              :src="cat.breeder.avatarUrl"
-              alt="User avatar"
-              :onerror="(avatarLoadError = true)"
-            />
-            <div
-              style="width: 32px; height: 32px; font-size: 14px"
-              class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
-            >
-              {{ cat.breeder.givenName[0] + cat.breeder.surname[0] }}
-            </div>
-            <div>{{ `${cat.breeder.givenName}  ${cat.breeder.surname}` }}</div>
-          </div>
-          <div class="col"></div>
-          <span class="badge rounded-pill text-bg-primary">{{ cat.breeder.isBreeder ? t("Users.breeder") : t("Users.breeder") }}</span>
-        </div>
+        <UserListItem :user="cat.breeder" />
       </div>
       <div class="d-flex flex-column gap-2">
         <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto">
@@ -184,20 +138,3 @@ watch(route, () => refetch());
   </div>
   <FsLightbox :key="cat?.photos.length" :toggler="toggler" :sources="catPhotos" :slide="selectedImage + 1" />
 </template>
-
-<style>
-.btn-light:hover {
-  background-color: #f3f4f6;
-}
-.image-container .btn {
-  visibility: hidden;
-}
-
-.image-container:hover .btn {
-  visibility: visible;
-}
-.cat-thumbnail:hover {
-  cursor: pointer;
-  opacity: 0.8;
-}
-</style>

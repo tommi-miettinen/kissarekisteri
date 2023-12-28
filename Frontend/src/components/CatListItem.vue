@@ -17,7 +17,13 @@ const getTextColor = (sex: string) => (sex === "Male" ? "#60a5fa" : "#fb7185");
 </script>
 
 <template>
-  <div @click="navigateToCat(cat.id)" class="cat border-bottom gap-3 p-3 d-flex align-items-center justify-content-between w-100">
+  <div
+    tabindex="0"
+    role="button"
+    @keyup.enter="navigateToCat(cat.id)"
+    @click="navigateToCat(cat.id)"
+    class="cat border-bottom gap-3 p-3 d-flex align-items-center justify-content-between w-100"
+  >
     <div class="d-flex align-items-center justify-content-start gap-3">
       <slot name="medal"></slot>
       <img
@@ -38,9 +44,7 @@ const getTextColor = (sex: string) => (sex === "Male" ? "#60a5fa" : "#fb7185");
         formatDateNoHours(cat.birthDate)
       }}
     </div>
-    <div class="overflow-hidden gap-2 align-items-center d-flex">
-      <span class="badge rounded-pill text-bg-primary">{{ "Myytävänä" }}</span>
-    </div>
+    <div class="overflow-hidden gap-2 align-items-center d-flex"></div>
     <slot name="actions"></slot>
   </div>
 </template>

@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import Modal from "../components/Modal.vue";
 import { useI18n } from "vue-i18n";
 import { formatDate } from "../utils/formatDate";
 import catShowAPI from "../api/catShowAPI";
-import { userStore } from "../store/userStore";
+import { useQuery, useMutation } from "@tanstack/vue-query";
+import { toast } from "vue-sonner";
 
 const router = useRouter();
 const { t } = useI18n();
 
-const events = ref<CatShowEvent[]>([]);
 const searchQuery = ref("");
 const newEvent = ref({
   name: "",
@@ -20,16 +20,25 @@ const newEvent = ref({
   endDate: "",
 });
 
-//@ts-ignore
-const user = computed(() => userStore.user);
-
 const addingEvent = ref(false);
 
-const filteredEvents = computed(() => {
+const { data: catShows, refetch: refetchCatShows } = useQuery({
+  queryKey: ["catshows"],
+  queryFn: () => catShowAPI.getEvents(),
+});
+
+const createCatShowMutation = useMutation({
+  mutationFn: () => catShowAPI.createCatShowEvent(newEvent.value),
+  onSuccess: () => {
+    toast.info("Tapahtuma luotu"), refetchCatShows();
+  },
+});
+
+const filteredCatShows = computed(() => {
   if (!searchQuery.value) {
-    return events.value;
+    return catShows.value;
   }
-  return events.value.filter(
+  return catShows.value?.filter(
     (event) =>
       event.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       event.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
@@ -38,20 +47,6 @@ const filteredEvents = computed(() => {
 });
 
 const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`);
-
-const createCatShow = async () => {
-  await catShowAPI.createCatShowEvent(newEvent.value);
-  await loadEvents();
-  addingEvent.value = false;
-};
-
-const loadEvents = async () => {
-  const response = await catShowAPI.getEvents();
-  if (!response) return;
-  events.value = response;
-};
-
-onMounted(async () => await loadEvents());
 </script>
 <template>
   <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center">
@@ -59,22 +54,28 @@ onMounted(async () => await loadEvents());
       <h3>{{ t("CatShowList.catShows") }}</h3>
       <div class="d-flex gap-4 py-3 sticky-top bg-white align-items-center">
         <div class="col-12 col-md-8 col-xxl-4">
-          <input type="text" class="form-control" v-model="searchQuery" :placeholder="t('CatShowList.searchInput')" />
+          <input
+            type="text"
+            class="form-control"
+            v-model="searchQuery"
+            :placeholder="t('CatShowList.searchInput')"
+            aria-label="Search Cat Shows"
+          />
         </div>
       </div>
       <div class="d-flex flex-column overflow-auto" style="height: 500px">
         <div
-          @click="() => navigateToEvent(event.id!)"
-          v-for="event in filteredEvents"
-          :key="event.id"
-          class="d-flex gap-4 border-bottom px-3 py-2 align-items-center pointer cat-show justify-content-between"
+          @click="() => navigateToEvent(catShow.id!)"
+          v-for="catShow in filteredCatShows"
+          :key="catShow.id"
+          class="d-flex gap-4 border-bottom px-3 py-2 align-items-center pointer hover-bg justify-content-between"
         >
           <div>
-            <div>{{ event.name }}</div>
-            <span class="text-body-secondary">{{ event.location }}</span>
+            <div>{{ catShow.name }}</div>
+            <span class="text-body-secondary">{{ catShow.location }}</span>
           </div>
           <div style="font-size: 12px; font-weight: bold; margin-top: auto">
-            {{ `${formatDate(event.startDate)} -  ${formatDate(event.endDate)}` }}
+            {{ `${formatDate(catShow.startDate)} -  ${formatDate(catShow.endDate)}` }}
           </div>
         </div>
       </div>
@@ -122,14 +123,7 @@ onMounted(async () => await loadEvents());
         <input id="end-date" type="date" class="form-control" v-model="newEvent.endDate" />
       </div>
 
-      <button @click="createCatShow" type="button" class="btn btn-primary ms-auto px-5">Luo tapahtuma +</button>
+      <button @click="createCatShowMutation.mutate" type="button" class="btn btn-primary ms-auto px-5">Luo tapahtuma +</button>
     </div>
   </Modal>
 </template>
-
-<style>
-.cat-show:hover {
-  cursor: pointer;
-  background-color: #f3f4f6;
-}
-</style>
