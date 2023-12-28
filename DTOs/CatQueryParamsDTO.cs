@@ -17,6 +17,8 @@ namespace Kissarekisteri.DTOs
         /// </summary>
         public int? Limit { get; set; }
 
+        public string? Sex { get; set; }
+
         /// <summary>
         /// A comma-separated list of additional data to include in the response.
         /// For example, "parents,results" to include both parents and results data.

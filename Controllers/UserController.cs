@@ -48,6 +48,10 @@ public class UserController(
     public async Task<ActionResult<UserResponse>> GetUser([FromRoute] string userId)
     {
         var user = await userService.GetUserById(userId);
+        if (user == null)
+        {
+            return NotFound();
+        }
         return Json(user);
     }
 

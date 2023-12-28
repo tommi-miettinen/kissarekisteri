@@ -8,12 +8,17 @@ import FsLightbox from "fslightbox-vue/v3";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import CatListItem from "../components/CatListItem.vue";
+import getMedalColor from "../utils/getMedalColor";
 
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 
-const { data: cat, refetch } = useQuery({
+const {
+  data: cat,
+  refetch,
+  isError: isCatError,
+} = useQuery({
   queryKey: [route.params.catId],
   queryFn: () => catAPI.getCatById(+route.params.catId),
 });
@@ -49,19 +54,11 @@ const catPhotos = computed(() => (cat.value ? cat.value.photos.map((photo) => ph
 const avatarLoadError = ref(false);
 
 watch(route, () => refetch());
-
-const getMedalColor = (place: number) => {
-  if (place === 1) {
-    return "#fee101";
-  } else if (place === 2) {
-    return "#d7d7d7";
-  } else if (place === 3) {
-    return "#cd7f32";
-  }
-};
 </script>
 
 <template>
+  <h3 v-if="isCatError" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
+
   <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4 p-5">
     <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8 gap-5 d-flex flex-column">
       <div class="d-flex flex-column flex-sm-row gap-4" style="min-height: 300px">

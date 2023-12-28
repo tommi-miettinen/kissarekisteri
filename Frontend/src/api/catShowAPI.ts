@@ -3,7 +3,8 @@ import axios from "axios";
 const baseUrl = import.meta.env.MODE === "development" ? "https://localhost:44316" : "/";
 
 const createCatShowEvent = async (catShowEvent: CatShowEvent) => {
-  await axios.post(`${baseUrl}/catshows`, catShowEvent);
+  const result = await axios.post(`${baseUrl}/catshows`, catShowEvent);
+  return result.data;
 };
 
 const getEvents = async (): Promise<CatShowEvent[] | undefined> => {
@@ -50,13 +51,7 @@ const leaveEvent = async (eventId: number) => {
   }
 };
 
-interface Payload {
-  catId: number;
-  place: number;
-  breed: string;
-}
-
-const assignCatPlacing = async (eventId: number, payload: Payload) => {
+const assignCatPlacing = async (eventId: number, payload: CatShowResultPayload) => {
   const result = await axios.post(`${baseUrl}/catshows/${eventId}/place`, payload);
   return result.data;
 };

@@ -57,6 +57,10 @@ public class CatShowController(CatShowService catShowService)
     public async Task<ActionResult<CatShow>> GetEvent(int catShowId)
     {
         var catShow = await _catShowService.GetCatShowByIdAsync(catShowId);
+        if (catShow == null)
+        {
+            return NotFound();
+        }
         return Json(catShow);
     }
 

@@ -73,6 +73,9 @@ public class CatService(
             .ThenInclude(Results => Results.CatShow)
             .FirstOrDefaultAsync(cat => cat.Id == catId);
 
+        if (cat == null)
+            return null;
+
         cat.Owner = await _userService.GetUserById(cat.OwnerId);
         cat.Breeder = await _userService.GetUserById(cat.BreederId);
         cat.CatParents = [];
@@ -107,23 +110,27 @@ public class CatService(
             .Include(c => c.Photos)
             .AsQueryable();
 
-        if (queryParams != null)
+
+        if (!string.IsNullOrEmpty(queryParams.Name))
         {
-            if (!string.IsNullOrEmpty(queryParams.Name))
-            {
-                queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
-            }
-
-            if (!string.IsNullOrEmpty(queryParams.Breed))
-            {
-                queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
-            }
-
-            if (queryParams.Limit.HasValue)
-            {
-                queryableCats = queryableCats.Take(queryParams.Limit.Value);
-            }
+            queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
         }
+
+        if (!string.IsNullOrEmpty(queryParams.Breed))
+        {
+            queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
+        }
+
+        if (!string.IsNullOrEmpty(queryParams.Sex))
+        {
+            queryableCats = queryableCats.Where(c => c.Sex == queryParams.Sex);
+        }
+
+        if (queryParams.Limit.HasValue)
+        {
+            queryableCats = queryableCats.Take(queryParams.Limit.Value);
+        }
+
 
         var filteredCats = await queryableCats.ToListAsync();
 

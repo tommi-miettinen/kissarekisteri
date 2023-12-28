@@ -8,6 +8,7 @@
     "members": "Jäsenet"
   },
   "Profile": {
+    "404": "404 Käyttäjää ei löytynyt",
     "addCat": "Lisää kissa",
     "cats": "Kissat"
   },
@@ -23,6 +24,7 @@
     "birthDate": "Syntymäaika"
   },
   "CatDetails": {
+    "404": "404 Kissaa ei löytynyt",
     "parents": "Vanhemmat",
     "placings": "Sijoitukset",
     "kittens": "Pennut",
@@ -43,6 +45,7 @@
     "eventLocationInput": "Tapahtuman sijainti"
   },
   "CatShowDetails": {
+    "404": "404 Näyttelyä ei löytynyt",
     "joinEvent": "Liity tapahtumaan",
     "leaveEvent": "Poistu tapahtumasta"
   }

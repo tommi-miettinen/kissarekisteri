@@ -8,6 +8,7 @@
     "members": "Members"
   },
   "Profile": {
+    "404": "404 User not found",
     "addCat": "Add cat",
     "cats": "Cats"
   },
@@ -23,6 +24,7 @@
     "birthDate": "Birth date"
   },
   "CatDetails": {
+    "404": "404 Cat not found",
     "parents": "Parents",
     "placings": "Placings",
     "kittens": "Kittens",
@@ -43,6 +45,7 @@
     "eventLocationInput": "Event location"
   },
   "CatShowDetails": {
+    "404": "404 Cat show not found",
     "joinEvent": "Join event",
     "leaveEvent": "Leave event"
   }

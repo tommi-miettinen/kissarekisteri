@@ -11,10 +11,8 @@ import catShowAPI from "../api/catShowAPI";
 //@ts-ignore doesnt have types
 import FsLightbox from "fslightbox-vue/v3";
 import CatListItem from "../components/CatListItem.vue";
-
-interface CatsGroupedByBreed {
-  [breed: string]: Cat[];
-}
+import getMedalColor from "../utils/getMedalColor";
+import ImageGallery from "../components/ImageGallery.vue";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -22,7 +20,7 @@ const { t } = useI18n();
 const selectedCatIds = ref<number[]>([]);
 const eventId = +route.params.eventId;
 
-const { data: catShow, refetch, isLoading } = useQuery({ queryKey: ["catshow"], queryFn: () => catShowAPI.getEventById(eventId) });
+const { data: catShow, refetch, isLoading, isError } = useQuery({ queryKey: ["catshow"], queryFn: () => catShowAPI.getEventById(eventId) });
 
 const { mutate: joinEvent } = useMutation({
   mutationFn: () => catShowAPI.joinEvent(eventId, selectedCatIds.value),
@@ -31,14 +29,8 @@ const { mutate: joinEvent } = useMutation({
   },
 });
 
-interface Payload {
-  catId: number;
-  place: number;
-  breed: string;
-}
-
 const updatePlacingMutation = useMutation({
-  mutationFn: (payload: Payload) => catShowAPI.assignCatPlacing(eventId, payload),
+  mutationFn: (payload: CatShowResultPayload) => catShowAPI.assignCatPlacing(eventId, payload),
   onSuccess: () => {
     toast.info("Osallistuminen rekisteröity"), refetch();
   },
@@ -75,12 +67,12 @@ const handleFileChange = async (event: Event) => {
   uploadMutation.mutate(input.files[0]);
 };
 
-const toggler = ref(false);
-const selectedImage = ref(0);
-
 const lightboxPhotos = computed(() => {
   if (catShow.value?.photos) {
-    return catShow.value.photos.map((photo) => photo.url);
+    return [
+      "https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg",
+      ...catShow.value.photos.map((photo) => photo.url),
+    ];
   }
   return [];
 });
@@ -104,19 +96,10 @@ const catsGroupedByBreed = computed(() => {
 
 const inputRef = ref();
 const triggerFileInput = () => inputRef.value?.click();
-
-const getMedalColor = (place: number) => {
-  if (place === 1) {
-    return "#fee101";
-  } else if (place === 2) {
-    return "#d7d7d7";
-  } else if (place === 3) {
-    return "#cd7f32";
-  }
-};
 </script>
 
 <template>
+  <h3 v-if="isError" class="m-5 fw-bold">{{ t("CatShowDetails.404") }}</h3>
   <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
@@ -150,90 +133,79 @@ const getMedalColor = (place: number) => {
         <div v-for="(cats, breed) in catsGroupedByBreed" :key="breed">
           <h4>{{ breed }}</h4>
 
-          <div class="d-flex align-items-center" v-if="cats" v-for="cat in cats">
-            <div
-              :style="{ backgroundColor: getMedalColor(cat.results.find((result) => result.catShowId === eventId)?.place || 0) }"
-              v-if="cat.results"
-              class="badge rounded-pill fw-bold text-black"
-            >
-              #{{ cat.results.find((result) => result.catShowId === eventId)?.place }}
-            </div>
-            <CatListItem :cat="cat" />
-            <div @click.stop class="dropdown d-flex ms-auto dropstart">
-              <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                  <path
-                    d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                  />
-                </svg>
-              </button>
-              <ul class="dropdown-menu">
-                <li
-                  @click="
-                    updatePlacingMutation.mutate({
-                      catId: cat.id,
-                      place: 1,
-                      breed: cat.breed,
-                    })
-                  "
-                  class="dropdown-item"
+          <div class="d-flex align-items-center" v-if="cats">
+            <CatListItem v-for="cat in cats" :cat="cat">
+              <template #medal>
+                <div
+                  :style="{ backgroundColor: getMedalColor(cat.results.find((result) => result.catShowId === eventId)?.place || 0) }"
+                  v-if="cat.results"
+                  class="badge rounded-pill fw-bold text-black"
                 >
-                  Ensimmäinen
-                </li>
-                <li
-                  @click="
-                    updatePlacingMutation.mutate({
-                      catId: cat.id,
-                      place: 2,
-                      breed: cat.breed,
-                    })
-                  "
-                  class="dropdown-item"
-                >
-                  Toinen
-                </li>
-                <li
-                  @click="
-                    updatePlacingMutation.mutate({
-                      catId: cat.id,
-                      place: 3,
-                      breed: cat.breed,
-                    })
-                  "
-                  class="dropdown-item"
-                >
-                  Kolmas
-                </li>
-              </ul>
-            </div>
+                  #{{ cat.results.find((result) => result.catShowId === eventId)?.place }}
+                </div>
+              </template>
+              <template #actions>
+                <div @click.stop class="dropdown d-flex dropstart">
+                  <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
+                      <path
+                        d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
+                      />
+                    </svg>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li
+                      @click="
+                        updatePlacingMutation.mutate({
+                          catId: cat.id,
+                          place: 1,
+                          breed: cat.breed,
+                        })
+                      "
+                      class="dropdown-item"
+                    >
+                      Ensimmäinen
+                    </li>
+                    <li
+                      @click="
+                        updatePlacingMutation.mutate({
+                          catId: cat.id,
+                          place: 2,
+                          breed: cat.breed,
+                        })
+                      "
+                      class="dropdown-item"
+                    >
+                      Toinen
+                    </li>
+                    <li
+                      @click="
+                        updatePlacingMutation.mutate({
+                          catId: cat.id,
+                          place: 3,
+                          breed: cat.breed,
+                        })
+                      "
+                      class="dropdown-item"
+                    >
+                      Kolmas
+                    </li>
+                  </ul>
+                </div>
+              </template>
+            </CatListItem>
           </div>
         </div>
       </div>
-      <div v-if="catShow" class="w-100 m-auto d-flex flex-column">
-        <div v-if="catShow" class="image-gallery gap-2">
-          <div
-            @click="console.log('click'), (selectedImage = index), (toggler = !toggler)"
-            v-for="(catShowImage, index) in catShow.photos"
-            :key="catShowImage.id"
-            class="border image-container rounded-4"
-            style="position: relative; width: 100%; overflow: hidden"
-          >
-            <div style="width: 100%; padding-top: 100%; position: relative"></div>
-            <img
-              :src="catShowImage.url"
-              alt="Cat image"
-              class="image thumbnail"
-              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
-            />
-          </div>
-        </div>
-      </div>
-      <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto">
-        <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
-        Lisää kuva +
-      </button>
+      <ImageGallery v-if="catShow" :photos="lightboxPhotos">
+        <template #upload>
+          <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto">
+            <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
+            Lisää kuva +
+          </button>
+        </template>
+      </ImageGallery>
     </div>
-    <FsLightbox :key="lightboxPhotos.length" :toggler="toggler" :sources="lightboxPhotos" :slide="selectedImage + 1" />
     <Modal :modalId="'join-event-modal'" :visible="joiningEvent" @onCancel="joiningEvent = false">
       <div class="d-flex flex-column bg-white w-100 p-4 gap-4 rounded">
         <div v-if="user && userCats && userCats.length > 0">

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { defineProps } from "vue";
 import { formatDateNoHours } from "../utils/formatDate";
-
 import { useRouter } from "vue-router";
 
 defineProps({
@@ -14,15 +13,13 @@ defineProps({
 const router = useRouter();
 
 const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
-
-const getTextColor = (sex: string) => {
-  return sex === "Male" ? "#60a5fa" : "#fb7185";
-};
+const getTextColor = (sex: string) => (sex === "Male" ? "#60a5fa" : "#fb7185");
 </script>
 
 <template>
-  <div @click="navigateToCat(cat.id)" class="cat border-bottom gap-3 p-3 align-items-center w-100">
-    <div class="d-flex align-items-center justify-content-start gap-2">
+  <div @click="navigateToCat(cat.id)" class="cat border-bottom gap-3 p-3 d-flex align-items-center justify-content-between w-100">
+    <div class="d-flex align-items-center justify-content-start gap-3">
+      <slot name="medal"></slot>
       <img
         :src="cat.imageUrl"
         class="rounded-circle"
@@ -35,12 +32,15 @@ const getTextColor = (sex: string) => {
     </div>
 
     <div>{{ cat.breed }}</div>
-    <div class="overflow-hidden gap-2 align-items-center d-flex justify-content-between">
-      <span>{{
+    <div>
+      {{
         //@ts-ignore
         formatDateNoHours(cat.birthDate)
-      }}</span>
+      }}
+    </div>
+    <div class="overflow-hidden gap-2 align-items-center d-flex">
       <span class="badge rounded-pill text-bg-primary">{{ "Myytävänä" }}</span>
     </div>
+    <slot name="actions"></slot>
   </div>
 </template>

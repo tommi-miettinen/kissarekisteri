@@ -3,10 +3,14 @@ import axios from "axios";
 const baseUrl = import.meta.env.MODE === "development" ? "https://localhost:44316" : "/";
 
 const addCat = async (cat: CatPayload) => {
-  const result = await axios.post<Cat>(`${baseUrl}/cats`, cat, {
-    withCredentials: true,
-  });
-  return result.data;
+  try {
+    const result = await axios.post<Cat>(`${baseUrl}/cats`, cat, {
+      withCredentials: true,
+    });
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const deleteCatById = async (catId: number): Promise<true | undefined> => {

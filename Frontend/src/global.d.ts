@@ -72,3 +72,13 @@ interface EditCatPayload extends CatPayload {
   imageUrl?: string;
   id?: number;
 }
+
+interface CatShowResultPayload {
+  catId: number;
+  place: number;
+  breed: string;
+}
+
+interface CatsGroupedByBreed {
+  [breed: string]: Cat[];
+}
