@@ -7,6 +7,7 @@ using Kissarekisteri.RBAC;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -18,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Graph;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Reflection;
@@ -32,7 +34,7 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(builder =>
     {
         builder
-            .WithOrigins("https://localhost:5173")
+            .WithOrigins("https://localhost:5173", "kissarekisteri.b2clogin.com")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -64,8 +66,6 @@ builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler
 
 builder.Services.AddAuthorization(options =>
 {
-
-
     foreach (PermissionType permission in Enum.GetValues(typeof(PermissionType)))
     {
         options.AddPolicy(permission.ToString(), policy =>
@@ -88,16 +88,33 @@ builder.Services.Configure<OpenIdConnectOptions>(
         {
             OnTokenValidated = async context =>
             {
+                var token = context.ProtocolMessage.IdToken;
                 await context.HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     context.Principal
                 );
-                context.Response.Redirect("https://localhost:5173/cats");
+                var frontendRedirectUrl = "https://localhost:5173/cats"; // Your frontend URL
+                context.Response.Redirect($"{frontendRedirectUrl}#id_token={token}");
                 context.HandleResponse();
             },
         };
     }
 );
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+ .AddJwtBearer(options =>
+ {
+     options.Authority = "https://kissarekisteri.b2clogin.com/kissarekisteri.onmicrosoft.com/B2C_1_SIGN_IN_SIGN_UP/v2.0/";
+     options.Audience = "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6";
+
+     options.TokenValidationParameters = new TokenValidationParameters
+     {
+         ValidAudience = "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6",
+         ValidIssuer = "https://kissarekisteri.b2clogin.com/d128e5ef-7125-45c2-8e8c-4fd41c0c862e/v2.0/"
+     };
+ });
+
 
 builder.Services.Configure<CookieAuthenticationOptions>(
        CookieAuthenticationDefaults.AuthenticationScheme,

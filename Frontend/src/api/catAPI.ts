@@ -5,7 +5,9 @@ const baseUrl = import.meta.env.MODE === "development" ? "https://localhost:4431
 const addCat = async (cat: CatPayload) => {
   try {
     const result = await axios.post<Cat>(`${baseUrl}/cats`, cat, {
-      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${localStorage.token}`,
+      },
     });
     return result.data;
   } catch (err) {

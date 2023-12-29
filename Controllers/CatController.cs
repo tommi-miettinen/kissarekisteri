@@ -1,7 +1,6 @@
 ﻿using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +25,7 @@ public class CatController(CatService catService) : Controller
     /// <param name="queryParameters">Optional query parameters for filtering the results</param>
     /// <returns>A list of cats</returns>
     /// <response media="application/json" code="200">Returns the list of cats</response>
+
     [HttpGet("/cats")]
     public async Task<ActionResult<List<Cat>>> GetCats([FromQuery] CatQueryParamsDTO queryParameters)
     {
@@ -52,6 +52,7 @@ public class CatController(CatService catService) : Controller
     /// <returns>The cat object if found.</returns>
     /// <response media="application/json" code="200">Returns the cat object</response>
     /// <response code="404">If a cat with the specified ID is not found</response>
+
     [HttpGet("/cats/{catId}")]
     public async Task<ActionResult<Cat>> GetCatAsync(int catId)
     {
@@ -104,7 +105,7 @@ public class CatController(CatService catService) : Controller
     /// </summary>
     /// <param name="catPayload"></param>
     /// <returns>The new cat</returns>
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize]
     [HttpPost("/cats")]
     public async Task<ActionResult<Cat>> CreateCat([FromBody] CatRequest catPayload)
     {
@@ -122,6 +123,7 @@ public class CatController(CatService catService) : Controller
     /// </summary>
     /// <param name="catId"></param>
     /// <returns>No Content</returns>
+    [Authorize]
     [HttpDelete("/cats/{catId}")]
     public async Task<IActionResult> DeleteCat(int catId)
     {

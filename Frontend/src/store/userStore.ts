@@ -15,7 +15,6 @@ export const setUser = (user: any) => {
 
 export const fetchUser = async () => {
   const user = await userAPI.getCurrentUser();
-  user.cats = await userAPI.getCatsByUserId(user.id);
   if (!user) return;
 
   userStore.user = user;

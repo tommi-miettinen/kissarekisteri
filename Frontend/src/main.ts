@@ -34,6 +34,25 @@ const router = createRouter({
   routes,
 });
 
+router.beforeEach((to, from, next) => {
+  const hash = to.hash;
+  const fragment = new URLSearchParams(hash.slice(1));
+
+  if (fragment.has("id_token")) {
+    localStorage.token = fragment.get("id_token");
+
+    const newRoute = {
+      ...to,
+      hash: "",
+      replace: true,
+    };
+
+    return next(newRoute);
+  }
+
+  next();
+});
+
 const i18n = createI18n({
   legacy: false,
   locale: "fi",
