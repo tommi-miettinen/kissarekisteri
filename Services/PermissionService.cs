@@ -1,36 +1,33 @@
 ﻿using Kissarekisteri.Database;
 using Kissarekisteri.Models;
+using Kissarekisteri.RBAC;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Kissarekisteri.Services
+namespace Kissarekisteri.Services;
+
+public class PermissionService(KissarekisteriDbContext dbContext)
 {
-    public class PermissionService(KissarekisteriDbContext dbContext)
+    public async Task<List<Permission>> GetPermissions(string userId)
     {
-        private readonly KissarekisteriDbContext _dbContext = dbContext;
+        var userRoleIds = await dbContext.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .Select(ur => ur.RoleId)
+            .ToListAsync();
 
-        public async Task<List<Permission>> GetPermissions(string userId)
-        {
-            var userRoles = await _dbContext.UserRoles
-                .Where(userRoles => userRoles.UserId == userId)
-                .ToListAsync();
+        return await dbContext.RolePermissions
+            .Where(rp => userRoleIds.Contains(rp.RoleId))
+            .Select(rp => rp.Permission)
+            .Distinct()
+            .ToListAsync();
+    }
 
-            var userRoleIds = userRoles.Select(ur => ur.RoleId).ToList();
+    public async Task<bool> HasPermission(string userId, PermissionType permissionName)
+    {
+        var permissions = await GetPermissions(userId);
 
-            var rolePermissions = await _dbContext.RolePermissions
-                .Where(rolePermission => userRoleIds.Contains(rolePermission.RoleId))
-                .ToListAsync();
-
-            var permissionIds = rolePermissions.Select(rolePermission => rolePermission.PermissionId)
-                .ToList();
-
-            var permissions = await _dbContext.Permissions
-                .Where(permission => permissionIds.Contains(permission.Id))
-                .ToListAsync();
-
-            return permissions;
-        }
+        return permissions.Any(permission => permission.Name == permissionName.ToString());
     }
 }

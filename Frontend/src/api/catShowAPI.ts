@@ -3,8 +3,14 @@ import axios from "axios";
 const baseUrl = import.meta.env.MODE === "development" ? "https://localhost:44316" : "/";
 
 const createCatShowEvent = async (catShowEvent: CatShowEvent) => {
-  const result = await axios.post(`${baseUrl}/catshows`, catShowEvent);
-  return result.data;
+  try {
+    const result = await axios.post(`${baseUrl}/catshows`, catShowEvent, {
+      withCredentials: true,
+    });
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const getEvents = async (): Promise<CatShowEvent[] | undefined> => {

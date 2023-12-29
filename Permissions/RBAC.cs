@@ -13,6 +13,7 @@ namespace Kissarekisteri.RBAC
     }
     public enum PermissionType
     {
+        CreateCatShowResult,
         CreateEvent,
         DeleteEvent,
         CreateCat,
@@ -57,7 +58,7 @@ namespace Kissarekisteri.RBAC
                 new RoleSeedData {
                     Name = RoleType.Admin.ToString(),
                     Permissions =
-                    {
+                    {   PermissionType.CreateCatShowResult,
                         PermissionType.CreateEvent,
                         PermissionType.DeleteEvent,
                         PermissionType.CreateCat,
@@ -69,6 +70,7 @@ namespace Kissarekisteri.RBAC
                     Name = RoleType.EventOrganizer.ToString(),
                     Permissions =
                     [
+                        PermissionType.CreateCatShowResult,
                         PermissionType.CreateEvent,
                         PermissionType.DeleteEvent
 

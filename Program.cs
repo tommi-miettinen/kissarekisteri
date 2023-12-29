@@ -1,13 +1,17 @@
 ﻿using Azure.Identity;
 using Azure.Storage.Blobs;
+using Kissarekisteri.Authorization;
 using Kissarekisteri.Database;
 using Kissarekisteri.Filters;
+using Kissarekisteri.RBAC;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +22,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -48,12 +53,27 @@ builder.Services.AddSingleton(serviceProvider =>
 });
 
 builder.Services.AddSingleton(new BlobServiceClient(config.GetConnectionString("Storage")));
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UploadService>();
 builder.Services.AddScoped<CatService>();
 builder.Services.AddScoped<CatShowService>();
 builder.Services.AddScoped<PermissionService>();
 builder.Services.AddScoped<SeedService>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+builder.Services.AddAuthorization(options =>
+{
+
+
+    foreach (PermissionType permission in Enum.GetValues(typeof(PermissionType)))
+    {
+        options.AddPolicy(permission.ToString(), policy =>
+            policy.Requirements.Add(new PermissionRequirement(permission)));
+    }
+});
+
+
 builder.Services.AddMicrosoftIdentityWebAppAuthentication(
     config,
     Microsoft.Identity.Web.Constants.AzureAdB2C
@@ -64,7 +84,6 @@ builder.Services.Configure<OpenIdConnectOptions>(
     options =>
     {
         options.Scope.Add(options.ClientId);
-
         options.Events = new OpenIdConnectEvents
         {
             OnTokenValidated = async context =>
@@ -75,10 +94,30 @@ builder.Services.Configure<OpenIdConnectOptions>(
                 );
                 context.Response.Redirect("https://localhost:5173/cats");
                 context.HandleResponse();
-            }
+            },
         };
     }
 );
+
+builder.Services.Configure<CookieAuthenticationOptions>(
+       CookieAuthenticationDefaults.AuthenticationScheme,
+          options =>
+          {
+              options.Events = new CookieAuthenticationEvents
+              {
+                  OnRedirectToLogin =
+                   context =>
+                  {
+                      context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                      return Task.CompletedTask;
+                  },
+                  OnRedirectToAccessDenied = context =>
+                  {
+                      context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                      return Task.CompletedTask;
+                  },
+              };
+          });
 
 builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
 {
