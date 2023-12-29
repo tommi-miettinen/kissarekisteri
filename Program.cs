@@ -5,14 +5,10 @@ using Kissarekisteri.Database;
 using Kissarekisteri.Filters;
 using Kissarekisteri.RBAC;
 using Kissarekisteri.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +20,6 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -55,7 +50,6 @@ builder.Services.AddSingleton(serviceProvider =>
 });
 
 builder.Services.AddSingleton(new BlobServiceClient(config.GetConnectionString("Storage")));
-
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UploadService>();
 builder.Services.AddScoped<CatService>();
@@ -79,28 +73,6 @@ builder.Services.AddMicrosoftIdentityWebAppAuthentication(
     Microsoft.Identity.Web.Constants.AzureAdB2C
 );
 
-builder.Services.Configure<OpenIdConnectOptions>(
-    OpenIdConnectDefaults.AuthenticationScheme,
-    options =>
-    {
-        options.Scope.Add(options.ClientId);
-        options.Events = new OpenIdConnectEvents
-        {
-            OnTokenValidated = async context =>
-            {
-                var token = context.ProtocolMessage.IdToken;
-                await context.HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    context.Principal
-                );
-                var frontendRedirectUrl = "https://localhost:5173/cats"; // Your frontend URL
-                context.Response.Redirect($"{frontendRedirectUrl}#id_token={token}");
-                context.HandleResponse();
-            },
-        };
-    }
-);
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
  .AddJwtBearer(options =>
@@ -116,25 +88,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
  });
 
 
-builder.Services.Configure<CookieAuthenticationOptions>(
-       CookieAuthenticationDefaults.AuthenticationScheme,
-          options =>
-          {
-              options.Events = new CookieAuthenticationEvents
-              {
-                  OnRedirectToLogin =
-                   context =>
-                  {
-                      context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                      return Task.CompletedTask;
-                  },
-                  OnRedirectToAccessDenied = context =>
-                  {
-                      context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                      return Task.CompletedTask;
-                  },
-              };
-          });
 
 builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
 {

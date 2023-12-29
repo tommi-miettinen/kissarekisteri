@@ -1,12 +1,25 @@
 import axios from "axios";
 
-const baseUrl = import.meta.env.MODE === "development" ? "https://localhost:44316" : "/";
+const apiClient = axios.create({
+  baseURL: import.meta.env.MODE === "development" ? "https://localhost:44316" : "/",
+});
+
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 const createCatShowEvent = async (catShowEvent: CatShowEvent) => {
   try {
-    const result = await axios.post(`${baseUrl}/catshows`, catShowEvent, {
-      withCredentials: true,
-    });
+    const result = await apiClient.post(`/catshows`, catShowEvent);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -15,7 +28,7 @@ const createCatShowEvent = async (catShowEvent: CatShowEvent) => {
 
 const getEvents = async (): Promise<CatShowEvent[] | undefined> => {
   try {
-    const result = await axios.get(`${baseUrl}/catshows`);
+    const result = await apiClient.get(`/catshows`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -24,7 +37,7 @@ const getEvents = async (): Promise<CatShowEvent[] | undefined> => {
 
 const getEventById = async (eventId: number) => {
   try {
-    const result = await axios.get<CatShowEvent>(`${baseUrl}/catshows/${eventId}`);
+    const result = await apiClient.get<CatShowEvent>(`/catshows/${eventId}`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -33,13 +46,7 @@ const getEventById = async (eventId: number) => {
 
 const joinEvent = async (eventId: number, catIds: number[]) => {
   try {
-    const result = await axios.post(
-      `${baseUrl}/catshows/${eventId}/join`,
-      { catIds },
-      {
-        withCredentials: true,
-      }
-    );
+    const result = await apiClient.post(`/catshows/${eventId}/join`, { catIds });
     return result.data;
   } catch (err) {
     console.log(err);
@@ -48,7 +55,7 @@ const joinEvent = async (eventId: number, catIds: number[]) => {
 
 const leaveEvent = async (eventId: number) => {
   try {
-    const result = await axios.delete(`${baseUrl}/catshows/${eventId}/leave`, {
+    const result = await apiClient.delete(`/catshows/${eventId}/leave`, {
       withCredentials: true,
     });
     return result.data;
@@ -58,8 +65,12 @@ const leaveEvent = async (eventId: number) => {
 };
 
 const assignCatPlacing = async (eventId: number, payload: CatShowResultPayload) => {
-  const result = await axios.post(`${baseUrl}/catshows/${eventId}/place`, payload);
-  return result.data;
+  try {
+    const result = await apiClient.post(`/catshows/${eventId}/place`, payload);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const addCatShowPhoto = async (eventId: number, image: File) => {
@@ -69,7 +80,7 @@ const addCatShowPhoto = async (eventId: number, image: File) => {
     const formData = new FormData();
     formData.append("file", image);
 
-    const result = await axios.post(`${baseUrl}/catshows/${eventId}/photos`, formData);
+    const result = await apiClient.post(`/catshows/${eventId}/photos`, formData);
     return result.data;
   } catch (err) {
     console.log(err);

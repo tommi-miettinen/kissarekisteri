@@ -4,7 +4,7 @@ import { Toaster } from "vue-sonner";
 import { onMounted } from "vue";
 import { fetchUser } from "./store/userStore";
 
-onMounted(async () => fetchUser());
+onMounted(() => fetchUser());
 </script>
 
 <template>

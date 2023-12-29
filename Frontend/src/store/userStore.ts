@@ -20,7 +20,10 @@ export const fetchUser = async () => {
   userStore.user = user;
 };
 
-export const logout = () => (userStore.user = null);
+export const logout = () => {
+  userStore.user = null;
+  localStorage.removeItem("token");
+};
 
 export const editUser = async (user: User) => {
   const editedUser = await userAPI.editUser(user);

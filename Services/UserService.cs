@@ -1,6 +1,8 @@
 ﻿using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
+using Kissarekisteri.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
 using System;
@@ -178,5 +180,18 @@ public class UserService(
             Console.ResetColor();
             return null;
         }
+    }
+
+    public async Task<List<Role>> GetRoles()
+    {
+        var roles = await _dbContext.Roles.ToListAsync();
+        return roles;
+    }
+
+    public async Task<UserRole> CreateUserRole(UserRole userRole)
+    {
+        _dbContext.UserRoles.Add(userRole);
+        await _dbContext.SaveChangesAsync();
+        return userRole;
     }
 }

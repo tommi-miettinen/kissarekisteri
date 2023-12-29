@@ -1,27 +1,52 @@
 import axios from "axios";
 
-const baseUrl = import.meta.env.MODE === "development" ? "https://localhost:44316" : "/";
+const apiClient = axios.create({
+  baseURL: import.meta.env.MODE === "development" ? "https://localhost:44316" : "/",
+});
+
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 const getCurrentUser = async () => {
-  const result = await axios.get<User>(`${baseUrl}/me`, {
-    withCredentials: true,
-  });
-  return result.data;
+  try {
+    const result = await apiClient.get<User>(`/me`);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const getUserById = async (userId: string) => {
-  const result = await axios.get<User>(`${baseUrl}/users/${userId}`);
-  return result.data;
+  try {
+    const result = await apiClient.get<User>(`/users/${userId}`);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const getUsers = async () => {
-  const result = await axios.get<User[]>(`${baseUrl}/users`);
-  return result.data;
+  try {
+    const result = await apiClient.get<User[]>(`/users`);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const getCatsByUserId = async (userId: string) => {
   try {
-    const result = await axios.get<Cat[]>(`${baseUrl}/users/${userId}/cats`);
+    const result = await apiClient.get<Cat[]>(`/users/${userId}/cats`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -30,7 +55,7 @@ const getCatsByUserId = async (userId: string) => {
 
 const editUser = async (user: User) => {
   try {
-    const result = await axios.put(`${baseUrl}/users/${user.id}`, user);
+    const result = await apiClient.put(`/users/${user.id}`, user);
     return result.data;
   } catch (err) {
     console.log(err);

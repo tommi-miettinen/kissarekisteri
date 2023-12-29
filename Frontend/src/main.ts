@@ -1,3 +1,5 @@
+import { PublicClientApplication } from "@azure/msal-browser";
+import { fetchUser } from "./store/userStore";
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { VueQueryPlugin } from "@tanstack/vue-query";
@@ -14,6 +16,26 @@ import fi from "./i18n/fi.json";
 import "./index.scss";
 
 const app = createApp(App);
+
+const b2cPolicies = {
+  authorities: {
+    signUpSignIn: {
+      authority: "https://kissarekisteri.b2clogin.com/kissarekisteri.onmicrosoft.com/b2c_1_sign_in_sign_up",
+    },
+  },
+  authorityDomain: "kissarekisteri.b2clogin.com",
+};
+
+const msalConfig = {
+  auth: {
+    authority: b2cPolicies.authorities.signUpSignIn.authority,
+    clientId: "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6",
+    knownAuthorities: [b2cPolicies.authorityDomain],
+    redirectUri: "https://localhost:5173",
+  },
+};
+
+const msalInstance = await PublicClientApplication.createPublicClientApplication(msalConfig);
 
 const routes = [
   { path: "/catshows", component: CatShowList },
@@ -47,6 +69,8 @@ router.beforeEach((to, from, next) => {
       replace: true,
     };
 
+    fetchUser();
+
     return next(newRoute);
   }
 
@@ -62,6 +86,7 @@ const i18n = createI18n({
   },
 });
 
+app.config.globalProperties.$msal = msalInstance;
 app.use(i18n);
 app.use(VueQueryPlugin);
 app.use(router);

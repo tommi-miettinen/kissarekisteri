@@ -1,12 +1,12 @@
 ﻿using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -17,31 +17,26 @@ namespace Kissarekisteri.Controllers;
 public class UserController(
     UserService userService,
     CatService catService,
-    SeedService seedService
+    SeedService seedService,
+    IConfiguration config
     ) : Controller
 {
 
-    [HttpGet("signout")]
-    public IActionResult Logout()
+    [HttpGet("config")]
+    public ActionResult GetConfig()
     {
-        var callbackUrl = Url.Action(nameof(SignedOut), "Account", values: null, protocol: Request.Scheme);
-        return SignOut(
-            new AuthenticationProperties { RedirectUri = callbackUrl },
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            OpenIdConnectDefaults.AuthenticationScheme);
+        var Adb2cConfig = config.GetSection(Microsoft.Identity.Web.Constants.AzureAdB2C);
+        return Json(new
+        {
+            ClientId = Adb2cConfig["ClientId"],
+            Instance = Adb2cConfig["Instance"],
+            Domain = Adb2cConfig["Domain"],
+        });
     }
 
-    public IActionResult SignedOut()
-    {
-        return RedirectToAction("Index", "Home");
-    }
-
-    [Authorize]
+    [Authorize(AuthenticationSchemes = OpenIdConnectDefaults.AuthenticationScheme)]
     [HttpGet("login")]
-    public IActionResult Login()
-    {
-        return Ok("ok");
-    }
+    public void Login() { }
 
 
     [HttpGet("users/{userId}")]
@@ -66,8 +61,9 @@ public class UserController(
     public async Task<ActionResult<List<UserResponse>>> SeedUsers()
     {
         var users = await seedService.SeedUsers();
-        var cats = await seedService.SeedCats();
+        //  var cats = await seedService.SeedCats();
         await seedService.SeedCatShows();
+        await seedService.SeedUserRolesForUsers();
         return Json(users);
     }
 
@@ -76,7 +72,7 @@ public class UserController(
     /// </summary>
     /// <remarks>Needs a logged in user</remarks>
     /// <returns>The logged in user</returns>
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize]
     [HttpGet("me")]
     public async Task<ActionResult<UserResponse>> GetCurrentUser()
     {

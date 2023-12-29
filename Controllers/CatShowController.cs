@@ -3,7 +3,6 @@ using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
 using Kissarekisteri.RBAC;
 using Kissarekisteri.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +14,7 @@ namespace Kissarekisteribackend.Controllers;
 
 public class CatShowController(CatShowService catShowService) : Controller
 {
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize]
     [HttpPost("catshows/{catShowId}/join")]
     public async Task<IActionResult> JoinCatShow(
         int catShowId,
@@ -28,7 +27,7 @@ public class CatShowController(CatShowService catShowService) : Controller
         return Ok("onnistu");
     }
 
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize]
     [HttpDelete("catshows/{catShowId}/leave")]
     public async Task<IActionResult> LeaveCatShow(int catShowId)
     {
@@ -45,6 +44,7 @@ public class CatShowController(CatShowService catShowService) : Controller
         return Json(catShows);
     }
 
+    [Authorize]
     [HttpPost("catshows/{catShowId}/photos")]
     public async Task<ActionResult<CatShow>> UploadCatShowPhoto(int catShowId, IFormFile file)
     {
@@ -63,7 +63,7 @@ public class CatShowController(CatShowService catShowService) : Controller
         return Json(catShow);
     }
 
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize]
     [PermissionAuthorize(PermissionType.CreateCatShowResult)]
     [HttpPost("catshows/{catShowId}/place")]
     public async Task<ActionResult<CatShowResult>> AssignCatPlacing(int catShowId, [FromBody] CatShowResultDTO resultPayload)
@@ -72,7 +72,7 @@ public class CatShowController(CatShowService catShowService) : Controller
         return result;
     }
 
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize]
     [PermissionAuthorize(PermissionType.CreateEvent)]
     [HttpPost("catshows")]
     public async Task<ActionResult<CatShow>> CreateEvent([FromBody] CatShow newCatShow)

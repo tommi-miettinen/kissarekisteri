@@ -110,25 +110,30 @@ public class CatService(
             .Include(c => c.Photos)
             .AsQueryable();
 
-
-        if (!string.IsNullOrEmpty(queryParams.Name))
+        if (queryParams != null)
         {
-            queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
-        }
 
-        if (!string.IsNullOrEmpty(queryParams.Breed))
-        {
-            queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
-        }
 
-        if (!string.IsNullOrEmpty(queryParams.Sex))
-        {
-            queryableCats = queryableCats.Where(c => c.Sex == queryParams.Sex);
-        }
 
-        if (queryParams.Limit.HasValue)
-        {
-            queryableCats = queryableCats.Take(queryParams.Limit.Value);
+            if (!string.IsNullOrEmpty(queryParams.Name))
+            {
+                queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
+            }
+
+            if (!string.IsNullOrEmpty(queryParams.Breed))
+            {
+                queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
+            }
+
+            if (!string.IsNullOrEmpty(queryParams.Sex))
+            {
+                queryableCats = queryableCats.Where(c => c.Sex == queryParams.Sex);
+            }
+
+            if (queryParams.Limit.HasValue)
+            {
+                queryableCats = queryableCats.Take(queryParams.Limit.Value);
+            }
         }
 
 

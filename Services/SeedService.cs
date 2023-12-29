@@ -177,5 +177,30 @@ namespace Kissarekisteri.Services
 
             return createdCats;
         }
+
+        public async Task SeedUserRolesForUsers()
+        {
+            var users = await userService.GetUsers();
+            var roles = await userService.GetRoles();
+
+            var userRoles = new List<UserRole>
+            {
+                new()
+                {
+                    UserId = users[0].Id,
+                    RoleId = roles[0].Id
+                },
+                new()
+                {
+                    UserId = users[1].Id,
+                    RoleId = roles[1].Id
+                },
+            };
+
+            foreach (var userRole in userRoles)
+            {
+                await userService.CreateUserRole(userRole);
+            }
+        }
     }
 }

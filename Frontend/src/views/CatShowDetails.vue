@@ -133,7 +133,7 @@ const triggerFileInput = () => inputRef.value?.click();
         <div v-for="(cats, breed) in catsGroupedByBreed" :key="breed">
           <h4>{{ breed }}</h4>
 
-          <div class="d-flex align-items-center" v-if="cats">
+          <div class="d-flex flex-column align-items-center" v-if="cats">
             <CatListItem v-for="cat in cats" :cat="cat">
               <template #medal>
                 <div

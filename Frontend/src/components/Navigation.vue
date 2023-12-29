@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, ref, getCurrentInstance } from "vue";
+import { IPublicClientApplication } from "@azure/msal-browser";
 import { user, logout } from "../store/userStore";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { onMounted } from "vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -10,13 +12,31 @@ const { t, locale } = useI18n();
 
 const avatarLoadError = ref(false);
 
+const instance = getCurrentInstance();
+const msal: IPublicClientApplication = instance?.appContext.config.globalProperties.$msal;
+
+const login = () => {
+  msal
+    .loginRedirect()
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err));
+};
+
 const handleLocaleClick = () => (locale.value === "fi" ? (locale.value = "en") : (locale.value = "fi"));
 const localeString = computed(() => (locale.value === "fi" ? "In English" : "Suomeksi"));
 
 const logoutFromApp = () => {
   logout();
+  msal
+    .logout()
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err));
   router.push("/");
 };
+
+onMounted(async () => {
+  await msal.handleRedirectPromise();
+});
 
 const avatarRef = ref<HTMLDivElement>();
 </script>
@@ -49,7 +69,7 @@ const avatarRef = ref<HTMLDivElement>();
           <li @click="logoutFromApp" class="dropdown-item">{{ t("Navigation.logout") }}</li>
         </ul>
       </div>
-      <a data-testid="login-btn" v-if="!user" href="https://localhost:44316/login" class="btn btn-primary">{{ t("Navigation.login") }}</a>
+      <button @click="login" data-testid="login-btn" v-if="!user" class="btn btn-primary">{{ t("Navigation.login") }}</button>
       <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path.includes('catshows') }">
         <router-link style="color: black" class="nav-link" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
       </li>
