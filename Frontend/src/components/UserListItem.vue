@@ -21,10 +21,9 @@ const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
 <template>
   <div
     tabindex="0"
-    role="button"
     @keyup.enter="() => navigateToUser(user.id)"
     @click="() => navigateToUser(user.id)"
-    class="hover-bg p-3 d-flex border-bottom p-2 flex align-items-center"
+    class="hover-bg p-3 d-flex border-bottom p-2 flex align-items-center focus-ring"
   >
     <div class="col d-flex align-items-center gap-2 col-8">
       <img

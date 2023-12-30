@@ -111,11 +111,11 @@ const loadCatForEdit = (cat: Cat) => {
       </div>
       <div class="d-flex flex-column rounded" v-if="cats">
         <h3>{{ t("Profile.cats") }}</h3>
-        <div class="overflow-auto p-1" style="height: 500px">
+        <div tabindex="-1" class="overflow-auto p-1" style="height: 500px">
           <CatListItem v-for="cat in cats" :key="cat.id" :cat="cat">
             <template #actions>
-              <div v-if="userIsLoggedInUser" data-testid="cat-options" @click.stop class="dropdown d-flex dropstart">
-                <button class="btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div @keyup.enter.stop="" v-if="userIsLoggedInUser" data-testid="cat-options" @click.stop class="dropdown d-flex dropstart">
+                <button tabindex="0" class="btn focus-ring" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
                     <path
                       d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
@@ -123,8 +123,14 @@ const loadCatForEdit = (cat: Cat) => {
                   </svg>
                 </button>
                 <ul class="dropdown-menu">
-                  <li class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
-                  <li data-testid="start-cat-delete" class="dropdown-item" @click.stop="(deletingCatId = cat.id), (deletingCat = true)">
+                  <li @keyup.enter="loadCatForEdit(cat)" tabIndex="0" class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
+                  <li
+                    tabIndex="0"
+                    data-testid="start-cat-delete"
+                    class="dropdown-item"
+                    @keyup.enter="(deletingCatId = cat.id), (deletingCat = true)"
+                    @click.stop="(deletingCatId = cat.id), (deletingCat = true)"
+                  >
                     Poista
                   </li>
                 </ul>

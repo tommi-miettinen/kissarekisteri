@@ -32,8 +32,8 @@ interface Cat {
   imageUrl: string;
   photos: { id: string; url: string }[];
   results: CatShowResult[];
-  catParents: Cat[];
-  kittens: Cat[];
+  parents: { parentCat: Cat }[];
+  kittens: { childCat: Cat }[];
   owner: User;
   breeder: User;
 }

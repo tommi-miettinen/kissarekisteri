@@ -41,6 +41,21 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .WithOne(r => r.Cat)
             .HasForeignKey(r => r.CatId);
 
+        modelBuilder
+            .Entity<Cat>()
+            .HasMany(c => c.Parents)
+            .WithOne(cr => cr.ChildCat)
+            .HasForeignKey(cr => cr.KittenId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+
+        modelBuilder
+            .Entity<Cat>()
+            .HasMany(c => c.Kittens)
+            .WithOne(cr => cr.ParentCat)
+            .HasForeignKey(cr => cr.ParentId)
+             .OnDelete(DeleteBehavior.NoAction);
+
 
         modelBuilder
             .Entity<CatShow>()

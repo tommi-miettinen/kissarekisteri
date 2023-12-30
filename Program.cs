@@ -108,10 +108,13 @@ if (app.Environment.IsDevelopment())
     {
         var context = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
 
-        /*  
-           context.Database.EnsureDeleted();
-           context.Database.EnsureCreated();
+        /*
+
+        context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
         */
+
+
     }
 }
 

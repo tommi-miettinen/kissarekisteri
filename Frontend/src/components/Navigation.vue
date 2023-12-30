@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { msalInstance } from "../auth";
 import { user, logout } from "../store/userStore";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { onMounted } from "vue";
+import { scopes } from "../auth";
 
 const route = useRoute();
 const router = useRouter();
@@ -14,7 +14,9 @@ const avatarLoadError = ref(false);
 
 const login = () => {
   msalInstance
-    .loginRedirect()
+    .loginRedirect({
+      scopes,
+    })
     .then((res) => console.log(res))
     .catch((err) => console.log(err));
 };
@@ -35,15 +37,13 @@ onMounted(async () => {
   await msalInstance.handleRedirectPromise();
 });
 
-console.log(msalInstance.getAllAccounts());
-
 const avatarRef = ref<HTMLDivElement>();
 </script>
 
 <template>
   <nav class="border w-100 p-2 bg-white">
     <ul class="nav align-items-center px-2 gap-1" style="color: black">
-      <div tabindex="0" role="button" @keyup.enter="() => avatarRef?.click()" v-if="user" class="dropdown">
+      <div tabindex="0" role="button" @keyup.enter="() => avatarRef?.click()" v-if="user" class="dropdown focus-ring rounded-circle">
         <div ref="avatarRef" class="rounded-circle" type="button" data-bs-toggle="dropdown">
           <img
             v-if="user.avatarUrl && !avatarLoadError"
@@ -65,20 +65,27 @@ const avatarRef = ref<HTMLDivElement>();
         </div>
         <ul class="dropdown-menu">
           <router-link class="dropdown-item" :to="`/users/${user.id}`">{{ t("Navigation.profile") }}</router-link>
-          <li @click="logoutFromApp" class="dropdown-item">{{ t("Navigation.logout") }}</li>
+          <li tabIndex="0" @click="logoutFromApp" class="dropdown-item">{{ t("Navigation.logout") }}</li>
         </ul>
       </div>
       <button @click="login" data-testid="login-btn" v-if="!user" class="btn btn-primary">{{ t("Navigation.login") }}</button>
       <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path.includes('catshows') }">
-        <router-link style="color: black" class="nav-link" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
+        <router-link style="color: black" class="nav-link rounded-3" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
       </li>
       <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path === '/cats' || route.path.startsWith('/cats/') }">
-        <router-link style="color: black" class="nav-link" to="/cats">{{ t("Navigation.cats") }}</router-link>
+        <router-link ref="cats" style="color: black" class="nav-link rounded-3" to="/cats">{{ t("Navigation.cats") }}</router-link>
       </li>
       <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path.includes('users') }">
-        <router-link style="color: black" class="nav-link" to="/users">{{ t("Navigation.members") }}</router-link>
+        <router-link style="color: black" class="nav-link rounded-3" to="/users">{{ t("Navigation.members") }}</router-link>
       </li>
-      <a style="cursor: pointer" @click="handleLocaleClick" class="ms-auto">{{ localeString }}</a>
+      <a
+        @keyup.enter="handleLocaleClick"
+        @click="handleLocaleClick"
+        tabindex="0"
+        style="cursor: pointer"
+        class="ms-auto focus-ring p-2 rounded-3"
+        >{{ localeString }}</a
+      >
     </ul>
   </nav>
 </template>

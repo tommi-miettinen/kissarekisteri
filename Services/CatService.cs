@@ -65,12 +65,17 @@ public class CatService(
         return cat;
     }
 
+
     public async Task<Cat> GetCatByIdAsync(int catId)
     {
         var cat = await _dbContext.Cats
             .Include(c => c.Photos)
             .Include(c => c.Results)
             .ThenInclude(Results => Results.CatShow)
+            .Include(c => c.Parents)
+            .ThenInclude(parent => parent.ParentCat)
+            .Include(c => c.Kittens)
+            .ThenInclude(kitten => kitten.ChildCat)
             .FirstOrDefaultAsync(cat => cat.Id == catId);
 
         if (cat == null)
@@ -78,27 +83,6 @@ public class CatService(
 
         cat.Owner = await _userService.GetUserById(cat.OwnerId);
         cat.Breeder = await _userService.GetUserById(cat.BreederId);
-        cat.CatParents = [];
-        cat.Kittens = [];
-
-        var catParents = await _dbContext.CatRelations
-        .Where(cp => cp.ChildCatId == cat.Id)
-        .ToListAsync();
-
-
-        foreach (CatRelation parent in catParents)
-        {
-            var catParent = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == parent.ParentCatId);
-            cat.CatParents.Add(catParent);
-        }
-
-        var kittens = await _dbContext.CatRelations.Where(cp => cp.ParentCatId == cat.Id).ToListAsync();
-
-        foreach (CatRelation kitten in kittens)
-        {
-            var catKitten = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == kitten.ChildCatId);
-            cat.Kittens.Add(catKitten);
-        }
 
 
         return cat;
@@ -109,9 +93,7 @@ public class CatService(
         queryParams ??= new CatQueryParamsDTO();
 
 
-        var queryableCats = _dbContext.Cats
-            .Include(c => c.Photos)
-            .AsQueryable();
+        var queryableCats = _dbContext.Cats.AsQueryable();
 
 
 
@@ -137,24 +119,8 @@ public class CatService(
         }
 
 
-
         var filteredCats = await queryableCats.ToListAsync();
 
-        foreach (Cat cat in filteredCats)
-        {
-            var parents = await _dbContext.CatRelations
-         .Where(cp => cp.ChildCatId == cat.Id)
-         .ToListAsync();
-
-            cat.CatParents = [];
-
-            foreach (CatRelation parent in parents)
-            {
-                var catParent = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == parent.ParentCatId);
-                cat.CatParents.Add(catParent);
-            }
-
-        }
 
         return filteredCats;
     }
@@ -197,8 +163,8 @@ public class CatService(
         {
             var motherRelation = new CatRelation
             {
-                ParentCatId = newCatRequest.MotherId.Value,
-                ChildCatId = cat.Id
+                ParentId = newCatRequest.MotherId.Value,
+                KittenId = cat.Id
             };
             _dbContext.CatRelations.Add(motherRelation);
         }
@@ -207,8 +173,8 @@ public class CatService(
         {
             var fatherRelation = new CatRelation
             {
-                ParentCatId = newCatRequest.FatherId.Value,
-                ChildCatId = cat.Id
+                ParentId = newCatRequest.FatherId.Value,
+                KittenId = cat.Id
             };
             _dbContext.CatRelations.Add(fatherRelation);
         }

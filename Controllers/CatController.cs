@@ -53,7 +53,6 @@ public class CatController(CatService catService) : Controller
     /// <response media="application/json" code="200">Returns the cat object</response>
     /// <response code="404">If a cat with the specified ID is not found</response>
 
-    [Authorize]
     [HttpGet("/cats/{catId}")]
     public async Task<ActionResult<Cat>> GetCatAsync(int catId)
     {

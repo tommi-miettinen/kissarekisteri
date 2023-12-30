@@ -1,4 +1,8 @@
-import { PublicClientApplication } from "@azure/msal-browser";
+import { BrowserCacheLocation, PublicClientApplication } from "@azure/msal-browser";
+
+//add client id as additional scope for access token
+//https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/2315#issuecomment-773407358
+export const scopes = ["openid", "offline_access", "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6"];
 
 const b2cPolicies = {
   authorities: {
@@ -15,6 +19,9 @@ const msalConfig = {
     clientId: "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6",
     knownAuthorities: [b2cPolicies.authorityDomain],
     redirectUri: "https://localhost:5173",
+  },
+  cache: {
+    cacheLocation: BrowserCacheLocation.LocalStorage,
   },
 };
 

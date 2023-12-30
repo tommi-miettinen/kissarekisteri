@@ -64,7 +64,8 @@ public class UserController(
     public async Task<ActionResult<List<UserResponse>>> SeedUsers()
     {
         await seedService.SeedUsers();
-        //  var cats = await seedService.SeedCats();
+        await seedService.SeedCatBreeds();
+        await seedService.SeedCats();
         await seedService.SeedCatShows();
         await seedService.SeedRoles();
         await seedService.SeedPermissions();

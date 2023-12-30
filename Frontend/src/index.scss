@@ -12,17 +12,22 @@
 
 .hover-bg:hover {
   cursor: pointer;
-  background-color: #f3f4f6;
+  background-color: #f8f9fa;
 }
 
 .btn-light:hover {
   background-color: #f3f4f6;
 }
-.image-container .btn {
+.image-container .btn-border {
   visibility: hidden;
 }
 
-.image-container:hover .btn {
+.image-container:focus-within .btn-border,
+.image-container .btn-border:focus {
+  visibility: visible;
+}
+
+.image-container:hover .btn-border {
   visibility: visible;
 }
 .cat-thumbnail:hover {
@@ -40,9 +45,8 @@
     grid-template-columns: repeat(3, 1fr);
   }
 }
-
 .btn-border {
-  border: 1px solid #000;
+  background-color: white;
 }
 .btn-border:hover {
   background-color: #f8f9fa;

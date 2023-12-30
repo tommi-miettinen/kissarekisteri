@@ -75,9 +75,11 @@ watch(route, () => refetch());
       <div v-if="cat.results.length > 0">
         <h5>{{ t("CatDetails.placings") }}</h5>
         <div
+          tabindex="0"
           v-for="result in cat.results"
+          @keyup.enter="() => navigateToCatShow(result.catShowId)"
           @click="() => navigateToCatShow(result.catShowId)"
-          class="hover-bg p-3 d-flex border-bottom p-2 flex align-items-center"
+          class="hover-bg p-3 d-flex border-bottom p-2 flex align-items-center focus-ring"
         >
           <div class="d-flex align-items-center gap-2">
             <span :style="{ backgroundColor: getMedalColor(result.place) }" class="badge rounded-pill text-black">#{{ result.place }}</span>
@@ -86,14 +88,14 @@ watch(route, () => refetch());
         </div>
       </div>
 
-      <div v-if="cat.catParents.length > 0">
+      <div v-if="cat.parents.length > 0">
         <h5>{{ t("CatDetails.parents") }}</h5>
-        <CatListItem v-if="cat.catParents" v-for="parent in cat.catParents" :cat="parent" />
+        <CatListItem v-if="cat.parents" v-for="parent in cat.parents" :cat="parent.parentCat" />
       </div>
 
       <div v-if="cat.kittens && cat.kittens.length > 0">
         <h5>{{ t("CatDetails.kittens") }}</h5>
-        <CatListItem v-if="cat.kittens" v-for="kitten in cat.kittens" :cat="kitten" />
+        <CatListItem v-if="cat.kittens" v-for="kitten in cat.kittens" :cat="kitten.childCat" />
       </div>
 
       <div>
@@ -105,7 +107,7 @@ watch(route, () => refetch());
         <UserListItem :user="cat.breeder" />
       </div>
       <div class="d-flex flex-column gap-2">
-        <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto">
+        <button @click="triggerFileInput" class="border rounded-3 px-5 py-2 btn-border me-auto focus-ring">
           <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
           {{ t("CatDetails.uploadImage") }} +
         </button>
@@ -113,8 +115,10 @@ watch(route, () => refetch());
           <div
             v-for="(catImage, index) in cat.photos"
             :key="catImage.id"
-            class="border image-container rounded-4 d-flex"
+            tabindex="0"
+            class="border image-container rounded-4 d-flex focus-ring"
             style="position: relative; width: 100%; overflow: hidden"
+            @keyup.enter="(selectedImage = index), (toggler = !toggler)"
             @click="(selectedImage = index), (toggler = !toggler)"
           >
             <div style="width: 100%; padding-top: 100%; position: relative"></div>
@@ -127,7 +131,7 @@ watch(route, () => refetch());
             <button
               style="width: 93%"
               @click.stop="catMutation.mutate(catImage.url)"
-              class="rounded-3 btn btn-light rounded-3 py-2 position-absolute z-2 bottom-0 m-2"
+              class="rounded-3 border btn-border focus-ring rounded-3 py-2 position-absolute z-2 bottom-0 m-2"
             >
               {{ t("CatDetails.setAsProfilePicture") }}
             </button>

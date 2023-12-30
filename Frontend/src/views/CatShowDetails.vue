@@ -106,6 +106,16 @@ const leaveEvent = () => {
   leaveEventMutation.mutate();
   leavingEvent.value = false;
 };
+
+const toggleCheckbox = (catId: number) => {
+  const catExists = selectedCatIds.value.includes(catId);
+
+  if (catExists) {
+    selectedCatIds.value = selectedCatIds.value.filter((id) => id !== catId);
+  } else {
+    selectedCatIds.value = [...selectedCatIds.value, catId];
+  }
+};
 </script>
 
 <template>
@@ -155,48 +165,36 @@ const leaveEvent = () => {
                 </div>
               </template>
               <template v-if="userHasPermission('CreateCatShowResult')" #actions>
-                <div @click.stop class="dropdown d-flex dropstart">
-                  <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <div @keyup.enter.stop="" @click.stop class="dropdown d-flex dropstart">
+                  <button tabindex="0" class="btn ms-auto focus-ring" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
                       <path
                         d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
                       />
                     </svg>
                   </button>
-                  <ul class="dropdown-menu">
+                  <ul tabindex="0" class="dropdown-menu focus-ring">
                     <li
-                      @click="
-                        updatePlacingMutation.mutate({
-                          catId: cat.id,
-                          place: 1,
-                          breed: cat.breed,
-                        })
-                      "
-                      class="dropdown-item"
+                      tabindex="0"
+                      @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
+                      @click="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
+                      class="dropdown-item focus-ring"
                     >
                       Ensimmäinen
                     </li>
                     <li
-                      @click="
-                        updatePlacingMutation.mutate({
-                          catId: cat.id,
-                          place: 2,
-                          breed: cat.breed,
-                        })
-                      "
-                      class="dropdown-item"
+                      tabindex="0"
+                      @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
+                      @click="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
+                      class="dropdown-item focus-ring"
                     >
                       Toinen
                     </li>
                     <li
-                      @click="
-                        updatePlacingMutation.mutate({
-                          catId: cat.id,
-                          place: 3,
-                          breed: cat.breed,
-                        })
-                      "
-                      class="dropdown-item"
+                      tabindex="0"
+                      @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
+                      @click="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
+                      class="dropdown-item focus-ring"
                     >
                       Kolmas
                     </li>
@@ -209,7 +207,7 @@ const leaveEvent = () => {
       </div>
       <ImageGallery v-if="catShow" :photos="lightboxPhotos">
         <template v-if="userHasPermission('CreateCatShowResult')" #upload>
-          <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto">
+          <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto focus-ring">
             <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
             Lisää kuva +
           </button>
@@ -222,7 +220,7 @@ const leaveEvent = () => {
           <h5>Osallistuvat kissat:</h5>
           <div v-for="(cat, index) in userCats" :key="index">
             <label>
-              <input type="checkbox" v-model="selectedCatIds" :value="cat.id" />
+              <input @keyup.enter="toggleCheckbox(cat.id)" type="checkbox" v-model="selectedCatIds" :value="cat.id" />
               {{ cat.name }}
             </label>
           </div>

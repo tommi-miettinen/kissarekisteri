@@ -64,8 +64,10 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
           />
         </div>
       </div>
-      <div class="d-flex flex-column overflow-auto" style="height: 500px">
+      <div tabindex="-1" class="d-flex flex-column overflow-auto" style="height: 500px">
         <div
+          tabindex="0"
+          @keyup.enter="() => navigateToEvent(catShow.id!)"
           @click="() => navigateToEvent(catShow.id!)"
           v-for="catShow in filteredCatShows"
           :key="catShow.id"

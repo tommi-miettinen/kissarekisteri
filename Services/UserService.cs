@@ -15,14 +15,13 @@ namespace Kissarekisteri.Services;
 public class UserService(
     GraphServiceClient graphClient,
     UploadService uploadService,
-    KissarekisteriDbContext dbContext,
-    PermissionService rbacService
+    KissarekisteriDbContext dbContext
     )
 {
     private readonly GraphServiceClient _graphClient = graphClient;
     private readonly UploadService _uploadService = uploadService;
     private readonly KissarekisteriDbContext _dbContext = dbContext;
-    private readonly PermissionService _rbacService = rbacService;
+
 
     public async Task<List<UserResponse>> GetUsers()
     {
@@ -168,7 +167,6 @@ public class UserService(
                 Surname = user.Surname,
                 Email = user.Identities.FirstOrDefault().IssuerAssignedId,
                 AvatarUrl = user.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null,
-                Permissions = await _rbacService.GetPermissions(user.Id)
             };
 
             return response;

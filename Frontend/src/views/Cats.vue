@@ -48,7 +48,7 @@ watchEffect(() => {
         <div class="col invisible sm-visible">{{ t("Cats.birthDate") }}</div>
       </div>
 
-      <div class="d-flex flex-column overflow-auto cat-list-container">
+      <div tabindex="-1" class="d-flex flex-column overflow-auto cat-list-container p-1">
         <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>

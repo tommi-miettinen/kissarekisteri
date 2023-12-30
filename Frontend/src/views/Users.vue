@@ -39,11 +39,11 @@ watchEffect(() => {
           <input class="form-control" type="text" v-model="searchQuery" :placeholder="t('Users.searchInput')" aria-label="Search Users" />
         </div>
       </div>
-      <div class="d-flex flex-column overflow-auto">
+      <div tabindex="-1" class="d-flex flex-column overflow-auto cat-list-container p-1">
         <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <UserListItem :key="user.id" :user="user" v-for="user in data" />
+        <UserListItem v-if="!isLoading" :key="user.id" :user="user" v-for="user in filteredUsers" />
       </div>
     </div>
   </div>

@@ -23,6 +23,7 @@ export const fetchUser = async () => {
 };
 
 export const fetchPermissions = async () => {
+  if (!userStore.user) return;
   const permissions = await userAPI.getPermissions(userStore.user!.id);
   if (!permissions) return;
 

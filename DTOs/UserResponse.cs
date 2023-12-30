@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Kissarekisteri.DTOs
+﻿namespace Kissarekisteri.DTOs
 {
     public class UserResponse
     {
@@ -11,6 +9,5 @@ namespace Kissarekisteri.DTOs
         public string AvatarUrl { get; set; }
 
         public string Email { get; set; }
-        public List<Models.Permission> Permissions { get; set; }
     }
 }
