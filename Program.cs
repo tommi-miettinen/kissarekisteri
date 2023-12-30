@@ -14,7 +14,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Graph;
-using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
@@ -43,7 +42,6 @@ builder.Services.AddSingleton(serviceProvider =>
     var appId = graphConfig["AppId"];
     var clientSecret = graphConfig["ClientSecret"];
     var clientSecretCredential = new ClientSecretCredential(tenantId, appId, clientSecret);
-
     var scopes = new[] { "https://graph.microsoft.com/.default" };
 
     return new GraphServiceClient(clientSecretCredential, scopes);
@@ -68,12 +66,6 @@ builder.Services.AddAuthorization(options =>
 });
 
 
-builder.Services.AddMicrosoftIdentityWebAppAuthentication(
-    config,
-    Microsoft.Identity.Web.Constants.AzureAdB2C
-);
-
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
  .AddJwtBearer(options =>
  {
@@ -90,25 +82,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 
 builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"));
-});
+options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL")));
 
 builder.Services
-    .AddControllers(options =>
-    {
-        options.Filters.Add(new ModelValidationFilter());
-    })
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    });
+    .AddControllers(options => options.Filters.Add(new ModelValidationFilter()))
+    .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(options =>
 {
+    options.AddJWTAuth();
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
@@ -126,19 +111,12 @@ if (app.Environment.IsDevelopment())
         /*  
            context.Database.EnsureDeleted();
            context.Database.EnsureCreated();
-           context.SeedCatBreeds();
-           context.SeedPermissions();
-           context.SeedRoles();
-           context.SeedRolePermissions();
         */
     }
 }
 
 app.UseSwagger();
-app.UseSwaggerUI(options =>
-{
-    options.SupportedSubmitMethods([]);
-});
+app.UseSwaggerUI();
 app.UseCors();
 app.UseHttpsRedirection();
 app.UseDefaultFiles();

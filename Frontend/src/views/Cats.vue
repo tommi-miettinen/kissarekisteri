@@ -62,18 +62,4 @@ watchEffect(() => {
 .cat-list-container {
   height: 500px;
 }
-
-@media screen and (max-width: 768px) {
-  .cat-list-container {
-    height: 100%;
-  }
-}
-.cat {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-}
-.cat:hover {
-  cursor: pointer;
-  background-color: #f3f4f6;
-}
 </style>

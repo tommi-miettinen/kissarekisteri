@@ -1,7 +1,5 @@
 ﻿using Kissarekisteri.Models;
-using Kissarekisteri.RBAC;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Kissarekisteri.Database;
 
@@ -61,86 +59,5 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .HasMany(Attendee => Attendee.CatAttendees)
             .WithOne(CatAttendee => CatAttendee.Attendee)
             .HasForeignKey(CatAttendee => CatAttendee.AttendeeId);
-    }
-
-    public void SeedCatBreeds()
-    {
-        var catBreeds = CatBreedSeed.GetSeedData();
-
-        foreach (var catBreed in catBreeds)
-        {
-            if (!CatBreeds.Any(cb => cb.Name == catBreed.Name))
-            {
-                CatBreeds.Add(catBreed);
-            }
-        }
-
-        SaveChanges();
-    }
-
-    public void SeedPermissions()
-    {
-        var permissions = PermissionSeed.GetSeedData();
-
-        foreach (var permission in permissions)
-        {
-            if (!Permissions.Any(p => p.Name == permission.Name))
-            {
-                Permissions.Add(permission);
-            }
-        }
-
-        SaveChanges();
-    }
-
-    public void SeedRoles()
-    {
-        var roles = RoleSeed.GetSeedData();
-
-        foreach (var role in roles)
-        {
-            if (!Roles.Any(r => r.Name == role.Name))
-            {
-                Roles.Add(new Role { Name = role.Name, });
-            }
-        }
-
-        SaveChanges();
-    }
-
-    public void SeedRolePermissions()
-    {
-        var roles = RolePermissionSeed.GetSeedData();
-
-        foreach (var role in roles)
-        {
-            var roleEntity = Roles.FirstOrDefault(r => r.Name == role.Name);
-
-            foreach (var permission in role.Permissions)
-            {
-                var permissionEntity = Permissions.FirstOrDefault(
-                    p => p.Name == permission.ToString()
-                );
-
-                if (
-                    !RolePermissions.Any(
-                        rp => rp.RoleId == roleEntity.Id && rp.PermissionId == permissionEntity.Id
-                    )
-                )
-                {
-                    RolePermissions.Add(
-                        new RolePermission
-                        {
-                            RoleId = roleEntity.Id,
-                            RoleName = roleEntity.Name,
-                            PermissionName = permissionEntity.Name,
-                            PermissionId = permissionEntity.Id
-                        }
-                    );
-                }
-            }
-        }
-
-        SaveChanges();
     }
 };

@@ -1,21 +1,4 @@
-import axios from "axios";
-
-const apiClient = axios.create({
-  baseURL: import.meta.env.MODE === "development" ? "https://localhost:44316" : "/",
-});
-
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+import apiClient from "./apiClient";
 
 const addCat = async (cat: CatPayload) => {
   try {
@@ -85,14 +68,13 @@ const uploadCatImage = async (catId: number, image: File) => {
   }
 };
 
-interface CatBreed {
-  id: number;
-  name: string;
-}
-
 const getCatBreeds = async () => {
-  const result = await apiClient.get<CatBreed[]>(`/cats/breeds`);
-  return result.data;
+  try {
+    const result = await apiClient.get<CatBreed[]>(`/cats/breeds`);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 export default {

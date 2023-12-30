@@ -1,21 +1,4 @@
-import axios from "axios";
-
-const apiClient = axios.create({
-  baseURL: import.meta.env.MODE === "development" ? "https://localhost:44316" : "/",
-});
-
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+import apiClient from "./apiClient";
 
 const getCurrentUser = async () => {
   try {
@@ -62,10 +45,20 @@ const editUser = async (user: User) => {
   }
 };
 
+const getPermissions = async (userId: string) => {
+  try {
+    const result = await apiClient.get<Permission[]>(`users/${userId}/permissions`);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export default {
   getUserById,
   getUsers,
   editUser,
   getCatsByUserId,
   getCurrentUser,
+  getPermissions,
 };

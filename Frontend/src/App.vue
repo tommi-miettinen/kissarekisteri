@@ -2,9 +2,12 @@
 import Navigation from "./components/Navigation.vue";
 import { Toaster } from "vue-sonner";
 import { onMounted } from "vue";
-import { fetchUser } from "./store/userStore";
+import { fetchPermissions, fetchUser } from "./store/userStore";
 
-onMounted(() => fetchUser());
+onMounted(async () => {
+  await fetchUser();
+  await fetchPermissions();
+});
 </script>
 
 <template>

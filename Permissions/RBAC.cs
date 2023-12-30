@@ -15,6 +15,7 @@ namespace Kissarekisteri.RBAC
     {
         CreateCatShowResult,
         CreateEvent,
+        EditEvent,
         DeleteEvent,
         CreateCat,
         EditCat

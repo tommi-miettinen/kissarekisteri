@@ -1,21 +1,4 @@
-import axios from "axios";
-
-const apiClient = axios.create({
-  baseURL: import.meta.env.MODE === "development" ? "https://localhost:44316" : "/",
-});
-
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = localStorage.token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+import apiClient from "./apiClient";
 
 const createCatShowEvent = async (catShowEvent: CatShowEvent) => {
   try {
@@ -55,9 +38,7 @@ const joinEvent = async (eventId: number, catIds: number[]) => {
 
 const leaveEvent = async (eventId: number) => {
   try {
-    const result = await apiClient.delete(`/catshows/${eventId}/leave`, {
-      withCredentials: true,
-    });
+    const result = await apiClient.delete(`/catshows/${eventId}/leave`);
     return result.data;
   } catch (err) {
     console.log(err);

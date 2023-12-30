@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, computed } from "vue";
 import userAPI from "../api/userAPI";
-import { userStore } from "../store/userStore";
+import { userHasPermission, userStore, user } from "../store/userStore";
 import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
 import { useMutation, useQuery } from "@tanstack/vue-query";
@@ -22,7 +22,7 @@ const eventId = +route.params.eventId;
 
 const { data: catShow, refetch, isLoading, isError } = useQuery({ queryKey: ["catshow"], queryFn: () => catShowAPI.getEventById(eventId) });
 
-const { mutate: joinEvent } = useMutation({
+const joinEventMutation = useMutation({
   mutationFn: () => catShowAPI.joinEvent(eventId, selectedCatIds.value),
   onSuccess: () => {
     toast.info("Osallistuminen rekisteröity"), refetch();
@@ -43,7 +43,7 @@ const uploadMutation = useMutation({
   onSuccess: () => refetch(),
 });
 
-const { mutate: leaveEvent } = useMutation({
+const leaveEventMutation = useMutation({
   mutationFn: () => catShowAPI.leaveEvent(eventId),
   onSuccess: () => {
     toast.info("Osallistuminen peruttu"), refetch();
@@ -55,10 +55,10 @@ const { data: userCats } = useQuery({
   queryFn: () => userAPI.getCatsByUserId(userStore.user?.id as string),
 });
 
-const user = userStore.user;
 const joiningEvent = ref(false);
+const leavingEvent = ref(false);
 
-const isUserAnAttendee = computed(() => catShow.value && catShow.value.attendees?.some((attendee) => attendee.userId === user?.id));
+const isUserAnAttendee = computed(() => catShow.value && catShow.value.attendees?.some((attendee) => attendee.userId === user.value?.id));
 
 const handleFileChange = async (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -96,6 +96,16 @@ const catsGroupedByBreed = computed(() => {
 
 const inputRef = ref();
 const triggerFileInput = () => inputRef.value?.click();
+
+const joinEvent = () => {
+  joinEventMutation.mutate();
+  joiningEvent.value = false;
+};
+
+const leaveEvent = () => {
+  leaveEventMutation.mutate();
+  leavingEvent.value = false;
+};
 </script>
 
 <template>
@@ -122,7 +132,7 @@ const triggerFileInput = () => inputRef.value?.click();
             <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary px-5" @click="joiningEvent = true">
               {{ t("CatShowDetails.joinEvent") }}
             </button>
-            <button v-else @click="() => leaveEvent()" type="button" class="btn btn-danger rounded-3 py-2 px-5">
+            <button v-else @click="leavingEvent = true" type="button" class="btn btn-danger rounded-3 py-2 px-5">
               {{ t("CatShowDetails.leaveEvent") }}
             </button>
           </div>
@@ -144,7 +154,7 @@ const triggerFileInput = () => inputRef.value?.click();
                   #{{ cat.results.find((result) => result.catShowId === eventId)?.place }}
                 </div>
               </template>
-              <template #actions>
+              <template v-if="userHasPermission('CreateCatShowResult')" #actions>
                 <div @click.stop class="dropdown d-flex dropstart">
                   <button class="btn ms-auto" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
@@ -198,7 +208,7 @@ const triggerFileInput = () => inputRef.value?.click();
         </div>
       </div>
       <ImageGallery v-if="catShow" :photos="lightboxPhotos">
-        <template #upload>
+        <template v-if="userHasPermission('CreateCatShowResult')" #upload>
           <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto">
             <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
             Lisää kuva +
@@ -218,7 +228,16 @@ const triggerFileInput = () => inputRef.value?.click();
           </div>
         </div>
         <div v-else>No cats available.</div>
-        <button @click="() => joinEvent()" type="button" class="btn btn-primary">Osallistu</button>
+        <button @click="joinEvent" type="button" class="btn btn-primary">Osallistu</button>
+      </div>
+    </Modal>
+    <Modal :modalId="'leave-event-modal'" :visible="leavingEvent" @onCancel="leavingEvent = false">
+      <div class="w-100 p-4 d-flex flex-column">
+        <p>Perutaanko osallistuminen?</p>
+        <div class="d-flex gap-2 justify-content-end">
+          <button @click="leavingEvent = false" type="button" class="btn btn-secondary">Peruuta</button>
+          <button data-testid="confirm-cat-delete" @click="leaveEvent" type="button" class="btn btn-danger">Peru osallistuminen</button>
+        </div>
       </div>
     </Modal>
   </div>

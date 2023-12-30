@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { computed, ref, getCurrentInstance } from "vue";
-import { IPublicClientApplication } from "@azure/msal-browser";
+import { computed, ref } from "vue";
+import { msalInstance } from "../auth";
 import { user, logout } from "../store/userStore";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -12,11 +12,8 @@ const { t, locale } = useI18n();
 
 const avatarLoadError = ref(false);
 
-const instance = getCurrentInstance();
-const msal: IPublicClientApplication = instance?.appContext.config.globalProperties.$msal;
-
 const login = () => {
-  msal
+  msalInstance
     .loginRedirect()
     .then((res) => console.log(res))
     .catch((err) => console.log(err));
@@ -27,7 +24,7 @@ const localeString = computed(() => (locale.value === "fi" ? "In English" : "Suo
 
 const logoutFromApp = () => {
   logout();
-  msal
+  msalInstance
     .logout()
     .then((res) => console.log(res))
     .catch((err) => console.log(err));
@@ -35,8 +32,10 @@ const logoutFromApp = () => {
 };
 
 onMounted(async () => {
-  await msal.handleRedirectPromise();
+  await msalInstance.handleRedirectPromise();
 });
+
+console.log(msalInstance.getAllAccounts());
 
 const avatarRef = ref<HTMLDivElement>();
 </script>

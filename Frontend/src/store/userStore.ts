@@ -3,10 +3,12 @@ import { reactive, computed } from "vue";
 
 interface UserState {
   user: null | User;
+  permissions: Permission[];
 }
 
 export const userStore = reactive<UserState>({
   user: null,
+  permissions: [],
 });
 
 export const setUser = (user: any) => {
@@ -20,10 +22,19 @@ export const fetchUser = async () => {
   userStore.user = user;
 };
 
+export const fetchPermissions = async () => {
+  const permissions = await userAPI.getPermissions(userStore.user!.id);
+  if (!permissions) return;
+
+  userStore.permissions = permissions;
+};
+
 export const logout = () => {
   userStore.user = null;
   localStorage.removeItem("token");
 };
+
+export const userHasPermission = (permission: string) => userStore.permissions.some((p) => p.name === permission);
 
 export const editUser = async (user: User) => {
   const editedUser = await userAPI.editUser(user);

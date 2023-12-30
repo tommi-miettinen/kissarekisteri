@@ -1,8 +1,6 @@
 ﻿using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +16,7 @@ public class UserController(
     UserService userService,
     CatService catService,
     SeedService seedService,
+    PermissionService permissionService,
     IConfiguration config
     ) : Controller
 {
@@ -34,9 +33,13 @@ public class UserController(
         });
     }
 
-    [Authorize(AuthenticationSchemes = OpenIdConnectDefaults.AuthenticationScheme)]
-    [HttpGet("login")]
-    public void Login() { }
+    [Authorize]
+    [HttpGet("/users/{userId}/permissions")]
+    public async Task<ActionResult<List<Permission>>> GetPermissionsByUserId(string userId)
+    {
+        var permissions = await permissionService.GetPermissions(userId);
+        return Json(permissions);
+    }
 
 
     [HttpGet("users/{userId}")]
@@ -60,11 +63,14 @@ public class UserController(
     [HttpPost("seed")]
     public async Task<ActionResult<List<UserResponse>>> SeedUsers()
     {
-        var users = await seedService.SeedUsers();
+        await seedService.SeedUsers();
         //  var cats = await seedService.SeedCats();
         await seedService.SeedCatShows();
+        await seedService.SeedRoles();
+        await seedService.SeedPermissions();
+        await seedService.SeedRolePermissions();
         await seedService.SeedUserRolesForUsers();
-        return Json(users);
+        return Ok();
     }
 
     /// <summary>
@@ -81,6 +87,8 @@ public class UserController(
         return Json(user);
     }
 
+
+    [Authorize]
     [HttpPost("users")]
     public async Task<ActionResult<UserResponse>> CreateUser()
     {
@@ -96,7 +104,7 @@ public class UserController(
     /// </summary>
     /// <param name="file"></param>
     /// <returns></returns>
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize]
     [HttpPost("avatar")]
     public async Task<ActionResult<UserResponse>> UploadUserAvatar(IFormFile file)
     {

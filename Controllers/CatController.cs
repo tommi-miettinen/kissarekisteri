@@ -53,6 +53,7 @@ public class CatController(CatService catService) : Controller
     /// <response media="application/json" code="200">Returns the cat object</response>
     /// <response code="404">If a cat with the specified ID is not found</response>
 
+    [Authorize]
     [HttpGet("/cats/{catId}")]
     public async Task<ActionResult<Cat>> GetCatAsync(int catId)
     {
@@ -80,6 +81,7 @@ public class CatController(CatService catService) : Controller
     /// POST /cats/123/photo
     /// Content-Disposition: form-data; name="file"; filename="cat_photo.jpg"
     /// </example>
+    [Authorize]
     [HttpPost("cats/{catId}/photo")]
     public async Task<ActionResult<Cat>> UploadCatPhoto(int catId, IFormFile file)
     {
@@ -93,6 +95,7 @@ public class CatController(CatService catService) : Controller
     /// <param name="catId">The ID of the cat to update.</param>
     /// <param name="catPayload"></param>
     /// <returns>The updated cat</returns>
+    [Authorize]
     [HttpPut("cats/{catId}")]
     public async Task<ActionResult<Cat>> EditCat(int catId, [FromBody] CatRequest catPayload)
     {

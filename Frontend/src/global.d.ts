@@ -82,3 +82,8 @@ interface CatShowResultPayload {
 interface CatsGroupedByBreed {
   [breed: string]: Cat[];
 }
+
+interface CatBreed {
+  id: number;
+  name: string;
+}

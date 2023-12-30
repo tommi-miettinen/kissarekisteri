@@ -106,35 +106,36 @@ public class CatService(
 
     public async Task<List<Cat>> GetCatsAsync(CatQueryParamsDTO queryParams = null)
     {
+        queryParams ??= new CatQueryParamsDTO();
+
+
         var queryableCats = _dbContext.Cats
             .Include(c => c.Photos)
             .AsQueryable();
 
-        if (queryParams != null)
+
+
+
+        if (!string.IsNullOrEmpty(queryParams.Name))
         {
-
-
-
-            if (!string.IsNullOrEmpty(queryParams.Name))
-            {
-                queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
-            }
-
-            if (!string.IsNullOrEmpty(queryParams.Breed))
-            {
-                queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
-            }
-
-            if (!string.IsNullOrEmpty(queryParams.Sex))
-            {
-                queryableCats = queryableCats.Where(c => c.Sex == queryParams.Sex);
-            }
-
-            if (queryParams.Limit.HasValue)
-            {
-                queryableCats = queryableCats.Take(queryParams.Limit.Value);
-            }
+            queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
         }
+
+        if (!string.IsNullOrEmpty(queryParams.Breed))
+        {
+            queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
+        }
+
+        if (!string.IsNullOrEmpty(queryParams.Sex))
+        {
+            queryableCats = queryableCats.Where(c => c.Sex == queryParams.Sex);
+        }
+
+        if (queryParams.Limit.HasValue)
+        {
+            queryableCats = queryableCats.Take(queryParams.Limit.Value);
+        }
+
 
 
         var filteredCats = await queryableCats.ToListAsync();

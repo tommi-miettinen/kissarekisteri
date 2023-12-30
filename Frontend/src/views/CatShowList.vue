@@ -7,6 +7,7 @@ import { formatDate } from "../utils/formatDate";
 import catShowAPI from "../api/catShowAPI";
 import { useQuery, useMutation } from "@tanstack/vue-query";
 import { toast } from "vue-sonner";
+import { userHasPermission } from "../store/userStore";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -79,7 +80,7 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
           </div>
         </div>
       </div>
-      <button @click="addingEvent = true" type="button" class="btn btn-primary ms-auto px-5 mt-2">
+      <button v-if="userHasPermission('CreateEvent')" @click="addingEvent = true" type="button" class="btn btn-primary ms-auto px-5 mt-2">
         {{ t("CatShowList.addCatShow") }} +
       </button>
     </div>
