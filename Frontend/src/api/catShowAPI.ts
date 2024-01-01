@@ -46,12 +46,8 @@ const leaveEvent = async (eventId: number) => {
 };
 
 const assignCatPlacing = async (eventId: number, payload: CatShowResultPayload) => {
-  try {
-    const result = await apiClient.post(`/catshows/${eventId}/place`, payload);
-    return result.data;
-  } catch (err) {
-    console.log(err);
-  }
+  const result = await apiClient.post(`/catshows/${eventId}/place`, payload);
+  return result.data;
 };
 
 const addCatShowPhoto = async (eventId: number, image: File) => {

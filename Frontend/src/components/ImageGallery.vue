@@ -19,11 +19,13 @@ const toggler = ref(false);
     <slot name="upload"></slot>
     <div class="image-gallery gap-2">
       <div
-        @click="console.log('click'), (selectedImageIndex = index), (toggler = !toggler)"
+        tabindex="0"
         v-for="(photo, index) in photos"
         :key="photo"
-        class="border image-container rounded-4"
+        class="border image-container rounded-4 d-flex focus-ring"
         style="position: relative; width: 100%; overflow: hidden"
+        @keyup.enter="(selectedImageIndex = index), (toggler = !toggler)"
+        @click="(selectedImageIndex = index), (toggler = !toggler)"
       >
         <div style="width: 100%; padding-top: 100%; position: relative"></div>
         <img
@@ -32,6 +34,8 @@ const toggler = ref(false);
           class="image thumbnail"
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
         />
+
+        <slot :name="'custom-content-' + index" :photo="photo"></slot>
       </div>
     </div>
   </div>

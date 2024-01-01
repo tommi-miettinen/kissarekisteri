@@ -25,7 +25,7 @@ interface Cat {
   sex: string;
   id: number;
   name: string;
-  birthDate: Date;
+  birthDate: string;
   breed: string;
   ownerId: string;
   breederId: string;
@@ -62,7 +62,7 @@ interface User {
 interface CatPayload {
   sex: string;
   name: string;
-  birthDate: Date | null;
+  birthDate: string;
   breed: string;
   fatherId?: number;
   motherId?: number;

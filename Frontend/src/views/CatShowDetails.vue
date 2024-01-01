@@ -32,8 +32,9 @@ const joinEventMutation = useMutation({
 const updatePlacingMutation = useMutation({
   mutationFn: (payload: CatShowResultPayload) => catShowAPI.assignCatPlacing(eventId, payload),
   onSuccess: () => {
-    toast.info("Osallistuminen rekisteröity"), refetch();
+    toast.info("Näyttelytulos tallennettu"), refetch();
   },
+  onError: () => toast.error("Toiminto epäonnistui"),
 });
 
 const uploadMutation = useMutation({
@@ -116,6 +117,14 @@ const toggleCheckbox = (catId: number) => {
     selectedCatIds.value = [...selectedCatIds.value, catId];
   }
 };
+
+//@ts-ignore
+const closeDropdown = (dropdownId: string) => bootstrap.Dropdown.getInstance(document.getElementById(dropdownId) || "")?.hide();
+
+const handleDropdownItemClick = (result: CatShowResultPayload) => {
+  updatePlacingMutation.mutate(result);
+  closeDropdown(result.catId.toString());
+};
 </script>
 
 <template>
@@ -165,40 +174,50 @@ const toggleCheckbox = (catId: number) => {
                 </div>
               </template>
               <template v-if="userHasPermission('CreateCatShowResult')" #actions>
-                <div @keyup.enter.stop="" @click.stop class="dropdown d-flex dropstart">
-                  <button tabindex="0" class="btn ms-auto focus-ring" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                      <path
-                        d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                      />
-                    </svg>
-                  </button>
-                  <ul tabindex="0" class="dropdown-menu focus-ring">
-                    <li
+                <div>
+                  <div @click.stop="() => console.log('test')" @keyup.enter.stop class="d-flex dropstart">
+                    <button
+                      :id="cat.id.toString()"
                       tabindex="0"
-                      @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
-                      @click="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
-                      class="dropdown-item focus-ring"
+                      class="btn py-1 px-2 accordion d-flex focus-ring rounded-1"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      data-bs-auto-close="inside"
+                      aria-expanded="false"
                     >
-                      Ensimmäinen
-                    </li>
-                    <li
-                      tabindex="0"
-                      @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
-                      @click="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
-                      class="dropdown-item focus-ring"
-                    >
-                      Toinen
-                    </li>
-                    <li
-                      tabindex="0"
-                      @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
-                      @click="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
-                      class="dropdown-item focus-ring"
-                    >
-                      Kolmas
-                    </li>
-                  </ul>
+                      <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
+                        <path
+                          d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
+                        />
+                      </svg>
+                    </button>
+                    <ul tabindex="0" class="dropdown-menu focus-ring">
+                      <li
+                        tabindex="0"
+                        @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
+                        @click="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
+                        class="dropdown-item focus-ring"
+                      >
+                        Ensimmäinen
+                      </li>
+                      <li
+                        tabindex="0"
+                        @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
+                        @click="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
+                        class="dropdown-item focus-ring"
+                      >
+                        Toinen
+                      </li>
+                      <li
+                        tabindex="0"
+                        @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
+                        @click="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
+                        class="dropdown-item focus-ring"
+                      >
+                        Kolmas
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </template>
             </CatListItem>

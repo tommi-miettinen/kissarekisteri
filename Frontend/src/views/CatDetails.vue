@@ -10,6 +10,7 @@ import { useI18n } from "vue-i18n";
 import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
 import UserListItem from "../components/UserListItem.vue";
+import ImageGallery from "../components/ImageGallery.vue";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -45,9 +46,6 @@ const handleFileChange = async (event: Event) => {
 
 const inputRef = ref();
 const triggerFileInput = () => inputRef.value?.click();
-
-const toggler = ref(false);
-const selectedImage = ref(0);
 
 const catPhotos = computed(() => (cat.value ? cat.value.photos.map((photo) => photo.url) : []));
 
@@ -111,34 +109,19 @@ watch(route, () => refetch());
           <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
           {{ t("CatDetails.uploadImage") }} +
         </button>
-        <div v-if="cat.photos" class="image-gallery gap-2">
-          <div
-            v-for="(catImage, index) in cat.photos"
-            :key="catImage.id"
-            tabindex="0"
-            class="border image-container rounded-4 d-flex focus-ring"
-            style="position: relative; width: 100%; overflow: hidden"
-            @keyup.enter="(selectedImage = index), (toggler = !toggler)"
-            @click="(selectedImage = index), (toggler = !toggler)"
-          >
-            <div style="width: 100%; padding-top: 100%; position: relative"></div>
-            <img
-              :src="catImage.url"
-              alt="Cat image"
-              class="image thumbnail"
-              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
-            />
+        <ImageGallery :photos="catPhotos">
+          <template v-for="(_, index) in cat.photos" v-slot:[`custom-content-${index}`]="{ photo }">
             <button
               style="width: 93%"
-              @click.stop="catMutation.mutate(catImage.url)"
-              class="rounded-3 border btn-border focus-ring rounded-3 py-2 position-absolute z-2 bottom-0 m-2"
+              @keyup.enter.stop="catMutation.mutate(photo)"
+              @click.stop="catMutation.mutate(photo)"
+              class="rounded-3 border btn-border focus-ring py-2 position-absolute z-2 bottom-0 m-2"
             >
               {{ t("CatDetails.setAsProfilePicture") }}
             </button>
-          </div>
-        </div>
+          </template>
+        </ImageGallery>
       </div>
     </div>
   </div>
-  <FsLightbox :key="cat?.photos.length" :toggler="toggler" :sources="catPhotos" :slide="selectedImage + 1" />
 </template>

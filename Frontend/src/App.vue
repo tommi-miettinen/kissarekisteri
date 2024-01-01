@@ -12,14 +12,18 @@ onMounted(async () => {
     console.log(error);
   }
 });
+
+const focusMainContent = () => document.querySelector("main")?.focus();
 </script>
 
 <template>
-  <a href="#maincontent" class="skip-link rounded-3 focus-ring">Skip to Main Content</a>
+  <button @keyup.enter="focusMainContent" @click="focusMainContent" class="skip-link rounded-3 focus-ring btn bg-white">
+    Skip to Main Content
+  </button>
   <div style="height: 100vh" class="d-flex flex-column align-items-center">
     <Navigation role="navigation" />
     <Toaster richColors closeButton />
-    <main id="maincontent" tabIndex="0" class="d-flex flex-column overflow-auto w-100 h-100 focus-ring">
+    <main id="maincontent" tabIndex="-1" class="d-flex flex-column overflow-auto w-100 h-100">
       <RouterView />
     </main>
   </div>

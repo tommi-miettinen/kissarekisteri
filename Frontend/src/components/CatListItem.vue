@@ -17,13 +17,13 @@ const getTextColor = (sex: string) => (sex === "Male" ? "#60a5fa" : "#fb7185");
 </script>
 
 <template>
-  <li
+  <div
     tabindex="0"
     @keyup.enter="navigateToCat(cat.id)"
     @click="navigateToCat(cat.id)"
-    class="hover-bg focus-ring border-bottom gap-3 p-3 d-flex align-items-center justify-content-between w-100"
+    class="hover-bg focus-ring border-bottom gap-3 p-3 d-flex justify-content-between align-items-center w-100"
   >
-    <div class="d-flex align-items-center justify-content-start gap-3">
+    <div class="d-flex w-100 align-items-center justify-content-start gap-3">
       <slot name="medal"></slot>
       <img
         :src="cat.imageUrl"
@@ -36,14 +36,15 @@ const getTextColor = (sex: string) => (sex === "Male" ? "#60a5fa" : "#fb7185");
       <span>{{ cat.name }}</span>
     </div>
 
-    <div>{{ cat.breed }}</div>
-    <div>
+    <div class="w-100">{{ cat.breed }}</div>
+    <div class="w-100 d-flex">
       {{
         //@ts-ignore
         formatDateNoHours(cat.birthDate)
       }}
     </div>
-    <div class="overflow-hidden gap-2 align-items-center d-flex"></div>
-    <slot name="actions"></slot>
-  </li>
+    <div class="gap-2 align-items-center d-flex">
+      <slot name="actions"></slot>
+    </div>
+  </div>
 </template>

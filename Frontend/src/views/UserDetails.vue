@@ -11,6 +11,7 @@ import Cropper from "../components/Cropper.vue";
 import CatListItem from "../components/CatListItem.vue";
 import { useRoute } from "vue-router";
 import CatForm from "../components/CatForm.vue";
+import List from "../components/List.vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -111,33 +112,41 @@ const loadCatForEdit = (cat: Cat) => {
       </div>
       <div class="d-flex flex-column rounded" v-if="cats">
         <h3>{{ t("Profile.cats") }}</h3>
-        <div tabindex="-1" class="overflow-auto p-1" style="height: 500px">
-          <CatListItem v-for="cat in cats" :key="cat.id" :cat="cat">
-            <template #actions>
-              <div @keyup.enter.stop="" v-if="userIsLoggedInUser" data-testid="cat-options" @click.stop class="dropdown d-flex dropstart">
-                <button tabindex="0" class="btn focus-ring" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                    <path
-                      d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                    />
-                  </svg>
-                </button>
-                <ul class="dropdown-menu">
-                  <li @keyup.enter="loadCatForEdit(cat)" tabIndex="0" class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
-                  <li
-                    tabIndex="0"
-                    data-testid="start-cat-delete"
-                    class="dropdown-item"
-                    @keyup.enter="(deletingCatId = cat.id), (deletingCat = true)"
-                    @click.stop="(deletingCatId = cat.id), (deletingCat = true)"
+        <List v-if="cats" :items="cats" :itemsPerPage="6">
+          <template v-slot="{ item: cat }">
+            <CatListItem :key="cat.id" :cat="cat">
+              <template #actions>
+                <div @keyup.enter.stop="" v-if="userIsLoggedInUser" data-testid="cat-options" @click.stop class="dropdown d-flex dropstart">
+                  <button
+                    tabindex="0"
+                    class="btn py-1 px-2 accordion d-flex focus-ring rounded-1"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
                   >
-                    Poista
-                  </li>
-                </ul>
-              </div>
-            </template>
-          </CatListItem>
-        </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
+                      <path
+                        d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
+                      />
+                    </svg>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li @keyup.enter="loadCatForEdit(cat)" tabIndex="0" class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
+                    <li
+                      tabIndex="0"
+                      data-testid="start-cat-delete"
+                      class="dropdown-item"
+                      @keyup.enter="(deletingCatId = cat.id), (deletingCat = true)"
+                      @click.stop="(deletingCatId = cat.id), (deletingCat = true)"
+                    >
+                      Poista
+                    </li>
+                  </ul>
+                </div>
+              </template>
+            </CatListItem>
+          </template>
+        </List>
         <button
           v-if="userIsLoggedInUser"
           @click="addingCat = true"

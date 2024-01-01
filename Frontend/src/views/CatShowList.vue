@@ -8,6 +8,7 @@ import catShowAPI from "../api/catShowAPI";
 import { useQuery, useMutation } from "@tanstack/vue-query";
 import { toast } from "vue-sonner";
 import { userHasPermission } from "../store/userStore";
+import { getCurrentFormattedDate } from "../utils/formatDate";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -17,8 +18,8 @@ const newEvent = ref({
   name: "",
   description: "",
   location: "",
-  startDate: "",
-  endDate: "",
+  startDate: getCurrentFormattedDate(),
+  endDate: getCurrentFormattedDate(),
 });
 
 const addingEvent = ref(false);
@@ -64,14 +65,14 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
           />
         </div>
       </div>
-      <div tabindex="-1" class="d-flex flex-column overflow-auto" style="height: 500px">
+      <div tabindex="-1" class="d-flex flex-column overflow-auto p-1" style="height: 500px">
         <div
           tabindex="0"
           @keyup.enter="() => navigateToEvent(catShow.id!)"
           @click="() => navigateToEvent(catShow.id!)"
           v-for="catShow in filteredCatShows"
           :key="catShow.id"
-          class="d-flex gap-4 border-bottom px-3 py-2 align-items-center pointer hover-bg justify-content-between"
+          class="d-flex gap-4 border-bottom px-3 py-2 align-items-center pointer hover-bg justify-content-between focus-ring"
         >
           <div>
             <div>{{ catShow.name }}</div>
@@ -91,42 +92,36 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
     <div class="d-flex flex-column w-100 p-4 gap-4">
       <div>
         <label for="event-name" class="form-label cursor-pointer">{{ t("CatShowList.eventNameInput") }}</label>
-        <input id="event-name" type="text" class="form-control" v-model="newEvent.name" :placeholder="t('CatShowList.eventNameInput')" />
+        <input id="event-name" type="text" class="form-control" v-model="newEvent.name" />
       </div>
-
       <div>
         <label for="event-description" class="form-label cursor-pointer">{{ t("CatShowList.eventDescriptionInput") }}</label>
-        <input
-          id="event-description"
-          type="text"
-          class="form-control"
-          v-model="newEvent.description"
-          :placeholder="t('CatShowList.eventDescriptionInput')"
-        />
+        <input id="event-description" type="text" class="form-control" v-model="newEvent.description" />
       </div>
-
       <div>
         <label for="event-location" class="form-label cursor-pointer">{{ t("CatShowList.eventLocationInput") }}</label>
-        <input
-          id="event-location"
-          type="text"
-          class="form-control"
-          v-model="newEvent.location"
-          :placeholder="t('CatShowList.eventLocationInput')"
-        />
+        <input id="event-location" type="text" class="form-control" v-model="newEvent.location" />
       </div>
-
       <div>
         <label for="start-date" class="form-label cursor-pointer">Start Date</label>
         <input id="start-date" type="date" class="form-control" v-model="newEvent.startDate" />
       </div>
-
       <div>
         <label for="end-date" class="form-label cursor-pointer">End Date</label>
         <input id="end-date" type="date" class="form-control" v-model="newEvent.endDate" />
       </div>
 
-      <button @click="createCatShowMutation.mutate" type="button" class="btn btn-primary ms-auto px-5">Luo tapahtuma +</button>
+      <button
+        @click="
+          () => {
+            createCatShowMutation.mutate(), (addingEvent = false);
+          }
+        "
+        type="button"
+        class="btn btn-primary ms-auto px-5"
+      >
+        Luo tapahtuma +
+      </button>
     </div>
   </Modal>
 </template>

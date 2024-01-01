@@ -12,7 +12,7 @@
 
 .hover-bg:hover {
   cursor: pointer;
-  background-color: #f8f9fa;
+  background-color: #f3f4f6;
 }
 
 .btn-light:hover {
@@ -66,17 +66,5 @@ $utilities: map-merge(
           responsive: true,
         )
       ),
-  )
-);
-
-$utilities: map-merge(
-  $utilities,
-  (
-    "cursor": (
-      property: cursor,
-      class: cursor,
-      responsive: true,
-      values: auto pointer grab,
-    ),
   )
 );

@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { ref, watchEffect, nextTick, computed } from "vue";
+import { ref, watchEffect, nextTick, computed, watch } from "vue";
 import catAPI from "../api/catAPI";
 import { useQuery } from "@tanstack/vue-query";
+import { getCurrentFormattedDate } from "../utils/formatDate";
 
 const motherCatQuery = ref("");
 const fatherCatQuery = ref("");
@@ -32,7 +33,7 @@ const { data: catBreeds } = useQuery({
 
 const newCat = ref<CatPayload>({
   name: "",
-  birthDate: null,
+  birthDate: getCurrentFormattedDate(),
   breed: "",
   sex: "Female",
   fatherId: undefined,
@@ -65,6 +66,22 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
+  if (catBreeds.value && catBreeds.value.length > 0) {
+    newCat.value.breed = catBreeds.value[0].name;
+  }
+});
+
+watch(
+  () => newCat.value.breed,
+  () => {
+    newCat.value.motherId = undefined;
+    motherCatQuery.value = "";
+    newCat.value.fatherId = undefined;
+    fatherCatQuery.value = "";
+  }
+);
+
+watchEffect(() => {
   if (props.cat) {
     newCat.value = { ...newCat.value, ...props.cat };
   }
@@ -86,7 +103,7 @@ const isFormValid = computed(() => {
   return (
     newCat.value.name.trim() !== "" &&
     newCat.value.breed.trim() !== "" &&
-    newCat.value.birthDate &&
+    newCat.value.birthDate.trim() !== "" &&
     (newCat.value.sex === "Female" || newCat.value.sex === "Male")
   );
 });
@@ -99,8 +116,8 @@ const isFormValid = computed(() => {
       <input data-testid="new-cat-name-input" type="text" class="form-control" id="catName" v-model="newCat.name" />
     </div>
     <div class="mb-3">
-      <label for="catSex" class="form-label">Rotu</label>
-      <select v-model="newCat.breed" class="form-select" id="catSex" aria-label="Cat sex">
+      <label for="breed" class="form-label">Rotu</label>
+      <select v-model="newCat.breed" class="form-select" id="breed" aria-label="breed">
         <option v-for="breed in catBreeds" :key="breed.id" :value="breed.name">
           {{ breed.name }}
         </option>
@@ -120,8 +137,8 @@ const isFormValid = computed(() => {
     </div>
 
     <div class="mb-3 position-relative">
-      <label for="exampleDataList" class="form-label">Kissan äiti</label>
-      <input v-model="motherCatQuery" class="form-control" id="exampleDataList" placeholder="Type to search..." />
+      <label for="mother-cat" class="form-label">Kissan äiti</label>
+      <input v-model="motherCatQuery" class="form-control" id="mother-cat" placeholder="Type to search..." />
       <div
         v-if="showMotherCatSuggestions && motherCats && motherCats.length > 0"
         class="z-2 bg-white p-2 gap-2 d-flex flex-column border rounded-2 border-top-0 position-absolute w-100"
@@ -132,8 +149,8 @@ const isFormValid = computed(() => {
       </div>
     </div>
     <div class="mb-3 position-relative">
-      <label for="exampleDataList" class="form-label">Kissan isä</label>
-      <input v-model="fatherCatQuery" class="form-control" id="exampleDataList" placeholder="Type to search..." />
+      <label for="father-cat" class="form-label">Kissan isä</label>
+      <input v-model="fatherCatQuery" class="form-control" id="father-cat" placeholder="Type to search..." />
       <div
         v-if="showFatherCatSuggestions && fatherCats && fatherCats.length > 0"
         class="z-2 bg-white p-2 gap-2 d-flex flex-column border rounded-2 border-top-0 position-absolute w-100"
