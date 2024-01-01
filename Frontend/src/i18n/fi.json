@@ -48,5 +48,8 @@
     "404": "404 Näyttelyä ei löytynyt",
     "joinEvent": "Liity tapahtumaan",
     "leaveEvent": "Poistu tapahtumasta"
+  },
+  "List": {
+    "Search": "Hae.."
   }
 }

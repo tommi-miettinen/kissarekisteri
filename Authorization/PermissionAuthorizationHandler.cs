@@ -1,6 +1,5 @@
 ﻿using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authorization;
-using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -31,10 +30,6 @@ public class PermissionAuthorizationHandler(PermissionService permissionService)
     {
         var userId = context.User.Claims.FirstOrDefault(
             c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-        Console.BackgroundColor = ConsoleColor.Red;
-        Console.WriteLine(userId);
-        Console.ResetColor();
 
         if (userId == null)
         {

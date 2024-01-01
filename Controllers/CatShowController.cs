@@ -69,7 +69,7 @@ public class CatShowController(CatShowService catShowService) : Controller
     public async Task<ActionResult<CatShowResult>> AssignCatPlacing(int catShowId, [FromBody] CatShowResultDTO resultPayload)
     {
         var result = await catShowService.AssignCatPlacing(catShowId, resultPayload);
-        return result;
+        return Json(result);
     }
 
     [Authorize]

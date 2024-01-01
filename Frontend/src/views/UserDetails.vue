@@ -26,7 +26,11 @@ const selectedCat = ref();
 
 const loggedInUser = computed(() => userStore.user);
 
-const { data: user, isError: isUserError } = useQuery({
+const {
+  data: user,
+  isError: isUserError,
+  refetch: refetchUser,
+} = useQuery({
   queryKey: ["user" + route.params.userId],
   queryFn: () => userAPI.getUserById(route.params.userId as string),
 });
@@ -37,7 +41,7 @@ const userIsLoggedInUser = computed(() => {
 });
 
 const { data: cats, refetch: refetchCats } = useQuery({
-  queryKey: ["cats" + user.value?.id],
+  queryKey: ["userCats"],
   queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
   enabled: Boolean(user.value?.id),
 });
@@ -57,7 +61,10 @@ const { mutate: mutateUser } = useMutation({
 });
 */
 
-watch(user, () => refetchCats());
+watch([route, user], () => {
+  refetchCats();
+  refetchUser();
+});
 
 const addCat = (newCat: CatPayload) => {
   mutate(newCat);
@@ -85,7 +92,7 @@ const loadCatForEdit = (cat: Cat) => {
 <template>
   <h3 v-if="isUserError" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
   <div v-if="user" class="w-100 h-100 d-flex justify-content-center p-5">
-    <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8">
+    <div class="p-4 p-sm-5 rounded col-12 col-lg-8">
       <div class="d-flex flex-column" v-if="user">
         <div class="d-flex align-items-center gap-2 mb-4">
           <div class="d-flex align-items-center" @click="editingAvatar = false">
@@ -110,9 +117,9 @@ const loadCatForEdit = (cat: Cat) => {
           <h3>{{ `${user.givenName}  ${user.surname}` }}</h3>
         </div>
       </div>
-      <div class="d-flex flex-column rounded" v-if="cats">
-        <h3>{{ t("Profile.cats") }}</h3>
-        <List v-if="cats" :items="cats" :itemsPerPage="6">
+      <div class="d-flex flex-column rounded h-100 pb-5" v-if="cats">
+        <h3 v-if="cats.length > 0">{{ t("Profile.cats") }}</h3>
+        <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats && cats.length > 0" :items="cats" :itemsPerPage="7">
           <template v-slot="{ item: cat }">
             <CatListItem :key="cat.id" :cat="cat">
               <template #actions>
@@ -146,16 +153,18 @@ const loadCatForEdit = (cat: Cat) => {
               </template>
             </CatListItem>
           </template>
+          <template #action>
+            <button
+              v-if="userIsLoggedInUser"
+              @click="addingCat = true"
+              data-testid="add-new-cat-btn"
+              type="button"
+              class="btn btn-primary ms-auto px-5"
+            >
+              {{ t("Profile.addCat") }} +
+            </button>
+          </template>
         </List>
-        <button
-          v-if="userIsLoggedInUser"
-          @click="addingCat = true"
-          data-testid="add-new-cat-btn"
-          type="button"
-          class="btn btn-primary ms-auto mt-2 px-5"
-        >
-          {{ t("Profile.addCat") }} +
-        </button>
       </div>
     </div>
   </div>
@@ -175,7 +184,7 @@ const loadCatForEdit = (cat: Cat) => {
       <p>Poistetaanko kissan tiedot?</p>
       <div class="d-flex gap-2 justify-content-end">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-        <button data-testid="confirm-cat-delete" @click="() => deleteCat(deletingCatId)" type="button" class="btn btn-primary">
+        <button data-testid="confirm-cat-delete" @click="() => deleteCat(deletingCatId)" type="button" class="btn btn-danger">
           Poista
         </button>
       </div>

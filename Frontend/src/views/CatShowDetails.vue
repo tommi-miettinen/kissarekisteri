@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import userAPI from "../api/userAPI";
-import { userHasPermission, userStore, user } from "../store/userStore";
+import { userHasPermission, user } from "../store/userStore";
 import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
 import { useMutation, useQuery } from "@tanstack/vue-query";
@@ -51,10 +51,13 @@ const leaveEventMutation = useMutation({
   },
 });
 
-const { data: userCats } = useQuery({
+const { data: userCats, refetch: refetchUserCats } = useQuery({
   queryKey: ["userCats"],
-  queryFn: () => userAPI.getCatsByUserId(userStore.user?.id as string),
+  queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
+  enabled: Boolean(user.value),
 });
+
+watch(user, () => refetchUserCats());
 
 const joiningEvent = ref(false);
 const leavingEvent = ref(false);
@@ -182,7 +185,6 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
                       class="btn py-1 px-2 accordion d-flex focus-ring rounded-1"
                       type="button"
                       data-bs-toggle="dropdown"
-                      data-bs-auto-close="inside"
                       aria-expanded="false"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">

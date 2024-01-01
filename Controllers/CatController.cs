@@ -1,4 +1,5 @@
 ﻿using Kissarekisteri.DTOs;
+using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -56,12 +57,14 @@ public class CatController(CatService catService) : Controller
     [HttpGet("/cats/{catId}")]
     public async Task<ActionResult<Cat>> GetCatAsync(int catId)
     {
-        var cat = await _catService.GetCatByIdAsync(catId);
-        if (cat == null)
+        var result = await _catService.GetCatByIdAsync(catId);
+
+        if (!result.IsSuccess)
         {
-            return NotFound();
+            return HttpStatusMapper.Map(result.Errors);
         }
-        return Json(cat);
+
+        return Json(result.Data);
     }
 
 

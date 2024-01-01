@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
+using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,16 +23,18 @@ public class CatService(
     private readonly UserService _userService = userService;
     private readonly IMapper _mapper = mapper;
 
-    public async Task<Cat> UploadCatPhoto(int catId, IFormFile file)
+    public async Task<Result<Cat>> UploadCatPhoto(int catId, IFormFile file)
     {
-        if (file == null || file.Length == 0)
-        {
-            Console.WriteLine("no file");
-            return null;
-        }
+        var result = new Result<Cat>();
+
         var cat = await _dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
 
         var uploadedPhoto = await _uploadService.UploadFile(file);
+
+        if (uploadedPhoto == null)
+        {
+            return result.AddError(CatErrors.PhotoUploadError);
+        }
 
         await _dbContext.CatPhotos.AddAsync(
             new CatPhoto { CatId = cat.Id, Url = uploadedPhoto.Uri.AbsoluteUri }
@@ -44,16 +46,17 @@ public class CatService(
             .Include(c => c.Photos)
             .FirstOrDefaultAsync(cat => cat.Id == catId);
 
-        return catWithPhotos;
+        return result.Success(catWithPhotos);
     }
 
-    public async Task<Cat> UpdateCatByIdAsync(int catId, CatRequest catPayload)
+    public async Task<Result<Cat>> UpdateCatByIdAsync(int catId, CatRequest catPayload)
     {
+        var result = new Result<Cat>();
         var cat = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == catId);
 
         if (cat == null)
         {
-            return null;
+            return result.AddError(CatErrors.NotFound);
         }
 
         cat.Name = catPayload.Name;
@@ -62,12 +65,15 @@ public class CatService(
         cat.ImageUrl = catPayload.ImageUrl;
 
         await _dbContext.SaveChangesAsync();
-        return cat;
+
+        return result.Success(cat);
     }
 
 
-    public async Task<Cat> GetCatByIdAsync(int catId)
+    public async Task<Result<Cat>> GetCatByIdAsync(int catId)
     {
+        var result = new Result<Cat>();
+
         var cat = await _dbContext.Cats
             .Include(c => c.Photos)
             .Include(c => c.Results)
@@ -79,23 +85,20 @@ public class CatService(
             .FirstOrDefaultAsync(cat => cat.Id == catId);
 
         if (cat == null)
-            return null;
+            return result.AddError(CatErrors.NotFound);
 
         cat.Owner = await _userService.GetUserById(cat.OwnerId);
         cat.Breeder = await _userService.GetUserById(cat.BreederId);
 
 
-        return cat;
+        return result.Success(cat);
     }
 
     public async Task<List<Cat>> GetCatsAsync(CatQueryParamsDTO queryParams = null)
     {
         queryParams ??= new CatQueryParamsDTO();
 
-
         var queryableCats = _dbContext.Cats.AsQueryable();
-
-
 
 
         if (!string.IsNullOrEmpty(queryParams.Name))
@@ -140,11 +143,6 @@ public class CatService(
 
     public async Task<Cat> CreateCat(CatRequest newCatRequest)
     {
-        if (newCatRequest == null)
-        {
-            return null;
-        }
-
         var cat = new Cat
         {
             Name = newCatRequest.Name,

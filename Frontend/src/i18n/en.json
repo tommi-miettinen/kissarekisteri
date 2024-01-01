@@ -48,5 +48,8 @@
     "404": "404 Cat show not found",
     "joinEvent": "Join event",
     "leaveEvent": "Leave event"
+  },
+  "List": {
+    "Search": "Search..."
   }
 }

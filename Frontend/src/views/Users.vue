@@ -17,7 +17,7 @@ const { data } = useQuery({
   <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center">
     <div class="p-2 p-sm-5 rounded col-12 col-lg-8 h-100 d-flex flex-column">
       <h3>{{ t("Users.members") }}</h3>
-      <List v-if="data" :items="data" :itemsPerPage="8">
+      <List :searchQueryPlaceholder="t('Users.searchInput')" v-if="data" :items="data" :itemsPerPage="7">
         <template v-slot="{ item: user }">
           <UserListItem :user="user" />
         </template>

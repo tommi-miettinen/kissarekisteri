@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
+using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,12 +23,13 @@ namespace Kissarekisteri.Services
         private readonly UploadService _uploadService = uploadService;
         private readonly IMapper _mapper = mapper;
 
-        public async Task<bool> JoinCatShowAsync(int catShowId, string userId, CatShowCatAttendeeIds catIds)
+        public async Task<Result<bool>> JoinCatShowAsync(int catShowId, string userId, CatShowCatAttendeeIds catIds)
         {
+            var result = new Result<bool>();
             var catShow = _dbContext.CatShows.FirstOrDefault(e => e.Id == catShowId);
             if (catShow == null)
             {
-                return false;
+                return result.AddError(CatShowErrors.NotFound);
             }
             var attendee = new Attendee
             {
@@ -58,15 +59,18 @@ namespace Kissarekisteri.Services
                     }
                 }
             }
-            return true;
+            return result.Success(true);
         }
 
-        public async Task<bool> LeaveCatShowAsync(int catShowId, string userId)
+        public async Task<Result<bool>> LeaveCatShowAsync(int catShowId, string userId)
         {
+            var result = new Result<bool>();
+
             var catShow = await _dbContext.CatShows.FirstOrDefaultAsync(e => e.Id == catShowId);
+
             if (catShow == null)
             {
-                return false;
+                return result.AddError(CatShowErrors.NotFound);
             }
 
             var attendee = await _dbContext.Attendees
@@ -74,7 +78,7 @@ namespace Kissarekisteri.Services
 
             if (attendee == null)
             {
-                return false;
+                return result.AddError(CatShowErrors.NotFound);
             }
 
             _dbContext.Attendees.Remove(attendee);
@@ -86,7 +90,8 @@ namespace Kissarekisteri.Services
             _dbContext.CatAttendees.RemoveRange(catAttendees);
 
             await _dbContext.SaveChangesAsync();
-            return true;
+
+            return result.Success(true);
         }
 
 
@@ -99,11 +104,6 @@ namespace Kissarekisteri.Services
 
         public async Task<CatShow> UploadCatShowPhoto(int catShowId, IFormFile file)
         {
-            if (file == null || file.Length == 0)
-            {
-                Console.WriteLine("no file");
-                return null;
-            }
             var cat = await _dbContext.CatShows.FirstOrDefaultAsync(catShow => catShow.Id == catShowId);
 
             var uploadedPhoto = await _uploadService.UploadFile(file);
@@ -145,13 +145,14 @@ namespace Kissarekisteri.Services
             return catShow;
         }
 
-        public async Task<CatShowResult> AssignCatPlacing(int catShowId, CatShowResultDTO newPlacing)
+        public async Task<Result<CatShowResult>> AssignCatPlacing(int catShowId, CatShowResultDTO newPlacing)
         {
+            var result = new Result<CatShowResult>();
             var catShow = await _dbContext.CatShows.AnyAsync(e => e.Id == catShowId);
 
             if (!catShow)
             {
-                return null;
+                return result.AddError(CatShowErrors.NotFound);
             }
 
             var catShowResult = await _dbContext.CatShowResults.AddAsync(new CatShowResult
@@ -163,7 +164,7 @@ namespace Kissarekisteri.Services
             });
             await _dbContext.SaveChangesAsync();
 
-            return catShowResult.Entity;
+            return result.Success(catShowResult.Entity);
         }
 
         public async Task<CatShow> CreateCatShow(CatShow newCatShow)

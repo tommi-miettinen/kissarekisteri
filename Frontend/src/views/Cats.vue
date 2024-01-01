@@ -17,7 +17,7 @@ const { data } = useQuery({
   <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center">
     <div class="p-2 p-sm-5 rounded col-12 col-lg-8 h-100 d-flex flex-column">
       <h3>{{ t("Cats.cats") }}</h3>
-      <List v-if="data" :items="data" :itemsPerPage="8">
+      <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="data" :items="data" :itemsPerPage="8">
         <template v-slot="{ item }">
           <CatListItem :cat="item" />
         </template>

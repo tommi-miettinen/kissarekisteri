@@ -1,4 +1,5 @@
-import { BrowserCacheLocation, PublicClientApplication } from "@azure/msal-browser";
+import { BrowserCacheLocation, PublicClientApplication, EventType } from "@azure/msal-browser";
+import { fetchUser, fetchPermissions } from "./store/userStore.ts";
 
 //add client id as additional scope for access token
 //https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/2315#issuecomment-773407358
@@ -26,3 +27,10 @@ const msalConfig = {
 };
 
 export const msalInstance = await PublicClientApplication.createPublicClientApplication(msalConfig);
+
+msalInstance.addEventCallback(async (event) => {
+  if (event.eventType === EventType.LOGIN_SUCCESS) {
+    await fetchUser();
+    await fetchPermissions();
+  }
+});

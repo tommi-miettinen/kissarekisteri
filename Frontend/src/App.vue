@@ -5,12 +5,8 @@ import { onMounted } from "vue";
 import { fetchPermissions, fetchUser } from "./store/userStore";
 
 onMounted(async () => {
-  try {
-    await fetchUser();
-    await fetchPermissions();
-  } catch (error) {
-    console.log(error);
-  }
+  await fetchUser();
+  await fetchPermissions();
 });
 
 const focusMainContent = () => document.querySelector("main")?.focus();
