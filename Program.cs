@@ -63,34 +63,38 @@ builder.Services.AddAuthorization(options =>
 {
     foreach (PermissionType permission in Enum.GetValues(typeof(PermissionType)))
     {
-        options.AddPolicy(permission.ToString(), policy =>
-            policy.Requirements.Add(new PermissionRequirement(permission)));
+        options.AddPolicy(
+            permission.ToString(),
+            policy => policy.Requirements.Add(new PermissionRequirement(permission))
+        );
     }
 });
 
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority =
+            "https://kissarekisteri.b2clogin.com/kissarekisteri.onmicrosoft.com/B2C_1_SIGN_IN_SIGN_UP/v2.0/";
+        options.Audience = "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6";
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
- .AddJwtBearer(options =>
- {
-     options.Authority = "https://kissarekisteri.b2clogin.com/kissarekisteri.onmicrosoft.com/B2C_1_SIGN_IN_SIGN_UP/v2.0/";
-     options.Audience = "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6";
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidAudience = "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6",
+            ValidIssuer =
+                "https://kissarekisteri.b2clogin.com/d128e5ef-7125-45c2-8e8c-4fd41c0c862e/v2.0/"
+        };
+    });
 
-     options.TokenValidationParameters = new TokenValidationParameters
-     {
-         ValidAudience = "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6",
-         ValidIssuer = "https://kissarekisteri.b2clogin.com/d128e5ef-7125-45c2-8e8c-4fd41c0c862e/v2.0/"
-     };
- });
-
-
-
-builder.Services.AddDbContext<KissarekisteriDbContext>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL")));
+builder.Services.AddDbContext<KissarekisteriDbContext>(
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSQL"))
+);
 
 builder.Services
     .AddControllers(options => options.Filters.Add(new ModelValidationFilter()))
-    .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
+    .AddJsonOptions(
+        options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
+    );
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(options =>
@@ -121,18 +125,10 @@ app.UseExceptionHandler(appBuilder =>
 
 if (app.Environment.IsDevelopment())
 {
-
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
-
-        /*
-
-        context.Database.EnsureDeleted();
         context.Database.EnsureCreated();
-        */
-
-
     }
 }
 

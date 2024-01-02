@@ -2,9 +2,11 @@
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -19,14 +21,19 @@ public class UserController(
     CatService catService,
     SeedService seedService,
     PermissionService permissionService,
-    IConfiguration config
+    IConfiguration config,
+    IWebHostEnvironment env
     ) : Controller
 {
 
     [HttpGet("config")]
     public ActionResult GetConfig()
     {
+        var request = HttpContext.Request;
         var Adb2cConfig = config.GetSection(Microsoft.Identity.Web.Constants.AzureAdB2C);
+        var currentUrl = $"https://{request.Host}{request.PathBase}";
+        var developmentUrl = "https://localhost:5173";
+
         return Json(new
         {
             AuthorityDomain = "kissarekisteri.b2clogin.com",
@@ -34,7 +41,7 @@ public class UserController(
             ClientId = Adb2cConfig["ClientId"],
             Instance = Adb2cConfig["Instance"],
             Domain = Adb2cConfig["Domain"],
-            redirectUri = "https://localhost:5173"
+            redirectUri = env.IsDevelopment() ? developmentUrl : currentUrl,
         });
     }
 

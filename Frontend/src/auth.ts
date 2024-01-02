@@ -1,5 +1,5 @@
 import configAPI from "./api/config.ts";
-import { BrowserCacheLocation, PublicClientApplication, EventType, IPublicClientApplication } from "@azure/msal-browser";
+import { BrowserCacheLocation, PublicClientApplication, EventType, IPublicClientApplication, Configuration } from "@azure/msal-browser";
 import { fetchUser, fetchPermissions } from "./store/userStore.ts";
 
 //add client id as additional scope for access token
@@ -9,11 +9,21 @@ export const scopes = ["openid", "offline_access", "8f374d27-54ee-40d1-bed8-ba2f
 export let msalInstance: IPublicClientApplication;
 
 export const initializeMsalInstance = async () => {
-  const config = await configAPI.fetchConfig();
+  let config;
 
-  if (!config) return console.log("No config found");
+  if (localStorage.msalConfig) {
+    config = JSON.parse(localStorage.msalConfig);
+  } else {
+    config = await configAPI.fetchConfig();
 
-  const msalConfig = {
+    localStorage.msalConfig = JSON.stringify(config);
+  }
+
+  if (!config) {
+    return console.log("No config found");
+  }
+
+  const msalConfig: Configuration = {
     auth: {
       authority: config.authority,
       clientId: config.clientId,
