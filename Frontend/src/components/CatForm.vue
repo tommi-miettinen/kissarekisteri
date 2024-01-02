@@ -112,11 +112,11 @@ const isFormValid = computed(() => {
 <template>
   <div class="w-100 p-4 d-flex flex-column">
     <div class="mb-3">
-      <label for="catName" class="form-label">Nimi</label>
+      <label for="catName" class="form-label w-100">Nimi</label>
       <input data-testid="new-cat-name-input" type="text" class="form-control" id="catName" v-model="newCat.name" />
     </div>
     <div class="mb-3">
-      <label for="breed" class="form-label">Rotu</label>
+      <label for="breed" class="form-label w-100">Rotu</label>
       <select v-model="newCat.breed" class="form-select" id="breed" aria-label="breed">
         <option v-for="breed in catBreeds" :key="breed.id" :value="breed.name">
           {{ breed.name }}
@@ -124,12 +124,12 @@ const isFormValid = computed(() => {
       </select>
     </div>
     <div class="mb-3">
-      <label for="catBirthDate" class="form-label">Syntymäaika</label>
+      <label for="catBirthDate" class="form-label w-100">Syntymäaika</label>
       <input data-testid="new-cat-birthdate-input" type="date" class="form-control" id="catBirthDate" v-model="newCat.birthDate" />
     </div>
 
     <div class="mb-3">
-      <label for="catSex" class="form-label">Sukupuoli</label>
+      <label for="catSex" class="form-label w-100">Sukupuoli</label>
       <select data-testid="new-cat-sex-select" class="form-select" id="catSex" v-model="newCat.sex" aria-label="Cat sex">
         <option value="Female">Naaras</option>
         <option value="Male">Uros</option>
@@ -137,7 +137,7 @@ const isFormValid = computed(() => {
     </div>
 
     <div class="mb-3 position-relative">
-      <label for="mother-cat" class="form-label">Kissan äiti</label>
+      <label for="mother-cat" class="form-label w-100">Kissan äiti</label>
       <input v-model="motherCatQuery" class="form-control" id="mother-cat" placeholder="Type to search..." />
       <div
         v-if="showMotherCatSuggestions && motherCats && motherCats.length > 0"
@@ -149,7 +149,7 @@ const isFormValid = computed(() => {
       </div>
     </div>
     <div class="mb-3 position-relative">
-      <label for="father-cat" class="form-label">Kissan isä</label>
+      <label for="father-cat" class="form-label w-100">Kissan isä</label>
       <input v-model="fatherCatQuery" class="form-control" id="father-cat" placeholder="Type to search..." />
       <div
         v-if="showFatherCatSuggestions && fatherCats && fatherCats.length > 0"

@@ -78,6 +78,7 @@ resource "azuread_application" "kissarekisteriAuth" {
 }
 
 
+
 resource "azurerm_resource_group" "rg" {
   name     = "kissarekisteri"
   location = "northeurope"
@@ -147,24 +148,3 @@ resource "azurerm_windows_web_app" "appservice" {
     type = "SystemAssigned"
   }
 }
-
-resource "azurerm_role_assignment" "sqlrole" {
-  scope                = azurerm_mssql_server.sqlserver.id
-  role_definition_name = "Contributor"
-  principal_id         = azurerm_windows_web_app.appservice.identity[0].principal_id
-}
-
-/*
-resource "null_resource" "sql_script" {
-  provisioner "local-exec" {
-    command = <<EOT
-      az sql db exec --resource-group ${local.rg_name} \
-                     --server ${azurerm_sql_server.sqlserver.name} \
-                     --name ${azurerm_sql_database.sql.name} \
-                     --sql "CREATE USER ${azurerm_windows_web_app.appservice.name} FROM EXTERNAL PROVIDER;"
-    EOT
-  }
-
-  depends_on = [azurerm_sql_database.sql]
-}
-*/

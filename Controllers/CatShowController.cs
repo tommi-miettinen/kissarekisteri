@@ -12,10 +12,12 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
 
+[ApiController]
+[Route("api/catshows")]
 public class CatShowController(CatShowService catShowService) : Controller
 {
     [Authorize]
-    [HttpPost("catshows/{catShowId}/join")]
+    [HttpPost("{catShowId}/join")]
     public async Task<IActionResult> JoinCatShow(
         int catShowId,
         [FromBody] CatShowCatAttendeeIds catIds
@@ -28,7 +30,7 @@ public class CatShowController(CatShowService catShowService) : Controller
     }
 
     [Authorize]
-    [HttpDelete("catshows/{catShowId}/leave")]
+    [HttpDelete("{catShowId}/leave")]
     public async Task<IActionResult> LeaveCatShow(int catShowId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -37,7 +39,7 @@ public class CatShowController(CatShowService catShowService) : Controller
         return Ok("Left cat show successfully");
     }
 
-    [HttpGet("catshows")]
+    [HttpGet]
     public async Task<ActionResult<List<CatShow>>> GetEvents()
     {
         var catShows = await catShowService.GetCatShows();
@@ -45,14 +47,14 @@ public class CatShowController(CatShowService catShowService) : Controller
     }
 
     [Authorize]
-    [HttpPost("catshows/{catShowId}/photos")]
+    [HttpPost("{catShowId}/photos")]
     public async Task<ActionResult<CatShow>> UploadCatShowPhoto(int catShowId, IFormFile file)
     {
         var catShow = await catShowService.UploadCatShowPhoto(catShowId, file);
         return Json(catShow);
     }
 
-    [HttpGet("catshows/{catShowId}")]
+    [HttpGet("{catShowId}")]
     public async Task<ActionResult<CatShow>> GetEvent(int catShowId)
     {
         var catShow = await catShowService.GetCatShowByIdAsync(catShowId);
@@ -65,7 +67,7 @@ public class CatShowController(CatShowService catShowService) : Controller
 
     [Authorize]
     [PermissionAuthorize(PermissionType.CreateCatShowResult)]
-    [HttpPost("catshows/{catShowId}/place")]
+    [HttpPost("{catShowId}/place")]
     public async Task<ActionResult<CatShowResult>> AssignCatPlacing(int catShowId, [FromBody] CatShowResultDTO resultPayload)
     {
         var result = await catShowService.AssignCatPlacing(catShowId, resultPayload);
@@ -74,17 +76,10 @@ public class CatShowController(CatShowService catShowService) : Controller
 
     [Authorize]
     [PermissionAuthorize(PermissionType.CreateEvent)]
-    [HttpPost("catshows")]
+    [HttpPost]
     public async Task<ActionResult<CatShow>> CreateEvent([FromBody] CatShow newCatShow)
     {
-        if (newCatShow == null)
-        {
-            return BadRequest("Invalid event data");
-        }
-
-
         var catShow = await catShowService.CreateCatShow(newCatShow);
-
         return Json(catShow);
     }
 }

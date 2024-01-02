@@ -11,10 +11,11 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
 
+
+[ApiController]
+[Route("api/cats")]
 public class CatController(CatService catService) : Controller
 {
-    private readonly CatService _catService = catService;
-
     /// <summary>
     /// Retrieves all cats with optional filters.
     /// </summary>
@@ -27,10 +28,10 @@ public class CatController(CatService catService) : Controller
     /// <returns>A list of cats</returns>
     /// <response media="application/json" code="200">Returns the list of cats</response>
 
-    [HttpGet("/cats")]
-    public async Task<ActionResult<List<Cat>>> GetCats([FromQuery] CatQueryParamsDTO queryParameters)
+    [HttpGet]
+    public async Task<ActionResult<Result<List<Cat>>>> GetCats([FromQuery] CatQueryParamsDTO queryParameters)
     {
-        var cats = await _catService.GetCatsAsync(queryParameters);
+        var cats = await catService.GetCatsAsync(queryParameters);
         return Json(cats);
     }
 
@@ -39,10 +40,10 @@ public class CatController(CatService catService) : Controller
     /// </summary>
     /// <returns>A list of breeds</returns>
     /// <response media="application/json" code="200">Returns the list of breeds</response>
-    [HttpGet("/cats/breeds")]
+    [HttpGet("breeds")]
     public async Task<ActionResult<List<CatBreed>>> GetBreeds()
     {
-        var breeds = await _catService.GetBreedsAsync();
+        var breeds = await catService.GetBreedsAsync();
         return Json(breeds);
     }
 
@@ -54,17 +55,17 @@ public class CatController(CatService catService) : Controller
     /// <response media="application/json" code="200">Returns the cat object</response>
     /// <response code="404">If a cat with the specified ID is not found</response>
 
-    [HttpGet("/cats/{catId}")]
+    [HttpGet("{catId}")]
     public async Task<ActionResult<Cat>> GetCatAsync(int catId)
     {
-        var result = await _catService.GetCatByIdAsync(catId);
+        var result = await catService.GetCatByIdAsync(catId);
 
         if (!result.IsSuccess)
         {
             return HttpStatusMapper.Map(result.Errors);
         }
 
-        return Json(result.Data);
+        return Json(result);
     }
 
 
@@ -84,11 +85,15 @@ public class CatController(CatService catService) : Controller
     /// Content-Disposition: form-data; name="file"; filename="cat_photo.jpg"
     /// </example>
     [Authorize]
-    [HttpPost("cats/{catId}/photo")]
+    [HttpPost("{catId}/photo")]
     public async Task<ActionResult<Cat>> UploadCatPhoto(int catId, IFormFile file)
     {
-        var cat = await _catService.UploadCatPhoto(catId, file);
-        return Json(cat);
+        var result = await catService.UploadCatPhoto(catId, file);
+        if (!result.IsSuccess)
+        {
+            return HttpStatusMapper.Map(result.Errors);
+        }
+        return Json(result.Data);
     }
 
     /// <summary>
@@ -98,11 +103,17 @@ public class CatController(CatService catService) : Controller
     /// <param name="catPayload"></param>
     /// <returns>The updated cat</returns>
     [Authorize]
-    [HttpPut("cats/{catId}")]
+    [HttpPut("{catId}")]
     public async Task<ActionResult<Cat>> EditCat(int catId, [FromBody] CatRequest catPayload)
     {
-        var cat = await _catService.UpdateCatByIdAsync(catId, catPayload);
-        return Json(cat);
+        var result = await catService.UpdateCatByIdAsync(catId, catPayload);
+
+        if (!result.IsSuccess)
+        {
+            return HttpStatusMapper.Map(result.Errors);
+        }
+
+        return Json(result.Data);
     }
 
     /// <summary>
@@ -111,7 +122,7 @@ public class CatController(CatService catService) : Controller
     /// <param name="catPayload"></param>
     /// <returns>The new cat</returns>
     [Authorize]
-    [HttpPost("/cats")]
+    [HttpPost]
     public async Task<ActionResult<Cat>> CreateCat([FromBody] CatRequest catPayload)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -119,7 +130,7 @@ public class CatController(CatService catService) : Controller
         catPayload.OwnerId = userId;
         catPayload.BreederId = userId;
 
-        var newCat = await _catService.CreateCat(catPayload);
+        var newCat = await catService.CreateCat(catPayload);
         return Json(newCat);
     }
 
@@ -129,10 +140,10 @@ public class CatController(CatService catService) : Controller
     /// <param name="catId"></param>
     /// <returns>No Content</returns>
     [Authorize]
-    [HttpDelete("/cats/{catId}")]
-    public async Task<IActionResult> DeleteCat(int catId)
+    [HttpDelete("{catId}")]
+    public async Task<ActionResult> DeleteCat(int catId)
     {
-        await _catService.DeleteCatByIdAsync(catId);
+        await catService.DeleteCatByIdAsync(catId);
         return NoContent();
     }
 }

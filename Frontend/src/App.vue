@@ -5,6 +5,7 @@ import { onMounted } from "vue";
 import { fetchPermissions, fetchUser } from "./store/userStore";
 
 onMounted(async () => {
+  console.log("TESTSTETSTTS");
   await fetchUser();
   await fetchPermissions();
 });
@@ -18,7 +19,7 @@ const focusMainContent = () => document.querySelector("main")?.focus();
   </button>
   <div style="height: 100vh" class="d-flex flex-column align-items-center">
     <Navigation role="navigation" />
-    <Toaster richColors closeButton />
+    <Toaster richColors closeButton :expand="true" position="top-right" />
     <main id="maincontent" tabIndex="-1" class="d-flex flex-column overflow-auto w-100 h-100">
       <RouterView />
     </main>

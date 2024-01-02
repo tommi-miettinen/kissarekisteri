@@ -36,7 +36,7 @@ watch(
 </script>
 
 <template>
-  <div class="modal fade" :id="props.modalId">
+  <div class="modal fade" tabindex="-1" :id="props.modalId">
     <div class="modal-dialog modal-dialog-centered">
       <div style="display: flex; flex-direction: column; justify-content: center; align-items: center" class="modal-content">
         <slot></slot>

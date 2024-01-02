@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteri.Controllers;
 
+[ApiController]
+[Route("api/users")]
 public class UserController(
     UserService userService,
     CatService catService,
@@ -27,14 +29,17 @@ public class UserController(
         var Adb2cConfig = config.GetSection(Microsoft.Identity.Web.Constants.AzureAdB2C);
         return Json(new
         {
+            AuthorityDomain = "kissarekisteri.b2clogin.com",
+            Authority = "https://kissarekisteri.b2clogin.com/kissarekisteri.onmicrosoft.com/b2c_1_sign_in_sign_up",
             ClientId = Adb2cConfig["ClientId"],
             Instance = Adb2cConfig["Instance"],
             Domain = Adb2cConfig["Domain"],
+            redirectUri = "https://localhost:5173"
         });
     }
 
     [Authorize]
-    [HttpGet("/users/{userId}/permissions")]
+    [HttpGet("{userId}/permissions")]
     public async Task<ActionResult<List<Permission>>> GetPermissionsByUserId(string userId)
     {
         var permissions = await permissionService.GetPermissions(userId);
@@ -42,7 +47,7 @@ public class UserController(
     }
 
 
-    [HttpGet("users/{userId}")]
+    [HttpGet("{userId}")]
     public async Task<ActionResult<UserResponse>> GetUser([FromRoute] string userId)
     {
         var user = await userService.GetUserById(userId);
@@ -53,7 +58,7 @@ public class UserController(
         return Json(user);
     }
 
-    [HttpGet("users")]
+    [HttpGet]
     public async Task<ActionResult<List<UserResponse>>> GetUsers()
     {
         var users = await userService.GetUsers();
@@ -90,7 +95,7 @@ public class UserController(
 
 
     [Authorize]
-    [HttpPost("users")]
+    [HttpPost]
     public async Task<ActionResult<UserResponse>> CreateUser()
     {
         var user = await userService.CreateUser(new UserCreatePayloadDTO
@@ -119,7 +124,7 @@ public class UserController(
     /// </summary>
     /// <param name="userId">The ID of the user</param>
     /// <returns>The cats owned by the user</returns>
-    [HttpGet("/users/{userId}/cats")]
+    [HttpGet("{userId}/cats")]
     public async Task<ActionResult<Cat>> GetCatsByUserId(string userId)
     {
         var catsByUserId = await catService.GetCatByUserIdAsync(userId);

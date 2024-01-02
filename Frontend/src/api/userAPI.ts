@@ -2,7 +2,7 @@ import apiClient from "./apiClient";
 
 const getCurrentUser = async () => {
   try {
-    const result = await apiClient.get<User>(`/me`);
+    const result = await apiClient.get<User>(`/users/me`);
     return result.data;
   } catch (err) {
     console.log(err);

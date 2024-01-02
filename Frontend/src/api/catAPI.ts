@@ -1,5 +1,11 @@
 import apiClient from "./apiClient";
 
+interface ApiResponse<T> {
+  isSuccess: boolean;
+  data: T;
+  errors: any[];
+}
+
 const addCat = async (cat: CatPayload) => {
   try {
     const result = await apiClient.post<Cat>("/cats", cat);
@@ -19,9 +25,10 @@ const deleteCatById = async (catId: number): Promise<true | undefined> => {
 };
 
 const getCats = async (query?: string) => {
+  console.log("REQUESTING CATS FROM", apiClient.defaults.baseURL);
   try {
-    const result = await apiClient.get<Cat[]>(`/cats?${query || ""}`);
-    return result.data;
+    const result = await apiClient.get<ApiResponse<Cat[]>>(`/cats?${query || ""}`);
+    return result.data.data;
   } catch (err) {
     console.log(err);
   }
@@ -29,7 +36,7 @@ const getCats = async (query?: string) => {
 
 const getCatsByUserId = async (userId: string) => {
   try {
-    const result = await apiClient.get<Cat>(`/users/${userId}/cats`);
+    const result = await apiClient.get<ApiResponse<Cat>>(`/users/${userId}/cats`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -38,7 +45,8 @@ const getCatsByUserId = async (userId: string) => {
 
 const getCatById = async (catId: number) => {
   try {
-    const result = await apiClient.get<Cat>(`/cats/${catId}`);
+    const result = await apiClient.get<ApiResponse<Cat>>(`/cats/${catId}`);
+    result.data.errors = ["test", "test2"];
     return result.data;
   } catch (err) {
     console.log(err);
@@ -47,7 +55,7 @@ const getCatById = async (catId: number) => {
 
 const editCat = async (updatedCat: EditCatPayload) => {
   try {
-    const result = await apiClient.put<Cat>(`/cats/${updatedCat.id}`, updatedCat);
+    const result = await apiClient.put<ApiResponse<Cat>>(`/cats/${updatedCat.id}`, updatedCat);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -61,7 +69,7 @@ const uploadCatImage = async (catId: number, image: File) => {
     const formData = new FormData();
     formData.append("file", image);
 
-    const result = await apiClient.post(`/cats/${catId}/photo`, formData);
+    const result = await apiClient.post<ApiResponse<Cat>>(`/cats/${catId}/photo`, formData);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -70,8 +78,8 @@ const uploadCatImage = async (catId: number, image: File) => {
 
 const getCatBreeds = async () => {
   try {
-    const result = await apiClient.get<CatBreed[]>(`/cats/breeds`);
-    return result.data;
+    const result = await apiClient.get<ApiResponse<CatBreed[]>>(`/cats/breeds`);
+    return result.data.data;
   } catch (err) {
     console.log(err);
   }

@@ -40,9 +40,10 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
 </script>
 <template>
   <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center">
-    <div class="p-4 p-sm-5 rounded col-12 col-lg-8 d-flex flex-column overflow-auto">
+    <div class="p-2 p-sm-5 rounded col-12 col-lg-8 h-100 d-flex flex-column">
       <h3>{{ t("CatShowList.catShows") }}</h3>
-      <List :searchQueryPlaceholder="t('CatShowList.searchInput')" v-if="catShows" :items="catShows" :itemsPerPage="8">
+
+      <List :searchQueryPlaceholder="t('CatShowList.searchInput')" v-if="catShows" :items="catShows" :itemsPerPage="7">
         <template v-slot="{ item: catShow }">
           <div
             tabindex="0"

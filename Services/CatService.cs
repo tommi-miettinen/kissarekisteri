@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Kissarekisteri.Database;
+﻿using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
 using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
@@ -14,14 +13,12 @@ namespace Kissarekisteri.Services;
 public class CatService(
     KissarekisteriDbContext dbContext,
     UploadService uploadService,
-    IMapper mapper,
     UserService userService
 )
 {
     private readonly KissarekisteriDbContext _dbContext = dbContext;
     private readonly UploadService _uploadService = uploadService;
     private readonly UserService _userService = userService;
-    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<Cat>> UploadCatPhoto(int catId, IFormFile file)
     {
@@ -94,8 +91,9 @@ public class CatService(
         return result.Success(cat);
     }
 
-    public async Task<List<Cat>> GetCatsAsync(CatQueryParamsDTO queryParams = null)
+    public async Task<Result<List<Cat>>> GetCatsAsync(CatQueryParamsDTO queryParams = null)
     {
+        var result = new Result<List<Cat>>();
         queryParams ??= new CatQueryParamsDTO();
 
         var queryableCats = _dbContext.Cats.AsQueryable();
@@ -124,8 +122,10 @@ public class CatService(
 
         var filteredCats = await queryableCats.ToListAsync();
 
+        result.AddError(CatErrors.NotFound);
 
-        return filteredCats;
+
+        return result.Success(filteredCats);
     }
 
     public async Task<List<CatBreed>> GetBreedsAsync()
@@ -134,15 +134,20 @@ public class CatService(
         return breeds;
     }
 
-    public async Task DeleteCatByIdAsync(int catId)
+    public async Task<Result<bool>> DeleteCatByIdAsync(int catId)
     {
+        var result = new Result<bool>();
         var cat = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == catId);
         _dbContext.Cats.Remove(cat);
         await _dbContext.SaveChangesAsync();
+
+
+        return result.Success(true);
     }
 
-    public async Task<Cat> CreateCat(CatRequest newCatRequest)
+    public async Task<Result<Cat>> CreateCat(CatRequest newCatRequest)
     {
+        var result = new Result<Cat>();
         var cat = new Cat
         {
             Name = newCatRequest.Name,
@@ -159,28 +164,45 @@ public class CatService(
 
         if (newCatRequest.MotherId.HasValue)
         {
-            var motherRelation = new CatRelation
+            var motherResult = await GetCatByIdAsync(newCatRequest.MotherId.Value);
+            if (motherResult.IsSuccess)
             {
-                ParentId = newCatRequest.MotherId.Value,
-                KittenId = cat.Id
-            };
-            _dbContext.CatRelations.Add(motherRelation);
+                var motherRelation = new CatRelation
+                {
+                    ParentId = newCatRequest.MotherId.Value,
+                    KittenId = cat.Id
+                };
+                _dbContext.CatRelations.Add(motherRelation);
+            }
+            else
+            {
+                result.AddError(CatErrors.MotherNotFound);
+            }
         }
 
         if (newCatRequest.FatherId.HasValue)
         {
-            var fatherRelation = new CatRelation
+            var fatherResult = await GetCatByIdAsync(newCatRequest.FatherId.Value);
+            if (fatherResult.IsSuccess)
             {
-                ParentId = newCatRequest.FatherId.Value,
-                KittenId = cat.Id
-            };
-            _dbContext.CatRelations.Add(fatherRelation);
+                var fatherRelation = new CatRelation
+                {
+                    ParentId = newCatRequest.FatherId.Value,
+                    KittenId = cat.Id
+                };
+                _dbContext.CatRelations.Add(fatherRelation);
+            }
+            else
+            {
+                result.AddError(CatErrors.FatherNotFound);
+            }
         }
 
         await _dbContext.SaveChangesAsync();
 
-        return cat;
+        return result.Success(cat);
     }
+
 
     public async Task<List<Cat>> GetCatByUserIdAsync(string userId)
     {

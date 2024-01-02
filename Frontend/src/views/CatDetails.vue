@@ -11,19 +11,22 @@ import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
 import UserListItem from "../components/UserListItem.vue";
 import ImageGallery from "../components/ImageGallery.vue";
+import { toast } from "vue-sonner";
 
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
 
 const {
-  data: cat,
+  data: catData,
   refetch,
   isError: isCatError,
 } = useQuery({
   queryKey: [route.params.catId],
   queryFn: () => catAPI.getCatById(+route.params.catId),
 });
+
+const cat = computed(() => catData.value?.data);
 
 const uploadMutation = useMutation({
   mutationFn: (file: File) => catAPI.uploadCatImage(cat.value!.id, file),
@@ -58,7 +61,11 @@ watch(route, () => refetch());
   <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4 p-5">
     <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8 gap-5 d-flex flex-column">
       <div class="d-flex flex-column flex-sm-row gap-4" style="min-height: 300px">
-        <div class="border image-container rounded-4" style="position: relative; min-width: 400px; overflow: hidden">
+        <div
+          @click="toast.error('test')"
+          class="border image-container rounded-4"
+          style="position: relative; min-width: 400px; overflow: hidden"
+        >
           <img style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover" :src="cat.imageUrl" />
         </div>
         <div class="d-flex flex-column p-2" style="width: 100%">
@@ -70,7 +77,7 @@ watch(route, () => refetch());
         </div>
       </div>
 
-      <div v-if="cat.results.length > 0">
+      <div v-if="cat.results && cat.results.length > 0">
         <h5>{{ t("CatDetails.placings") }}</h5>
         <div
           tabindex="0"
@@ -86,7 +93,7 @@ watch(route, () => refetch());
         </div>
       </div>
 
-      <div v-if="cat.parents.length > 0">
+      <div v-if="cat.parents && cat.parents.length > 0">
         <h5>{{ t("CatDetails.parents") }}</h5>
         <CatListItem v-if="cat.parents" v-for="parent in cat.parents" :cat="parent.parentCat" />
       </div>

@@ -87,3 +87,10 @@ interface CatBreed {
   id: number;
   name: string;
 }
+
+interface MsalConfig {
+  authority: string;
+  clientId: string;
+  authorityDomain: string;
+  redirectUri: string;
+}

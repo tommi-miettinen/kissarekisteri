@@ -91,7 +91,6 @@ builder.Services
     .AddControllers(options => options.Filters.Add(new ModelValidationFilter()))
     .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(options =>
@@ -147,5 +146,5 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
+app.MapFallbackToFile("index.html");
 app.Run();

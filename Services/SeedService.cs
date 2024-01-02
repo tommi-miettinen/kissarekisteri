@@ -235,7 +235,7 @@ namespace Kissarekisteri.Services
             var catsToCreate = catData
                 .Where(
                     newCat =>
-                        !existingCats.Any(
+                        !existingCats.Data.Any(
                             existingCat =>
                                 existingCat.Name.Equals(
                                     newCat.Name,
@@ -253,7 +253,7 @@ namespace Kissarekisteri.Services
             foreach (var catRequest in catsToCreate)
             {
                 var createdCat = await catService.CreateCat(catRequest);
-                createdCats.Add(createdCat);
+                createdCats.Add(createdCat.Data);
             }
 
             return createdCats;
