@@ -70,7 +70,7 @@ watchEffect(() => {
         />
       </div>
     </div>
-    <div class="p-1">
+    <div class="">
       <div v-for="item in displayedItems" :key="item.id">
         <slot :item="item"></slot>
       </div>

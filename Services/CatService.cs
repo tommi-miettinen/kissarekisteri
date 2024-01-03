@@ -128,10 +128,11 @@ public class CatService(
         return result.Success(filteredCats);
     }
 
-    public async Task<List<CatBreed>> GetBreedsAsync()
+    public async Task<Result<List<CatBreed>>> GetBreedsAsync()
     {
+        var result = new Result<List<CatBreed>>();
         var breeds = await _dbContext.CatBreeds.ToListAsync();
-        return breeds;
+        return result.Success(breeds);
     }
 
     public async Task<Result<bool>> DeleteCatByIdAsync(int catId)
@@ -204,9 +205,10 @@ public class CatService(
     }
 
 
-    public async Task<List<Cat>> GetCatByUserIdAsync(string userId)
+    public async Task<Result<List<Cat>>> GetCatByUserIdAsync(string userId)
     {
+        var result = new Result<List<Cat>>();
         var cats = await _dbContext.Cats.Where(cat => cat.OwnerId == userId).ToListAsync();
-        return cats;
+        return result.Success(cats);
     }
 }

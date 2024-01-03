@@ -87,7 +87,7 @@ builder.Services
     });
 
 builder.Services.AddDbContext<KissarekisteriDbContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSQL"))
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"))
 );
 
 builder.Services

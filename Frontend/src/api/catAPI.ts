@@ -1,15 +1,9 @@
 import apiClient from "./apiClient";
 
-interface ApiResponse<T> {
-  isSuccess: boolean;
-  data: T;
-  errors: any[];
-}
-
 const addCat = async (cat: CatPayload) => {
   try {
-    const result = await apiClient.post<Cat>("/cats", cat);
-    return result.data;
+    const result = await apiClient.post<ApiResponse<Cat>>("/cats", cat);
+    return result.data.data;
   } catch (err) {
     console.log(err);
   }
@@ -25,7 +19,6 @@ const deleteCatById = async (catId: number): Promise<true | undefined> => {
 };
 
 const getCats = async (query?: string) => {
-  console.log("REQUESTING CATS FROM", apiClient.defaults.baseURL);
   try {
     const result = await apiClient.get<ApiResponse<Cat[]>>(`/cats?${query || ""}`);
     return result.data.data;
@@ -79,7 +72,7 @@ const uploadCatImage = async (catId: number, image: File) => {
 const getCatBreeds = async () => {
   try {
     const result = await apiClient.get<ApiResponse<CatBreed[]>>(`/cats/breeds`);
-    return result.data.data;
+    return result.data;
   } catch (err) {
     console.log(err);
   }

@@ -58,13 +58,13 @@ watch(route, () => refetch());
 <template>
   <h3 v-if="isCatError" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
 
-  <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4 p-5">
-    <div class="p-4 p-sm-5 rounded overflow-auto col-12 col-lg-8 gap-5 d-flex flex-column">
+  <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4 p-sm-5">
+    <div class="p-1 p-sm-5 rounded overflow-auto col-12 col-lg-8 gap-5 d-flex flex-column">
       <div class="d-flex flex-column flex-sm-row gap-4" style="min-height: 300px">
         <div
           @click="toast.error('test')"
           class="border image-container rounded-4"
-          style="position: relative; min-width: 400px; overflow: hidden"
+          style="position: relative; min-width: 400px; min-height: 300px"
         >
           <img style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover" :src="cat.imageUrl" />
         </div>

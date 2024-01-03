@@ -26,10 +26,12 @@ const { data: fatherCats, refetch: refetchFatherCats } = useQuery({
   queryFn: () => catAPI.getCats(`name=${fatherCatQuery.value}&breed=${newCat.value.breed}&limit=3&sex=male`),
 });
 
-const { data: catBreeds } = useQuery({
+const { data: catBreedData } = useQuery({
   queryKey: ["catBreeds"],
   queryFn: () => catAPI.getCatBreeds(),
 });
+
+const catBreeds = computed(() => catBreedData.value?.data);
 
 const newCat = ref<CatPayload>({
   name: "",
@@ -110,7 +112,7 @@ const isFormValid = computed(() => {
 </script>
 
 <template>
-  <div class="w-100 p-4 d-flex flex-column">
+  <div class="w-100 p-3 sm-p-4 d-flex flex-column">
     <div class="mb-3">
       <label for="catName" class="form-label w-100">Nimi</label>
       <input data-testid="new-cat-name-input" type="text" class="form-control" id="catName" v-model="newCat.name" />

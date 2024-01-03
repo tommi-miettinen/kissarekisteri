@@ -68,7 +68,7 @@ resource "azuread_application" "kissarekisteriAuth" {
   }
 
   web {
-    redirect_uris = ["https://jwt.ms/"]
+    redirect_uris = ["https://localhost:44316", "https://localhost:5173", azurerm_windows_web_app.appservice.default_site_hostname]
 
     implicit_grant {
       access_token_issuance_enabled = true

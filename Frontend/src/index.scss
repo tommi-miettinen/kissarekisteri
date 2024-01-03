@@ -10,6 +10,10 @@
   cursor: pointer;
 }
 
+.hover-bg:focus {
+  background-color: #f3f4f6;
+}
+
 .hover-bg:hover {
   cursor: pointer;
   background-color: #f3f4f6;

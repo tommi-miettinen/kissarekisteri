@@ -94,3 +94,9 @@ interface MsalConfig {
   authorityDomain: string;
   redirectUri: string;
 }
+
+interface ApiResponse<T> {
+  isSuccess: boolean;
+  data: T;
+  errors: any[];
+}

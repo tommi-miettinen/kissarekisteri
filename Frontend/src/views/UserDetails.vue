@@ -12,6 +12,8 @@ import CatListItem from "../components/CatListItem.vue";
 import { useRoute } from "vue-router";
 import CatForm from "../components/CatForm.vue";
 import List from "../components/List.vue";
+import Drawer from "../components/Drawer.vue";
+import { useWindowSize } from "@vueuse/core";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -40,11 +42,13 @@ const userIsLoggedInUser = computed(() => {
   return false;
 });
 
-const { data: cats, refetch: refetchCats } = useQuery({
+const { data: catsData, refetch: refetchCats } = useQuery({
   queryKey: ["userCats"],
   queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
   enabled: Boolean(user.value?.id),
 });
+
+const cats = computed(() => catsData.value?.data);
 
 const { mutate } = useMutation({
   mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),
@@ -54,17 +58,20 @@ const { mutate } = useMutation({
   onError: () => toast.error("Jokin meni vikaan."),
 });
 
-/*
-const { mutate: mutateUser } = useMutation({
-  mutationFn: (userPayload: User) => editUser(userPayload),
-  onSuccess: () => toast.info("Tiedot tallennettu"),
+const deleteMutation = useMutation({
+  mutationFn: (catId: number) => catAPI.deleteCatById(catId),
+  onSuccess: () => {
+    toast.success("Kissan tiedot poistettu"), refetchCats();
+  },
+  onError: () => toast.error("Jokin meni vikaan."),
 });
-*/
 
 watch([route, user], () => {
   refetchCats();
   refetchUser();
 });
+
+const isMobile = computed(() => useWindowSize().width.value < 768);
 
 const addCat = (newCat: CatPayload) => {
   mutate(newCat);
@@ -72,10 +79,7 @@ const addCat = (newCat: CatPayload) => {
 };
 
 const deleteCat = async (catId: number) => {
-  const result = await catAPI.deleteCatById(catId);
-  if (!result) return;
-
-  cats.value = cats.value?.filter((c) => c.id !== catId);
+  deleteMutation.mutate(catId);
   deletingCat.value = false;
 };
 
@@ -91,7 +95,7 @@ const loadCatForEdit = (cat: Cat) => {
 
 <template>
   <h3 v-if="isUserError" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
-  <div v-if="user" class="w-100 h-100 d-flex justify-content-center p-5">
+  <div v-if="user" class="w-100 h-100 d-flex justify-content-center sm-p-5">
     <div class="p-4 p-sm-5 rounded col-12 col-lg-8">
       <div class="d-flex flex-column" v-if="user">
         <div class="d-flex align-items-center gap-2 mb-4">
@@ -117,9 +121,9 @@ const loadCatForEdit = (cat: Cat) => {
           <h3>{{ `${user.givenName}  ${user.surname}` }}</h3>
         </div>
       </div>
-      <div class="d-flex flex-column rounded h-100 pb-5" v-if="cats">
-        <h3 v-if="cats.length > 0">{{ t("Profile.cats") }}</h3>
-        <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats && cats.length > 0" :items="cats" :itemsPerPage="7">
+      <div class="d-flex flex-column rounded h-100 pb-5">
+        <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
+        <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats" :items="cats" :itemsPerPage="6">
           <template v-slot="{ item: cat }">
             <CatListItem :key="cat.id" :cat="cat">
               <template #actions>
@@ -168,8 +172,13 @@ const loadCatForEdit = (cat: Cat) => {
       </div>
     </div>
   </div>
-  <Modal :modalId="'add-cat-modal'" :visible="addingCat" @onCancel="addingCat = false">
+  <Drawer :visible="addingCat">
     <CatForm @onSave="addCat" />
+  </Drawer>
+  <Modal v-if="!isMobile" :modalId="'add-cat-modal'" :visible="addingCat" @onCancel="addingCat = false">
+    <div style="width: 550px">
+      <CatForm @onSave="addCat" />
+    </div>
   </Modal>
   <Modal :modalId="'edit-avatar-modal'" @onCancel="editingAvatar = false" :visible="editingAvatar">
     <div class="p-5">
@@ -177,7 +186,9 @@ const loadCatForEdit = (cat: Cat) => {
     </div>
   </Modal>
   <Modal :modalId="'edit-modal'" @onCancel="editingCat = false" :visible="editingCat">
-    <CatForm :cat="selectedCat" @onSave="editCat" />
+    <div style="width: 550px">
+      <CatForm :cat="selectedCat" @onSave="editCat" />
+    </div>
   </Modal>
   <Modal :modalId="'delete-modal'" @onCancel="deletingCat = false" :visible="deletingCat">
     <div class="w-100 p-4 d-flex flex-column">

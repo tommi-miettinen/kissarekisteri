@@ -74,7 +74,7 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
     </div>
   </div>
   <Modal :modalId="'event-modal'" @onCancel="addingEvent = false" :visible="addingEvent">
-    <div class="d-flex flex-column w-100 p-4 gap-4">
+    <div style="width: 500px" class="d-flex flex-column p-4 gap-4">
       <div>
         <label for="event-name" class="form-label cursor-pointer">{{ t("CatShowList.eventNameInput") }}</label>
         <input id="event-name" type="text" class="form-control" v-model="newEvent.name" />
