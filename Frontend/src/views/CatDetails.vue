@@ -66,7 +66,11 @@ watch(route, () => refetch());
           class="border image-container rounded-4"
           style="position: relative; min-width: 400px; min-height: 300px"
         >
-          <img style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover" :src="cat.imageUrl" />
+          <img
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
+            :src="cat.imageUrl"
+            alt="Cat image"
+          />
         </div>
         <div class="d-flex flex-column p-2" style="width: 100%">
           <h3>{{ cat.name }}</h3>

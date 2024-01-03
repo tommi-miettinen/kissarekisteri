@@ -51,11 +51,13 @@ const leaveEventMutation = useMutation({
   },
 });
 
-const { data: userCats, refetch: refetchUserCats } = useQuery({
+const { data: userCatsData, refetch: refetchUserCats } = useQuery({
   queryKey: ["userCats"],
   queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
   enabled: Boolean(user.value),
 });
+
+const userCats = computed(() => userCatsData.value?.data);
 
 watch(user, () => refetchUserCats());
 
@@ -178,7 +180,7 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
               </template>
               <template v-if="userHasPermission('CreateCatShowResult')" #actions>
                 <div>
-                  <div @click.stop="() => console.log('test')" @keyup.enter.stop class="d-flex dropstart">
+                  <div @click.stop @keyup.enter.stop class="d-flex dropstart">
                     <button
                       :id="cat.id.toString()"
                       tabindex="0"
@@ -237,7 +239,7 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
     </div>
     <Modal :modalId="'join-event-modal'" :visible="joiningEvent" @onCancel="joiningEvent = false">
       <div class="d-flex flex-column bg-white w-100 p-4 gap-4 rounded">
-        <div v-if="user && userCats && userCats.length > 0">
+        <div v-if="userCats && userCats.length > 0">
           <h5>Osallistuvat kissat:</h5>
           <div v-for="(cat, index) in userCats" :key="index">
             <label>

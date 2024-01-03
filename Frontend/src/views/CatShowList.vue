@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import Modal from "../components/Modal.vue";
 import { useI18n } from "vue-i18n";
@@ -10,6 +10,8 @@ import { toast } from "vue-sonner";
 import { userHasPermission } from "../store/userStore";
 import { getCurrentFormattedDate } from "../utils/formatDate";
 import List from "../components/List.vue";
+import Drawer from "../components/Drawer.vue";
+import { useWindowSize } from "@vueuse/core";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -36,6 +38,8 @@ const createCatShowMutation = useMutation({
   },
 });
 
+const isMobile = computed(() => useWindowSize().width.value < 768);
+
 const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`);
 </script>
 <template>
@@ -45,18 +49,20 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
 
       <List :searchQueryPlaceholder="t('CatShowList.searchInput')" v-if="catShows" :items="catShows" :itemsPerPage="7">
         <template v-slot="{ item: catShow }">
-          <div
-            tabindex="0"
-            @keyup.enter="() => navigateToEvent(catShow.id!)"
-            @click="() => navigateToEvent(catShow.id!)"
-            class="d-flex gap-4 border-bottom px-3 py-2 align-items-center pointer hover-bg justify-content-between focus-ring"
-          >
-            <div>
-              <div>{{ catShow.name }}</div>
-              <span class="text-body-secondary">{{ catShow.location }}</span>
-            </div>
-            <div style="font-size: 12px; font-weight: bold; margin-top: auto">
-              {{ `${formatDate(catShow.startDate)} -  ${formatDate(catShow.endDate)}` }}
+          <div class="py-1 border-bottom">
+            <div
+              tabindex="0"
+              @keyup.enter="() => navigateToEvent(catShow.id!)"
+              @click="() => navigateToEvent(catShow.id!)"
+              class="d-flex gap-4 rounded-3 px-3 py-2 align-items-center pointer hover-bg justify-content-between focus-ring"
+            >
+              <div>
+                <div>{{ catShow.name }}</div>
+                <span class="text-body-secondary">{{ catShow.location }}</span>
+              </div>
+              <div style="font-size: 12px; font-weight: bold; margin-top: auto">
+                {{ `${formatDate(catShow.startDate)} -  ${formatDate(catShow.endDate)}` }}
+              </div>
             </div>
           </div>
         </template>
@@ -73,7 +79,43 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
       </List>
     </div>
   </div>
-  <Modal :modalId="'event-modal'" @onCancel="addingEvent = false" :visible="addingEvent">
+  <Drawer :fullsize="true" :visible="addingEvent && isMobile">
+    <div class="d-flex flex-column p-4 gap-4">
+      <div>
+        <label for="event-name" class="form-label cursor-pointer">{{ t("CatShowList.eventNameInput") }}</label>
+        <input id="event-name" type="text" class="form-control" v-model="newEvent.name" />
+      </div>
+      <div>
+        <label for="event-description" class="form-label cursor-pointer">{{ t("CatShowList.eventDescriptionInput") }}</label>
+        <input id="event-description" type="text" class="form-control" v-model="newEvent.description" />
+      </div>
+      <div>
+        <label for="event-location" class="form-label cursor-pointer">{{ t("CatShowList.eventLocationInput") }}</label>
+        <input id="event-location" type="text" class="form-control" v-model="newEvent.location" />
+      </div>
+      <div>
+        <label for="start-date" class="form-label cursor-pointer">Start Date</label>
+        <input id="start-date" type="date" class="form-control" v-model="newEvent.startDate" />
+      </div>
+      <div>
+        <label for="end-date" class="form-label cursor-pointer">End Date</label>
+        <input id="end-date" type="date" class="form-control" v-model="newEvent.endDate" />
+      </div>
+
+      <button
+        @click="
+          () => {
+            createCatShowMutation.mutate(), (addingEvent = false);
+          }
+        "
+        type="button"
+        class="btn btn-primary ms-auto px-5"
+      >
+        Luo tapahtuma +
+      </button>
+    </div>
+  </Drawer>
+  <Modal :modalId="'event-modal'" @onCancel="addingEvent = false" :visible="addingEvent && !isMobile">
     <div style="width: 500px" class="d-flex flex-column p-4 gap-4">
       <div>
         <label for="event-name" class="form-label cursor-pointer">{{ t("CatShowList.eventNameInput") }}</label>

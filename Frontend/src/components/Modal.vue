@@ -40,7 +40,7 @@ watch(
     <div class="modal-dialog modal-dialog-centered">
       <div
         style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: min-content"
-        class="modal-content"
+        class="modal-content m-auto"
       >
         <slot></slot>
       </div>

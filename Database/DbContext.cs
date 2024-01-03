@@ -23,6 +23,11 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.HasServiceTier("Basic");
+        modelBuilder.HasServiceTierSql("Basic");
+        modelBuilder.HasDatabaseMaxSize("2 GB");
+
         modelBuilder
             .Entity<CatShow>()
             .HasMany(c => c.Attendees)

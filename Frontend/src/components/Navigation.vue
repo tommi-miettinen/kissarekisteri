@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { msalInstance } from "../auth";
 
 import { user, logout } from "../store/userStore";
@@ -9,6 +9,7 @@ import { scopes } from "../auth";
 import { useWindowSize } from "@vueuse/core";
 
 import { Offcanvas } from "bootstrap";
+import DropdownVue from "./Dropdown.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -47,20 +48,18 @@ let bsOffcanvas: Offcanvas;
 let sideOffCanvas: Offcanvas;
 
 onMounted(() => {
-  //@ts-ignore
-  bsOffcanvas = new bootstrap.Offcanvas(offCanvasRef.value as HTMLDivElement);
-  //@ts-ignore
-  sideOffCanvas = new bootstrap.Offcanvas(sideOffcanvasRef.value as HTMLDivElement);
+  bsOffcanvas = new Offcanvas(offCanvasRef.value as HTMLDivElement);
+  sideOffCanvas = new Offcanvas(sideOffcanvasRef.value as HTMLDivElement);
 });
 
 const handleAvatarClick = async () => {
-  if (isMobile.value) return bsOffcanvas.toggle();
+  if (isMobile.value) {
+    bsOffcanvas.toggle();
+  }
 };
-
 const offCanvasRef = ref<HTMLDivElement>();
 const sideOffcanvasRef = ref<HTMLDivElement>();
-
-const avatarRef = ref<HTMLDivElement>();
+const dropdownTriggerRef = ref<HTMLDivElement>();
 
 const handleNavigateToProfile = () => {
   bsOffcanvas.hide();
@@ -72,6 +71,8 @@ const toggleSideOffCanvas = () => {
 };
 
 const navigateToProfile = () => router.push(`/users/${user.value?.id}`);
+
+watch(route, () => sideOffCanvas.hide());
 </script>
 
 <template>
@@ -80,12 +81,13 @@ const navigateToProfile = () => router.push(`/users/${user.value?.id}`);
       <div
         tabindex="0"
         role="button"
-        @click="handleAvatarClick"
-        @keyup.enter="() => avatarRef?.click()"
+        @click.stop="handleAvatarClick"
+        @keyup.enter="handleAvatarClick"
         v-if="user"
-        class="dropdown focus-ring rounded-circle"
+        class="focus-ring rounded-circle bg-danger"
+        ref="dropdownTriggerRef"
       >
-        <div ref="avatarRef" class="rounded-circle" type="button" data-bs-toggle="dropdown">
+        <div class="rounded-circle" type="button">
           <img
             v-if="user.avatarUrl && !avatarLoadError"
             class="rounded-circle"
@@ -104,11 +106,14 @@ const navigateToProfile = () => router.push(`/users/${user.value?.id}`);
             {{ user.givenName[0] + user.surname[0] }}
           </div>
         </div>
-        <ul class="dropdown-menu">
+      </div>
+      <DropdownVue :visible="!isMobile" :triggerRef="dropdownTriggerRef">
+        <template v-if="user">
           <router-link class="dropdown-item" :to="`/users/${user.id}`">{{ t("Navigation.profile") }}</router-link>
           <li tabIndex="0" @click="logoutFromApp" class="dropdown-item">{{ t("Navigation.logout") }}</li>
-        </ul>
-      </div>
+        </template>
+      </DropdownVue>
+
       <button @click="login" data-testid="login-btn" v-if="!user" class="btn btn-primary">{{ t("Navigation.login") }}</button>
       <li class="nav-item rounded-3" :class="{ 'd-none': isMobile, 'nav-item-active': route.path.includes('catshows') }">
         <router-link style="color: black" class="nav-link rounded-3" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
@@ -171,8 +176,8 @@ const navigateToProfile = () => router.push(`/users/${user.value?.id}`);
       <button type="button" class="btn-close ms-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="p-2">
-      <div @click="handleNavigateToProfile" class="hover-bg rounded-3 p-2">{{ t("Navigation.profile") }}</div>
-      <div @click="logoutFromApp" class="hover-bg rounded-3 p-2">{{ t("Navigation.logout") }}</div>
+      <div tabindex="0" @click="handleNavigateToProfile" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.profile") }}</div>
+      <div tabindex="0" @click="logoutFromApp" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.logout") }}</div>
     </div>
   </div>
 </template>

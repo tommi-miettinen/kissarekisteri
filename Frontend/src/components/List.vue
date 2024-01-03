@@ -85,7 +85,7 @@ watchEffect(() => {
             class="btn border focus-ring hover-bg"
             v-for="page in totalPages"
             :key="page"
-            :class="{ 'bg-primary': currentPage === page, 'text-white': currentPage === page }"
+            :class="{ 'border-primary': currentPage === page, 'bg-primary': currentPage === page, 'text-white': currentPage === page }"
           >
             {{ page }}
           </li>
