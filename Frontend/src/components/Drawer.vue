@@ -15,21 +15,26 @@ const props = defineProps({
 });
 
 const sideOffCanvas = ref<Offcanvas>();
-
-onMounted(() => (sideOffCanvas.value = new Offcanvas(sideOffcanvasRef.value as HTMLDivElement)));
-
 const sideOffcanvasRef = ref<HTMLDivElement>();
-
 const emit = defineEmits(["onCancel"]);
+
+onMounted(() => {
+  sideOffCanvas.value = new Offcanvas(sideOffcanvasRef.value as HTMLDivElement);
+});
+
+const close = () => {
+  sideOffCanvas.value?.hide();
+  emit("onCancel");
+};
 
 watch(
   () => props.visible,
   (newValue) => {
-    if (!sideOffCanvas.value) return;
+    console.log(newValue);
     if (newValue) {
-      sideOffCanvas.value.show();
+      sideOffCanvas.value?.show();
     } else {
-      sideOffCanvas.value.hide();
+      sideOffCanvas.value?.hide();
       emit("onCancel");
     }
   }
@@ -45,7 +50,7 @@ watch(
     aria-labelledby="offcanvasRightLabel"
   >
     <div class="offcanvas-header">
-      <button type="button" class="btn-close ms-auto" @click="sideOffCanvas?.toggle()" aria-label="Close"></button>
+      <button type="button" class="btn-close ms-auto" @click="close()" aria-label="Close"></button>
     </div>
     <div class="d-flex flex-column">
       <slot></slot>

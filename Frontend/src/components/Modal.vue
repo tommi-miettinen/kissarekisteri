@@ -1,42 +1,33 @@
 <script lang="ts" setup>
-import { onMounted, watch } from "vue";
-import Modal from "bootstrap/js/dist/modal";
-
-let modal: Modal | null = null;
+import { ref, onMounted, watch } from "vue";
+import { Modal } from "bootstrap";
 
 const props = defineProps({
   visible: Boolean,
   modalId: String,
 });
 
+const modal = ref<Modal>();
+const modalRef = ref<HTMLDivElement>();
 const emit = defineEmits(["onCancel"]);
 
-onMounted(() => {
-  const modalElement = document.getElementById(props.modalId!);
-  if (modalElement) {
-    modal = new Modal(modalElement);
-
-    modalElement.addEventListener("hide.bs.modal", () => {
-      emit("onCancel");
-    });
-  }
-});
+onMounted(() => (modal.value = new Modal(modalRef.value as HTMLDivElement)));
 
 watch(
   () => props.visible,
   (newValue) => {
-    if (!modal) return;
     if (newValue) {
-      modal.show();
+      modal.value?.show();
     } else {
-      modal.hide();
+      modal.value?.hide();
+      emit("onCancel");
     }
   }
 );
 </script>
 
 <template>
-  <div class="modal fade" tabindex="-1" :id="props.modalId">
+  <div ref="modalRef" class="modal fade" tabindex="-1" :id="props.modalId">
     <div class="modal-dialog modal-dialog-centered">
       <div
         style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: min-content"

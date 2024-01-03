@@ -1,13 +1,12 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue";
-import { userStore } from "../store/userStore";
+import { user as loggedInUser } from "../store/userStore";
 import { toast } from "vue-sonner";
 import userAPI from "../api/userAPI";
 import Modal from "../components/Modal.vue";
 import catAPI from "../api/catAPI";
 import { useQuery, useMutation } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
-import Cropper from "../components/Cropper.vue";
 import CatListItem from "../components/CatListItem.vue";
 import { useRoute } from "vue-router";
 import CatForm from "../components/CatForm.vue";
@@ -19,15 +18,31 @@ import Dropdown from "../components/Dropdown.vue";
 const { t } = useI18n();
 const route = useRoute();
 
-const editingCat = ref(false);
-const editingAvatar = ref(false);
-const deletingCat = ref(false);
-const deletingCatId = ref();
-const addingCat = ref(false);
-const avatarLoadError = ref(false);
-const selectedCat = ref();
+enum ActionType {
+  NONE,
+  EDITING_CAT,
+  EDITING_CAT_MOBILE,
+  DELETING_CAT,
+  ADDING_CAT,
+  ADDING_CAT_MOBILE,
+  EDITING_AVATAR,
+  SELECTING_ACTION,
+}
 
-const loggedInUser = computed(() => userStore.user);
+const toggleAction = (actionType: ActionType, item = null) => {
+  if (currentAction.value === actionType && currentItem.value === item) {
+    currentAction.value = ActionType.NONE;
+    currentItem.value = null;
+  } else {
+    currentAction.value = actionType;
+    currentItem.value = item;
+  }
+};
+
+const isCurrentAction = (actionType: ActionType) => currentAction.value === actionType;
+
+const currentAction = ref<ActionType>(ActionType.NONE);
+const currentItem = ref<any>(null);
 
 const {
   data: user,
@@ -51,10 +66,12 @@ const { data: catsData, refetch: refetchCats } = useQuery({
 
 const cats = computed(() => catsData.value?.data);
 
-const { mutate } = useMutation({
+const addCatMutation = useMutation({
   mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),
   onSuccess: () => {
-    toast.success("Kissan tiedot lisätty"), refetchCats();
+    toast.success("Kissan tiedot lisätty");
+    refetchCats();
+    toggleAction(ActionType.NONE);
   },
   onError: () => toast.error("Jokin meni vikaan."),
 });
@@ -62,7 +79,9 @@ const { mutate } = useMutation({
 const deleteMutation = useMutation({
   mutationFn: (catId: number) => catAPI.deleteCatById(catId),
   onSuccess: () => {
-    toast.success("Kissan tiedot poistettu"), refetchCats();
+    toast.success("Kissan tiedot poistettu");
+    refetchCats();
+    toggleAction(ActionType.NONE);
   },
   onError: () => toast.error("Jokin meni vikaan."),
 });
@@ -72,61 +91,30 @@ watch([route, user], () => {
   refetchUser();
 });
 
-const isMobile = computed(() => useWindowSize().width.value < 768);
-const openDrawerId = ref<number | null>(null);
-
-const addCat = (newCat: CatPayload) => {
-  mutate(newCat);
-  addingCat.value = false;
-};
-
-const deleteCat = async (catId: number) => {
-  deleteMutation.mutate(catId);
-  deletingCat.value = false;
-};
+const width = useWindowSize().width;
+const isMobile = computed(() => {
+  const mobile = width.value < 768;
+  console.log("Is Mobile:", mobile);
+  return mobile;
+});
 
 const editCat = async (updatedCat: EditCatPayload) => {
   await catAPI.editCat(updatedCat);
 };
 
-const loadCatForEdit = (cat: Cat) => {
-  selectedCat.value = cat;
-  editingCat.value = true;
-};
-
 const catListItemRefs = ref<Record<number, HTMLElement>>({});
-const toggleDrawer = (catId: number) => {
-  openDrawerId.value = openDrawerId.value === catId ? null : catId;
-};
-
-watch([editingCat, deletingCat], () => {
-  if (editingCat.value || deletingCat.value) {
-    openDrawerId.value = null;
-  }
-});
 </script>
 
 <template>
   <h3 v-if="isUserError" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
-  <div v-if="user" class="w-100 h-100 d-flex justify-content-center sm-p-5 overflow-hidden">
+  <div v-if="user" class="w-100 h-100 d-flex justify-content-center sm-p-5">
     <div class="p-4 p-sm-5 rounded col-12 col-lg-8">
       <div class="d-flex flex-column" v-if="user">
         <div class="d-flex align-items-center gap-2 mb-4">
-          <div class="d-flex align-items-center" @click="editingAvatar = false">
-            <img
-              v-if="user.avatarUrl && !avatarLoadError"
-              class="rounded-circle"
-              height="32"
-              width="32"
-              style="object-fit: fill"
-              :src="user.avatarUrl"
-              alt="User avatar"
-              :onerror="(avatarLoadError = true)"
-            />
+          <div class="d-flex align-items-center">
             <div
               style="width: 32px; height: 32px; font-size: 14px"
               class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
-              v-else
             >
               {{ user.givenName[0] + user.surname[0] }}
             </div>
@@ -145,7 +133,7 @@ watch([editingCat, deletingCat], () => {
                   @keyup.enter.stop
                   v-if="userIsLoggedInUser"
                   data-testid="cat-options"
-                  @click.stop="toggleDrawer(cat.id)"
+                  @click.stop="toggleAction(ActionType.SELECTING_ACTION, cat.id)"
                   class="d-flex"
                 >
                   <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1" type="button">
@@ -156,28 +144,40 @@ watch([editingCat, deletingCat], () => {
                     </svg>
                   </button>
                   <Dropdown :visible="!isMobile" :placement="'left-start'" :triggerRef="catListItemRefs[cat.id]">
-                    <li @keyup.enter="loadCatForEdit(cat)" tabIndex="0" class="dropdown-item" @click.stop="loadCatForEdit(cat)">Muokkaa</li>
+                    <li
+                      @keyup.enter="toggleAction(ActionType.EDITING_CAT, cat)"
+                      @click.stop="toggleAction(ActionType.EDITING_CAT, cat)"
+                      tabIndex="0"
+                      class="dropdown-item"
+                    >
+                      Muokkaa
+                    </li>
                     <li
                       tabIndex="0"
                       class="dropdown-item"
                       data-testid="start-cat-delete"
-                      @keyup.enter="(deletingCatId = cat.id), (deletingCat = true)"
-                      @click.stop="(deletingCatId = cat.id), (deletingCat = true)"
+                      @keyup.enter="toggleAction(ActionType.DELETING_CAT, cat.id)"
+                      @click.stop="toggleAction(ActionType.DELETING_CAT, cat.id)"
                     >
                       Poista
                     </li>
                   </Dropdown>
-                  <Drawer :visible="isMobile && openDrawerId === cat.id">
+                  <Drawer :visible="isMobile && currentItem === cat.id && isCurrentAction(ActionType.SELECTING_ACTION)">
                     <div class="gap-2 p-2 d-flex flex-column list-unstyled">
-                      <li @keyup.enter="loadCatForEdit(cat)" tabIndex="0" class="p-2 hover-bg rounded-3" @click.stop="loadCatForEdit(cat)">
+                      <li
+                        @keyup.enter="toggleAction(ActionType.EDITING_CAT_MOBILE, cat)"
+                        @click.stop="toggleAction(ActionType.EDITING_CAT_MOBILE, cat)"
+                        tabIndex="0"
+                        class="p-2 hover-bg rounded-3"
+                      >
                         Muokkaa
                       </li>
                       <li
                         tabIndex="0"
                         data-testid="start-cat-delete"
                         class="p-2 hover-bg rounded-3"
-                        @keyup.enter="(deletingCatId = cat.id), (deletingCat = true)"
-                        @click.stop="(deletingCatId = cat.id), (deletingCat = true)"
+                        @keyup.enter="toggleAction(ActionType.DELETING_CAT, cat.id)"
+                        @click.stop="toggleAction(ActionType.DELETING_CAT, cat.id)"
                       >
                         Poista
                       </li>
@@ -190,7 +190,8 @@ watch([editingCat, deletingCat], () => {
           <template #action>
             <button
               v-if="userIsLoggedInUser"
-              @click="addingCat = true"
+              @click.stop="toggleAction(isMobile ? ActionType.ADDING_CAT_MOBILE : ActionType.ADDING_CAT)"
+              @keyup.enter.stop="toggleAction(isMobile ? ActionType.ADDING_CAT_MOBILE : ActionType.ADDING_CAT)"
               data-testid="add-new-cat-btn"
               type="button"
               class="btn btn-primary ms-auto px-5"
@@ -202,35 +203,32 @@ watch([editingCat, deletingCat], () => {
       </div>
     </div>
   </div>
-  <Drawer :fullsize="true" :visible="addingCat && isMobile" @onCancel="addingCat = false">
-    <CatForm @onSave="addCat" />
+  <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.ADDING_CAT_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
+    <CatForm @onSave="addCatMutation.mutate" />
   </Drawer>
-  <Modal :modalId="'add-cat-modal'" :visible="addingCat && !isMobile" @onCancel="addingCat = false">
+  <Modal
+    :modalId="'add-cat-modal'"
+    :visible="isCurrentAction(ActionType.ADDING_CAT) && !isMobile"
+    @onCancel="toggleAction(ActionType.NONE)"
+  >
     <div style="width: 550px">
-      <CatForm @onSave="addCat" />
+      <CatForm @onSave="addCatMutation.mutate" />
     </div>
   </Modal>
-  <Modal :modalId="'edit-avatar-modal'" @onCancel="editingAvatar = false" :visible="editingAvatar">
-    <div class="p-5">
-      <Cropper @onCrop="(data:string) => console.log(data)" />
-    </div>
-  </Modal>
-  <Modal :modalId="'edit-modal'" @onCancel="editingCat = false" :visible="editingCat && !isMobile">
+  <Modal :modalId="'edit-modal'" :visible="isCurrentAction(ActionType.EDITING_CAT) && !isMobile" @onCancel="toggleAction(ActionType.NONE)">
     <div style="width: 550px">
-      <CatForm :cat="selectedCat" @onSave="editCat" />
+      <CatForm :cat="currentItem" @onSave="editCat" />
     </div>
   </Modal>
-
-  <Drawer :fullsize="true" :visible="editingCat && isMobile" @onCancel="editingCat = false">
-    <CatForm :cat="selectedCat" @onSave="editCat" />
+  <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.EDITING_CAT_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
+    <CatForm :cat="currentItem" @onSave="editCat" />
   </Drawer>
-
-  <Modal :modalId="'delete-modal'" @onCancel="deletingCat = false" :visible="deletingCat">
-    <div style="width: 90vw" class="p-4 d-flex flex-column">
+  <Modal :modalId="'delete-modal'" @onCancel="toggleAction(ActionType.NONE)" :visible="isCurrentAction(ActionType.DELETING_CAT)">
+    <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
       <p>Poistetaanko kissan tiedot?</p>
       <div class="d-flex gap-2 justify-content-end">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-        <button data-testid="confirm-cat-delete" @click="() => deleteCat(deletingCatId)" type="button" class="btn btn-danger">
+        <button data-testid="confirm-cat-delete" @click="() => deleteMutation.mutate(currentItem)" type="button" class="btn btn-danger">
           Poista
         </button>
       </div>

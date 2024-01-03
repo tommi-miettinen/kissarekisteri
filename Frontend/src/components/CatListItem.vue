@@ -22,7 +22,7 @@ const getTextColor = (sex: string) => (sex === "Male" ? "#60a5fa" : "#fb7185");
       tabindex="0"
       @keyup.enter="navigateToCat(cat.id)"
       @click="navigateToCat(cat.id)"
-      class="hover-bg rounded-3 p-3 focus-ring gap-3 d-flex justify-content-between align-items-center w-100"
+      class="hover-bg rounded-3 p-2 p-sm-3 focus-ring gap-3 d-flex justify-content-between align-items-center w-100"
     >
       <div class="d-flex w-100 align-items-center justify-content-start gap-3">
         <slot name="medal"></slot>

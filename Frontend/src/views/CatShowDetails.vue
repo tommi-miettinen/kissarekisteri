@@ -13,6 +13,7 @@ import FsLightbox from "fslightbox-vue/v3";
 import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
 import ImageGallery from "../components/ImageGallery.vue";
+import Dropdown from "../components/Dropdown.vue";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -123,13 +124,11 @@ const toggleCheckbox = (catId: number) => {
   }
 };
 
-//@ts-ignore
-const closeDropdown = (dropdownId: string) => bootstrap.Dropdown.getInstance(document.getElementById(dropdownId) || "")?.hide();
-
 const handleDropdownItemClick = (result: CatShowResultPayload) => {
   updatePlacingMutation.mutate(result);
-  closeDropdown(result.catId.toString());
 };
+
+const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
 </script>
 
 <template>
@@ -152,7 +151,7 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
             {{ catShow.description }}
           </p>
           <span>{{ catShow.location }}</span>
-          <div class="mt-auto ms-auto">
+          <div v-if="user" class="mt-auto ms-auto">
             <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary px-5" @click="joiningEvent = true">
               {{ t("CatShowDetails.joinEvent") }}
             </button>
@@ -182,6 +181,7 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
                 <div>
                   <div @click.stop @keyup.enter.stop class="d-flex dropstart">
                     <button
+                      :ref="el => (dropdownRefs[cat.id] = el as HTMLDivElement)"
                       :id="cat.id.toString()"
                       tabindex="0"
                       class="btn py-1 px-2 accordion d-flex focus-ring rounded-1"
@@ -195,7 +195,7 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
                         />
                       </svg>
                     </button>
-                    <ul tabindex="0" class="dropdown-menu focus-ring">
+                    <Dropdown :placement="'left-start'" :triggerRef="dropdownRefs[cat.id]">
                       <li
                         tabindex="0"
                         @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
@@ -220,7 +220,7 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
                       >
                         Kolmas
                       </li>
-                    </ul>
+                    </Dropdown>
                   </div>
                 </div>
               </template>
@@ -238,7 +238,7 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
       </ImageGallery>
     </div>
     <Modal :modalId="'join-event-modal'" :visible="joiningEvent" @onCancel="joiningEvent = false">
-      <div class="d-flex flex-column bg-white w-100 p-4 gap-4 rounded">
+      <div style="width: 90vw; max-width: 500px" class="d-flex flex-column bg-white p-4 gap-4 rounded">
         <div v-if="userCats && userCats.length > 0">
           <h5>Osallistuvat kissat:</h5>
           <div v-for="(cat, index) in userCats" :key="index">
@@ -253,7 +253,7 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
       </div>
     </Modal>
     <Modal :modalId="'leave-event-modal'" :visible="leavingEvent" @onCancel="leavingEvent = false">
-      <div class="w-100 p-4 d-flex flex-column">
+      <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
         <p>Perutaanko osallistuminen?</p>
         <div class="d-flex gap-2 justify-content-end">
           <button @click="leavingEvent = false" type="button" class="btn btn-secondary">Peruuta</button>

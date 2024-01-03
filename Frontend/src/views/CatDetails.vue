@@ -64,7 +64,7 @@ watch(route, () => refetch());
         <div
           @click="toast.error('test')"
           class="border image-container rounded-4"
-          style="position: relative; min-width: 400px; min-height: 300px"
+          style="position: relative; min-width: 400px; min-height: 300px; overflow: hidden"
         >
           <img
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
@@ -83,16 +83,19 @@ watch(route, () => refetch());
 
       <div v-if="cat.results && cat.results.length > 0">
         <h5>{{ t("CatDetails.placings") }}</h5>
-        <div
-          tabindex="0"
-          v-for="result in cat.results"
-          @keyup.enter="() => navigateToCatShow(result.catShowId)"
-          @click="() => navigateToCatShow(result.catShowId)"
-          class="hover-bg p-3 d-flex border-bottom p-2 flex align-items-center focus-ring"
-        >
-          <div class="d-flex align-items-center gap-2">
-            <span :style="{ backgroundColor: getMedalColor(result.place) }" class="badge rounded-pill text-black">#{{ result.place }}</span>
-            <span class="mb-1">{{ result.catShow.name }}</span>
+        <div v-for="result in cat.results" class="border-bottom py-1">
+          <div
+            tabindex="0"
+            @keyup.enter="() => navigateToCatShow(result.catShowId)"
+            @click="() => navigateToCatShow(result.catShowId)"
+            class="hover-bg p-3 d-flex rounded-3 p-2 flex align-items-center focus-ring"
+          >
+            <div class="d-flex align-items-center gap-2">
+              <span :style="{ backgroundColor: getMedalColor(result.place) }" class="badge rounded-pill text-black"
+                >#{{ result.place }}</span
+              >
+              <span class="mb-1">{{ result.catShow.name }}</span>
+            </div>
           </div>
         </div>
       </div>

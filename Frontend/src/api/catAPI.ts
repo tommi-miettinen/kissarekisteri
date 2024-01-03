@@ -11,7 +11,7 @@ const addCat = async (cat: CatPayload) => {
 
 const deleteCatById = async (catId: number): Promise<true | undefined> => {
   try {
-    await apiClient.delete(`$/cats/${catId}`);
+    await apiClient.delete(`/cats/${catId}`);
     return true;
   } catch (err) {
     console.log(err);

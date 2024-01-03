@@ -129,8 +129,7 @@ if (app.Environment.IsDevelopment())
     {
         var context = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
 
-        //EnsureCreated in Azure SQL creates the database automatically at a
-        //high cost plan even if it was configured with lower plan in terraform
+
 
     }
 }
