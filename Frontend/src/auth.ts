@@ -46,3 +46,17 @@ export const initializeMsalInstance = async () => {
 
   return msalInstance;
 };
+
+export const login = () =>
+  msalInstance
+    .loginRedirect({
+      scopes,
+    })
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err));
+
+export const logout = () =>
+  msalInstance
+    .logout()
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err));

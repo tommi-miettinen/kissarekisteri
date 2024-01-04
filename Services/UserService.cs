@@ -16,7 +16,8 @@ namespace Kissarekisteri.Services;
 public class UserService(
     GraphServiceClient graphClient,
     UploadService uploadService,
-    KissarekisteriDbContext dbContext
+    KissarekisteriDbContext dbContext,
+    PermissionService permissionService
     )
 {
     private readonly GraphServiceClient _graphClient = graphClient;
@@ -35,28 +36,34 @@ public class UserService(
             {
                 requestConfiguration.QueryParameters.Select = new string[]
                 {
-                    "givenName",
-                    "surname",
-                    "id",
-                    "displayName",
-                    "identities",
-                    avatarUrl };
-
+                "givenName",
+                "surname",
+                "id",
+                "displayName",
+                "identities",
+                avatarUrl
+                };
             });
 
-            var response = users.Value.Select(u => new UserResponse
+            var responses = new List<UserResponse>();
+
+            foreach (var u in users.Value)
             {
-                GivenName = u.GivenName,
-                Id = u.Id,
-                DisplayName = u.DisplayName,
-                Surname = u.Surname,
-                Email = u.Identities.FirstOrDefault().IssuerAssignedId,
-                AvatarUrl = u.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null
-            }).ToList();
+                var userResponse = new UserResponse
+                {
+                    GivenName = u.GivenName,
+                    Id = u.Id,
+                    DisplayName = u.DisplayName,
+                    Surname = u.Surname,
+                    Email = u.Identities.FirstOrDefault().IssuerAssignedId,
+                    AvatarUrl = u.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null,
+                    UserRole = await permissionService.GetUserRole(u.Id) ?? null
+                };
+                responses.Add(userResponse);
+            }
 
-            return response;
+            return responses;
         }
-
         catch (Exception ex)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -168,6 +175,7 @@ public class UserService(
                 Surname = user.Surname,
                 Email = user.Identities.FirstOrDefault().IssuerAssignedId,
                 AvatarUrl = user.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null,
+                UserRole = await permissionService.GetUserRole(user.Id) ?? null
             };
 
             return response;

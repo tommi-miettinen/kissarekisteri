@@ -17,3 +17,6 @@ export const actionStack = computed(() => actionStore.actionStack);
 export const isCurrentAction = (actionType: any) => actionStack.value[actionStack.value.length - 1] === actionType;
 
 export const resetActionStack = () => (actionStore.actionStack = []);
+
+export const removeAction = (actionType: any) =>
+  (actionStore.actionStack = actionStore.actionStack.filter((action) => action !== actionType));

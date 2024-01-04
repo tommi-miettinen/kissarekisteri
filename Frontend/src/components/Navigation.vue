@@ -1,15 +1,37 @@
 <script lang="ts" setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { msalInstance } from "../auth";
 
-import { user, logout } from "../store/userStore";
+import { user } from "../store/userStore";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { scopes } from "../auth";
+import { login, logout } from "../auth";
 import { useWindowSize } from "@vueuse/core";
-
-import { Offcanvas } from "bootstrap";
 import DropdownVue from "./Dropdown.vue";
+import Drawer from "./Drawer.vue";
+import { pushAction, isCurrentAction, popAction } from "../store/actionStore";
+
+enum ActionType {
+  NONE = "NONE",
+  BOTTOM_SHEET = "BOTTOM_SHEET",
+  SIDE_SHEET = "SIDE_SHEET",
+}
+
+const toggleAction = (actionType: ActionType, item = null) => {
+  if (actionType === ActionType.NONE) {
+    popAction();
+  }
+  if (actionType !== ActionType.NONE) {
+    pushAction(actionType);
+  }
+  if (currentItem.value === item) {
+    currentItem.value = null;
+  } else {
+    currentItem.value = item;
+  }
+};
+
+const currentItem = ref<any>(null);
 
 const route = useRoute();
 const router = useRouter();
@@ -17,24 +39,11 @@ const { t, locale } = useI18n();
 
 const avatarLoadError = ref(false);
 
-const login = () => {
-  msalInstance
-    .loginRedirect({
-      scopes,
-    })
-    .then((res) => console.log(res))
-    .catch((err) => console.log(err));
-};
-
 const handleLocaleClick = () => (locale.value === "fi" ? (locale.value = "en") : (locale.value = "fi"));
 const localeString = computed(() => (locale.value === "fi" ? "In English" : "Suomeksi"));
 
 const logoutFromApp = () => {
   logout();
-  msalInstance
-    .logout()
-    .then((res) => console.log(res))
-    .catch((err) => console.log(err));
   router.push("/");
 };
 
@@ -44,35 +53,23 @@ onMounted(async () => {
   await msalInstance.handleRedirectPromise();
 });
 
-let bsOffcanvas: Offcanvas;
-let sideOffCanvas: Offcanvas;
-
-onMounted(() => {
-  bsOffcanvas = new Offcanvas(offCanvasRef.value as HTMLDivElement);
-  sideOffCanvas = new Offcanvas(sideOffcanvasRef.value as HTMLDivElement);
-});
+onMounted(() => {});
 
 const handleAvatarClick = async () => {
-  if (isMobile.value) {
-    bsOffcanvas.toggle();
-  }
+  if (isMobile.value) toggleAction(ActionType.BOTTOM_SHEET);
 };
-const offCanvasRef = ref<HTMLDivElement>();
-const sideOffcanvasRef = ref<HTMLDivElement>();
+
 const dropdownTriggerRef = ref<HTMLDivElement>();
 
-const handleNavigateToProfile = () => {
-  bsOffcanvas.hide();
-  navigateToProfile();
+const navigateToProfile = () => {
+  toggleAction(ActionType.NONE);
+  router.push(`/users/${user.value?.id}`);
 };
 
-const toggleSideOffCanvas = () => {
-  if (isMobile.value) sideOffCanvas.toggle();
+const navigateTo = (route: string) => {
+  toggleAction(ActionType.NONE);
+  router.push(route);
 };
-
-const navigateToProfile = () => router.push(`/users/${user.value?.id}`);
-
-watch(route, () => sideOffCanvas.hide());
 </script>
 
 <template>
@@ -109,8 +106,10 @@ watch(route, () => sideOffCanvas.hide());
       </div>
       <DropdownVue :visible="!isMobile" :triggerRef="dropdownTriggerRef">
         <template v-if="user">
-          <router-link class="dropdown-item" :to="`/users/${user.id}`">{{ t("Navigation.profile") }}</router-link>
-          <li tabIndex="0" @click="logoutFromApp" class="dropdown-item">{{ t("Navigation.logout") }}</li>
+          <router-link class="dropdown-item rounded-2 hover-bg px-3 py-2" :to="`/users/${user.id}`">{{
+            t("Navigation.profile")
+          }}</router-link>
+          <li tabIndex="0" @click="logoutFromApp" class="dropdown-item rounded-2 hover-bg px-3 py-2">{{ t("Navigation.logout") }}</li>
         </template>
       </DropdownVue>
 
@@ -135,7 +134,7 @@ watch(route, () => sideOffCanvas.hide());
         class="ms-auto focus-ring p-2 rounded-3"
         >{{ localeString }}</a
       >
-      <button type="button" v-if="isMobile" class="navbar-toggler focus-ring p-2 rounded-3" @click="toggleSideOffCanvas">
+      <button @click="toggleAction(ActionType.SIDE_SHEET)" type="button" v-if="isMobile" class="navbar-toggler focus-ring p-2 rounded-3">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -149,37 +148,45 @@ watch(route, () => sideOffCanvas.hide());
       </button>
     </ul>
   </nav>
-  <div
-    ref="sideOffcanvasRef"
-    style="height: 100%"
-    class="offcanvas offcanvas-end w-100"
-    tabindex="-1"
-    aria-labelledby="offcanvasRightLabel"
+  <Drawer
+    :fullsize="true"
+    :placement="'end'"
+    :visible="isCurrentAction(ActionType.SIDE_SHEET) && isMobile"
+    @onCancel="toggleAction(ActionType.NONE)"
   >
-    <div class="offcanvas-header">
-      <button type="button" class="btn-close ms-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="d-flex flex-column p-3 gap-1 list-unstyled">
-      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path.includes('catshows') }">
-        <router-link style="color: black" class="nav-link rounded-3 p-2" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
+    <div @click.stop class="d-flex flex-column p-3 gap-1 list-unstyled">
+      <li
+        @click="navigateTo('/catshows')"
+        class="cursor-pointer nav-item rounded-3 nav-link rounded-3 p-2"
+        :class="{ 'nav-item-active': route.path.includes('catshows') }"
+      >
+        {{ t("Navigation.catShows") }}
       </li>
-      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path === '/cats' || route.path.startsWith('/cats/') }">
-        <router-link ref="cats" style="color: black" class="nav-link rounded-3 p-2" to="/cats">{{ t("Navigation.cats") }}</router-link>
+      <li
+        @click="navigateTo('/cats')"
+        class="cursor-pointer nav-item rounded-3 nav-link rounded-3 p-2"
+        :class="{ 'nav-item-active': route.path === '/cats' || route.path.startsWith('/cats/') }"
+      >
+        {{ t("Navigation.cats") }}
       </li>
-      <li class="nav-item rounded-3" :class="{ 'nav-item-active': route.path.includes('users') }">
-        <router-link style="color: black" class="nav-link rounded-3 p-2" to="/users">{{ t("Navigation.members") }}</router-link>
+      <li
+        @click="navigateTo('/users')"
+        class="cursor-pointer nav-item rounded-3 nav-link rounded-3 p-2"
+        :class="{ 'nav-item-active': route.path.includes('users') }"
+      >
+        {{ t("Navigation.members") }}
+      </li>
+      <li class="cursor-pointer nav-item rounded-3 nav-link rounded-3 p-2" tabIndex="0" @click="logoutFromApp">
+        {{ t("Navigation.logout") }}
       </li>
     </div>
-  </div>
-  <div ref="offCanvasRef" class="offcanvas offcanvas-bottom" tabindex="-1" aria-labelledby="offcanvasBottomLabel">
-    <div class="offcanvas-header">
-      <button type="button" class="btn-close ms-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
+  </Drawer>
+  <Drawer :visible="isCurrentAction(ActionType.BOTTOM_SHEET) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
     <div class="p-2">
-      <div tabindex="0" @click="handleNavigateToProfile" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.profile") }}</div>
+      <div tabindex="0" @click="navigateToProfile" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.profile") }}</div>
       <div tabindex="0" @click="logoutFromApp" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.logout") }}</div>
     </div>
-  </div>
+  </Drawer>
 </template>
 
 <style>

@@ -30,4 +30,13 @@ public class PermissionService(KissarekisteriDbContext dbContext)
 
         return permissions.Any(permission => permission.Name == permissionName.ToString());
     }
+
+
+    public async Task<UserRole> GetUserRole(string userId)
+    {
+        return await dbContext.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .Include(ur => ur.Role)
+            .FirstOrDefaultAsync();
+    }
 }

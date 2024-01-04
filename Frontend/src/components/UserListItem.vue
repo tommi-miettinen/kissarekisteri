@@ -32,9 +32,9 @@ const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
         </div>
         <div>{{ `${user.givenName}  ${user.surname}` }}</div>
       </div>
-      <div class="col"></div>
-      <span class="badge rounded-pill text-bg-primary">{{ user.isBreeder ? t("Users.breeder") : t("Users.breeder") }}</span>
-      <div class="col">
+      <div class="col justify-content-end d-flex gap-2 align-items-center">
+        <span class="badge rounded-pill text-bg-primary">{{ user.isBreeder ? t("Users.breeder") : t("Users.breeder") }}</span>
+
         <slot name="actions"></slot>
       </div>
     </div>

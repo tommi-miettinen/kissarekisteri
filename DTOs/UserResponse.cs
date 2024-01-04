@@ -1,4 +1,6 @@
-﻿namespace Kissarekisteri.DTOs
+﻿using Kissarekisteri.Models;
+
+namespace Kissarekisteri.DTOs
 {
     public class UserResponse
     {
@@ -9,5 +11,7 @@
         public string AvatarUrl { get; set; }
 
         public string Email { get; set; }
+
+        public UserRole UserRole { get; set; }
     }
 }

@@ -2,7 +2,13 @@
 import { ref, onMounted, watch } from "vue";
 import { Offcanvas } from "bootstrap";
 
+type Placement = "top" | "bottom" | "start" | "end";
+
 const props = defineProps({
+  placement: {
+    type: String as () => Placement,
+    default: "bottom",
+  },
   fullsize: {
     type: Boolean,
     default: false,
@@ -19,13 +25,10 @@ const sideOffcanvasRef = ref<HTMLDivElement>();
 const emit = defineEmits(["onCancel"]);
 
 onMounted(() => {
-  sideOffCanvas.value = new Offcanvas(sideOffcanvasRef.value as HTMLDivElement);
+  if (!sideOffcanvasRef.value) return console.error("ref is null");
+  sideOffCanvas.value = new Offcanvas(sideOffcanvasRef.value);
+  sideOffcanvasRef.value.addEventListener("hide.bs.offcanvas", () => emit("onCancel"));
 });
-
-const close = () => {
-  sideOffCanvas.value?.hide();
-  emit("onCancel");
-};
 
 watch(
   () => props.visible,
@@ -35,7 +38,6 @@ watch(
       sideOffCanvas.value?.show();
     } else {
       sideOffCanvas.value?.hide();
-      emit("onCancel");
     }
   }
 );
@@ -43,14 +45,13 @@ watch(
 
 <template>
   <div
-    :class="{ 'h-100': fullsize }"
+    :class="['offcanvas', `offcanvas-${props.placement}`, { 'h-100': props.fullsize, 'w-100': props.fullsize }]"
     ref="sideOffcanvasRef"
-    class="offcanvas offcanvas-bottom w-100"
     tabindex="-1"
     aria-labelledby="offcanvasRightLabel"
   >
     <div class="offcanvas-header">
-      <button type="button" class="btn-close ms-auto" @click="close()" aria-label="Close"></button>
+      <button type="button" class="btn-close ms-auto" @click="sideOffCanvas?.hide()" aria-label="Close"></button>
     </div>
     <div class="d-flex flex-column">
       <slot></slot>

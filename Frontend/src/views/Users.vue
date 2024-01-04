@@ -10,17 +10,18 @@ import Modal from "../components/Modal.vue";
 import { useWindowSize } from "@vueuse/core";
 import UserForm from "../components/UserForm.vue";
 import Dropdown from "../components/Dropdown.vue";
-import { popAction, pushAction, isCurrentAction } from "../store/actionStore";
+import { popAction, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 
 const { t } = useI18n();
 
 enum ActionType {
-  NONE,
-  EDITING_USER,
-  EDITING_USER_MOBILE,
-  ADDING_USER_MOBILE,
-  ADDING_USER,
-  DELETING_USER,
+  NONE = "NONE",
+  EDITING_USER = "EDITING_USER",
+  EDITING_USER_MOBILE = "EDITING_USER_MOBILE",
+  ADDING_USER_MOBILE = "ADDING_USER_MOBILE",
+  ADDING_USER = "ADDING_USER",
+  DELETING_USER = "DELETING_USER",
+  SELECTING_USER_ACTION = "SELECTING_USER_ACTION",
 }
 
 const toggleAction = (actionType: ActionType, item = null) => {
@@ -30,16 +31,13 @@ const toggleAction = (actionType: ActionType, item = null) => {
   if (actionType !== ActionType.NONE) {
     pushAction(actionType);
   }
-  if (currentAction.value === actionType && currentItem.value === item) {
-    currentAction.value = ActionType.NONE;
+  if (currentItem.value === item) {
     currentItem.value = null;
   } else {
-    currentAction.value = actionType;
     currentItem.value = item;
   }
 };
 
-const currentAction = ref<ActionType>(ActionType.NONE);
 const currentItem = ref<any>(null);
 
 const { data } = useQuery({
@@ -47,7 +45,6 @@ const { data } = useQuery({
   queryFn: userAPI.getUsers,
 });
 
-const addingUser = ref(false);
 const isMobile = computed(() => useWindowSize().width.value < 768);
 
 const userListItemRefs = reactive<Record<string, HTMLElement>>({});
@@ -61,7 +58,10 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
         <template v-slot="{ item: user }">
           <UserListItem :user="user">
             <template v-slot:actions>
-              <div @click.stop :ref="el => userListItemRefs[user.id] = el as HTMLElement">
+              <div
+                @click.stop="toggleAction(ActionType.SELECTING_USER_ACTION, user)"
+                :ref="el => userListItemRefs[user.id] = el as HTMLElement"
+              >
                 <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
                     <path
@@ -69,8 +69,14 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
                     />
                   </svg>
                 </button>
-                <Dropdown :triggerRef="userListItemRefs[user.id]" :placement="'left-start'">
-                  <li tabIndex="0" class="dropdown-item">Muokkaa</li>
+                <Dropdown :visible="!isMobile" :triggerRef="userListItemRefs[user.id]" :placement="'left-start'">
+                  <li
+                    @click="toggleAction(isMobile ? ActionType.EDITING_USER_MOBILE : ActionType.EDITING_USER, user)"
+                    tabIndex="0"
+                    class="dropdown-item"
+                  >
+                    Muokkaa
+                  </li>
                   <li
                     @click="toggleAction(ActionType.DELETING_USER, user.id)"
                     tabIndex="0"
@@ -92,13 +98,36 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
       </List>
     </div>
   </div>
-  <Modal :visible="isCurrentAction(ActionType.ADDING_USER) && !isMobile" @onCancel="toggleAction(ActionType.NONE)">
+  <Drawer
+    :visible="isCurrentAction(ActionType.SELECTING_USER_ACTION) && isMobile"
+    @onCancel="removeAction(ActionType.SELECTING_USER_ACTION)"
+  >
+    <div v-if="currentItem" @click="toggleAction(ActionType.EDITING_USER_MOBILE, currentItem)">{{ currentItem.id }}</div>
+    <div
+      v-if="currentItem"
+      @click="toggleAction(ActionType.DELETING_USER, currentItem.id)"
+      tabIndex="0"
+      class="dropdown-item"
+      data-testid="start-cat-delete"
+    >
+      Poista
+    </div>
+  </Drawer>
+  <Modal :visible="isCurrentAction(ActionType.ADDING_USER) && !isMobile" @onCancel="removeAction(ActionType.ADDING_USER)">
     <div style="width: 550px">
-      <UserForm @onSave="addingUser = false" />
+      <UserForm @onSave="isCurrentAction(ActionType.NONE)" />
     </div>
   </Modal>
   <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.ADDING_USER_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
-    <UserForm @onSave="addingUser = false" />
+    <UserForm @onSave="isCurrentAction(ActionType.NONE)" />
+  </Drawer>
+  <Modal :visible="isCurrentAction(ActionType.EDITING_USER) && !isMobile" @onCancel="toggleAction(ActionType.NONE)">
+    <div style="width: 550px">
+      <UserForm :user="currentItem" @onSave="isCurrentAction(ActionType.NONE)" />
+    </div>
+  </Modal>
+  <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.EDITING_USER_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
+    <UserForm :user="currentItem" @onSave="isCurrentAction(ActionType.NONE)" />
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.DELETING_USER)" @onCancel="toggleAction(ActionType.NONE)">
     <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">

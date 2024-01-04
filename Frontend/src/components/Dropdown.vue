@@ -70,7 +70,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div :class="{ invisible: !visible }" class="dropdown-menu" ref="dropdownMenuRef">
+  <div :class="{ invisible: !visible }" class="dropdown-menu border p-1 rounded-3" ref="dropdownMenuRef">
     <slot></slot>
   </div>
 </template>
