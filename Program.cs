@@ -129,7 +129,7 @@ if (app.Environment.IsDevelopment())
     {
         var context = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
 
-
+        context.Database.EnsureCreated();
 
     }
 }

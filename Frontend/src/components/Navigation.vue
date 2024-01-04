@@ -1,15 +1,16 @@
 <script lang="ts" setup>
 import { ref, onMounted, computed } from "vue";
 import { msalInstance } from "../auth";
-
 import { user } from "../store/userStore";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { login, logout } from "../auth";
 import { useWindowSize } from "@vueuse/core";
-import DropdownVue from "./Dropdown.vue";
 import Drawer from "./Drawer.vue";
 import { pushAction, isCurrentAction, popAction } from "../store/actionStore";
+import { useQuery } from "@tanstack/vue-query";
+import catAPI from "../api/catAPI";
+import Dropdown from "./Dropdown.vue";
 
 enum ActionType {
   NONE = "NONE",
@@ -39,6 +40,14 @@ const { t, locale } = useI18n();
 
 const avatarLoadError = ref(false);
 
+const { data: confirmationRequestsData } = useQuery({
+  queryKey: ["confirmationRequests"],
+  queryFn: () => catAPI.getConfirmationRequests(),
+  refetchInterval: 5000,
+});
+
+const confirmationRequests = computed(() => confirmationRequestsData.value?.data);
+
 const handleLocaleClick = () => (locale.value === "fi" ? (locale.value = "en") : (locale.value = "fi"));
 const localeString = computed(() => (locale.value === "fi" ? "In English" : "Suomeksi"));
 
@@ -59,8 +68,6 @@ const handleAvatarClick = async () => {
   if (isMobile.value) toggleAction(ActionType.BOTTOM_SHEET);
 };
 
-const dropdownTriggerRef = ref<HTMLDivElement>();
-
 const navigateToProfile = () => {
   toggleAction(ActionType.NONE);
   router.push(`/users/${user.value?.id}`);
@@ -70,6 +77,9 @@ const navigateTo = (route: string) => {
   toggleAction(ActionType.NONE);
   router.push(route);
 };
+
+const dropdownTriggerRef = ref<HTMLDivElement>();
+const requestsRef = ref<HTMLDivElement>();
 </script>
 
 <template>
@@ -104,14 +114,14 @@ const navigateTo = (route: string) => {
           </div>
         </div>
       </div>
-      <DropdownVue :visible="!isMobile" :triggerRef="dropdownTriggerRef">
+      <Dropdown :visible="!isMobile" :triggerRef="dropdownTriggerRef">
         <template v-if="user">
           <router-link class="dropdown-item rounded-2 hover-bg px-3 py-2" :to="`/users/${user.id}`">{{
             t("Navigation.profile")
           }}</router-link>
           <li tabIndex="0" @click="logoutFromApp" class="dropdown-item rounded-2 hover-bg px-3 py-2">{{ t("Navigation.logout") }}</li>
         </template>
-      </DropdownVue>
+      </Dropdown>
 
       <button @click="login" data-testid="login-btn" v-if="!user" class="btn btn-primary">{{ t("Navigation.login") }}</button>
       <li class="nav-item rounded-3" :class="{ 'd-none': isMobile, 'nav-item-active': route.path.includes('catshows') }">
@@ -126,14 +136,55 @@ const navigateTo = (route: string) => {
       <li class="nav-item rounded-3" :class="{ 'd-none': isMobile, 'nav-item-active': route.path.includes('users') }">
         <router-link style="color: black" class="nav-link rounded-3" to="/users">{{ t("Navigation.members") }}</router-link>
       </li>
+
+      <div ref="requestsRef" tabindex="0" role="button" class="cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="3"
+          className="feather feather-bell"
+          viewBox="0 0 24 24"
+        >
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"></path>
+        </svg>
+
+        <span
+          style="margin-left: -8px"
+          v-if="confirmationRequests && confirmationRequests.length > 0"
+          class="badge rounded-circle bg-danger"
+          >{{ confirmationRequests.length }}</span
+        >
+      </div>
+      <Dropdown :placement="'bottom-end'" :triggerRef="requestsRef">
+        <template v-if="user">
+          <div class="d-flex flex-column z-100 bg-white" style="max-width: 600px">
+            <div v-if="confirmationRequests && confirmationRequests.length > 0">
+              <div class="py-1 text-break">
+                <div v-for="request in confirmationRequests" class="p-3">
+                  <div>Käyttäjä {{ request.requesterId }}</div>
+                  Pyytää omistajuutta kissalle {{ request.cat?.name }}
+                  <button class="btn btn-primary">hyväksy</button>
+                </div>
+              </div>
+            </div>
+            <div v-else class="p-2">Ei pyyntöjä</div>
+          </div>
+        </template>
+      </Dropdown>
       <a
         @keyup.enter="handleLocaleClick"
         @click="handleLocaleClick"
         tabindex="0"
         style="cursor: pointer"
-        class="ms-auto focus-ring p-2 rounded-3"
+        class="focus-ring p-2 rounded-3"
         >{{ localeString }}</a
       >
+
       <button @click="toggleAction(ActionType.SIDE_SHEET)" type="button" v-if="isMobile" class="navbar-toggler focus-ring p-2 rounded-3">
         <svg
           xmlns="http://www.w3.org/2000/svg"

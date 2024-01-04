@@ -69,6 +69,23 @@ const uploadCatImage = async (catId: number, image: File) => {
   }
 };
 
+const requestOwnershipTransfer = async (catId: number) => {
+  try {
+    const result = await apiClient.post<ApiResponse<Cat>>(`/cats/${catId}/transfer`);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getConfirmationRequests = async () => {
+  try {
+    const result = await apiClient.get<ApiResponse<any[]>>(`/cats/transfer-requests`);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
 const getCatBreeds = async () => {
   try {
     const result = await apiClient.get<ApiResponse<CatBreed[]>>(`/cats/breeds`);
@@ -87,4 +104,6 @@ export default {
   editCat,
   uploadCatImage,
   getCatBreeds,
+  requestOwnershipTransfer,
+  getConfirmationRequests,
 };

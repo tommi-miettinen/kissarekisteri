@@ -14,7 +14,7 @@ import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
 import { useWindowSize } from "@vueuse/core";
 import Dropdown from "../components/Dropdown.vue";
-import { popAction, pushAction, isCurrentAction } from "../store/actionStore";
+import { popAction, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -35,7 +35,7 @@ const toggleAction = (actionType: ActionType, item = null) => {
     popAction();
   }
   if (actionType !== ActionType.NONE) {
-    pushAction(actionType);
+    if (!isCurrentAction(actionType)) pushAction(actionType);
   }
   if (currentItem.value === item) {
     currentItem.value = null;
@@ -131,7 +131,7 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
                   @keyup.enter.stop
                   v-if="userIsLoggedInUser"
                   data-testid="cat-options"
-                  @click.stop="toggleAction(ActionType.SELECTING_ACTION, cat.id)"
+                  @click.stop="toggleAction(ActionType.SELECTING_ACTION, cat)"
                   class="d-flex"
                 >
                   <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1" type="button">
@@ -160,27 +160,6 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
                       Poista
                     </li>
                   </Dropdown>
-                  <Drawer :visible="isMobile && currentItem === cat.id && isCurrentAction(ActionType.SELECTING_ACTION)">
-                    <div class="gap-2 p-2 d-flex flex-column list-unstyled">
-                      <li
-                        @keyup.enter="toggleAction(ActionType.EDITING_CAT_MOBILE, cat)"
-                        @click.stop="toggleAction(ActionType.EDITING_CAT_MOBILE, cat)"
-                        tabIndex="0"
-                        class="p-2 hover-bg rounded-3"
-                      >
-                        Muokkaa
-                      </li>
-                      <li
-                        tabIndex="0"
-                        data-testid="start-cat-delete"
-                        class="p-2 hover-bg rounded-3"
-                        @keyup.enter="toggleAction(ActionType.DELETING_CAT, cat.id)"
-                        @click.stop="toggleAction(ActionType.DELETING_CAT, cat.id)"
-                      >
-                        Poista
-                      </li>
-                    </div>
-                  </Drawer>
                 </div>
               </template>
             </CatListItem>
@@ -201,6 +180,27 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
       </div>
     </div>
   </div>
+  <Drawer :visible="isMobile && isCurrentAction(ActionType.SELECTING_ACTION)" @onCancel="removeAction(ActionType.SELECTING_ACTION)">
+    <div class="gap-2 p-2 d-flex flex-column list-unstyled">
+      <li
+        @keyup.enter="toggleAction(ActionType.EDITING_CAT_MOBILE, currentItem)"
+        @click.stop="toggleAction(ActionType.EDITING_CAT_MOBILE, currentItem)"
+        tabIndex="0"
+        class="p-2 hover-bg rounded-3"
+      >
+        Muokkaa
+      </li>
+      <li
+        tabIndex="0"
+        data-testid="start-cat-delete"
+        class="p-2 hover-bg rounded-3"
+        @keyup.enter="toggleAction(ActionType.DELETING_CAT, currentItem.id)"
+        @click.stop="toggleAction(ActionType.DELETING_CAT, currentItem.id)"
+      >
+        Poista
+      </li>
+    </div>
+  </Drawer>
   <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.ADDING_CAT_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
     <CatForm @onSave="addCatMutation.mutate" />
   </Drawer>

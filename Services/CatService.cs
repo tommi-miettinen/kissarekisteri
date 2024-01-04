@@ -91,6 +91,42 @@ public class CatService(
         return result.Success(cat);
     }
 
+    public async Task<Result<CatTransfer>> CreateTransferRequest(string userId, int catId)
+    {
+        var result = new Result<CatTransfer>();
+
+        var cat = await _dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
+
+        if (cat == null)
+        {
+            return result.AddError(CatErrors.NotFound);
+        }
+
+        var catTransfer = new CatTransfer
+        {
+            CatId = catId,
+            RequesterId = userId,
+            ConfirmerId = cat.OwnerId,
+        };
+
+        await _dbContext.CatTransfers.AddAsync(catTransfer);
+        await _dbContext.SaveChangesAsync();
+
+        return result.Success(catTransfer);
+    }
+
+    public async Task<Result<List<CatTransfer>>> GetTransferRequests(string userId)
+    {
+        var result = new Result<List<CatTransfer>>();
+
+        var catTransfers = await _dbContext.CatTransfers
+            .Include(ct => ct.Cat)
+            .Where(ct => ct.ConfirmerId == userId)
+            .ToListAsync();
+
+        return result.Success(catTransfers);
+    }
+
     public async Task<Result<List<Cat>>> GetCatsAsync(CatQueryParamsDTO queryParams = null)
     {
         var result = new Result<List<Cat>>();

@@ -116,6 +116,38 @@ public class CatController(CatService catService) : Controller
         return Json(result.Data);
     }
 
+    [Authorize]
+    [HttpPost("{catId}/transfer")]
+    public async Task<ActionResult<Result<CatTransfer>>> TransferCat([FromRoute] int catId)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var result = await catService.CreateTransferRequest(userId, catId);
+
+        if (!result.IsSuccess)
+        {
+            return HttpStatusMapper.Map(result.Errors);
+        }
+
+        return Json(result);
+    }
+
+    [Authorize]
+    [HttpGet("transfer-requests")]
+    public async Task<ActionResult<Result<List<CatTransfer>>>> GetTransferRequests()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        var result = await catService.GetTransferRequests(userId);
+
+        if (!result.IsSuccess)
+        {
+            return HttpStatusMapper.Map(result.Errors);
+        }
+
+        return Json(result);
+    }
+
     /// <summary>
     /// Creates a new cat.
     /// </summary>

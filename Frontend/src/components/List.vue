@@ -59,7 +59,7 @@ watchEffect(() => {
 
 <template>
   <div class="w-100 h-100 d-flex flex-column">
-    <div class="d-flex gap-3 py-3 sticky-top bg-white align-items-center">
+    <div class="d-flex gap-3 py-3 bg-white align-items-center">
       <div class="col-12 col-sm-4">
         <input
           data-testid="cat-search-input"

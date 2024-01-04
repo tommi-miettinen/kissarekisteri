@@ -40,7 +40,7 @@ const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainec
       </div>
 
       <div class="w-100">{{ cat.breed }}</div>
-      <div class="w-100 d-flex">
+      <div class="d-none w-100 d-sm-flex">
         {{
           //@ts-ignore
           formatDateNoHours(cat.birthDate)

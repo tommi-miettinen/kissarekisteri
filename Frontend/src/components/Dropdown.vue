@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch, defineProps, onUnmounted } from "vue";
+import { ref, defineProps, watch, onMounted, onBeforeUnmount } from "vue";
 import { Dropdown } from "bootstrap";
 import { Placement } from "@popperjs/core/lib/enums";
 
@@ -15,62 +15,52 @@ const props = defineProps({
   },
 });
 
-let bootstrapDropdownInstance: Dropdown;
-const dropdownMenuRef = ref<HTMLDivElement>();
+const dropdown = ref<Dropdown>();
+const dropdownContentRef = ref<HTMLDivElement>();
 
-const outsideClickListener = () => {
-  bootstrapDropdownInstance.hide();
-};
-
-const handleTriggerClick = () => {
-  bootstrapDropdownInstance.toggle();
-};
-
-const handleKeyup = (e: KeyboardEvent) => {
-  if (e.key === "Enter" || e.key === "Escape") {
-    bootstrapDropdownInstance.toggle();
+const closeDropdownIfClickedOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (!dropdownContentRef.value?.contains(target) && !props.triggerRef?.contains(target)) {
+    dropdown.value?.hide();
   }
-};
-
-const addEventListeners = () => {
-  document.addEventListener("click", outsideClickListener);
-  props.triggerRef?.addEventListener("click", handleTriggerClick);
-  props.triggerRef?.addEventListener("keyup", handleKeyup);
-};
-
-const removeEventListeners = () => {
-  document.removeEventListener("click", outsideClickListener);
-  props.triggerRef?.removeEventListener("click", handleTriggerClick);
-  props.triggerRef?.removeEventListener("keyup", handleKeyup);
 };
 
 watch(
   () => props.triggerRef,
-  (newVal, oldVal) => {
-    if (!newVal) return;
-    if (oldVal) {
-      removeEventListeners(); // Remove listeners from the old element
-    }
-    bootstrapDropdownInstance = new Dropdown(newVal, {
-      reference: newVal,
+  () => {
+    if (!props.triggerRef) return console.error("Trigger ref is null");
+
+    if (dropdown.value) return console.log("Dropdown already initialized");
+
+    dropdown.value = new Dropdown(props.triggerRef!, {
       autoClose: true,
+      reference: props.triggerRef,
       popperConfig: {
         placement: props.placement,
       },
     });
 
-    addEventListeners();
-    dropdownMenuRef.value?.focus();
+    props.triggerRef.onclick = () => dropdown.value?.toggle();
+
+    props.triggerRef.onkeyup = (e) => {
+      if (e.key === "Enter" || e.key === "Escape") {
+        dropdown.value?.toggle();
+      }
+    };
   }
 );
 
-onUnmounted(() => {
-  removeEventListeners();
+onMounted(() => {
+  document.addEventListener("click", closeDropdownIfClickedOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", closeDropdownIfClickedOutside);
 });
 </script>
 
 <template>
-  <div :class="{ invisible: !visible }" class="dropdown-menu border p-1 rounded-3" ref="dropdownMenuRef">
+  <div ref="dropdownContentRef" tabIndex="0" @blur="dropdown?.toggle()" class="dropdown-menu border p-1 rounded-3">
     <slot></slot>
   </div>
 </template>

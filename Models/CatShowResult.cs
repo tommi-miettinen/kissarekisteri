@@ -10,7 +10,7 @@ namespace Kissarekisteri.Models
         Third = 3,
     }
 
-    [Index(nameof(CatId), nameof(CatShowId), IsUnique = true)]
+    [Index(nameof(CatId), nameof(Breed), nameof(CatShowId), IsUnique = true)]
     public class CatShowResult
     {
         public int Id { get; set; }

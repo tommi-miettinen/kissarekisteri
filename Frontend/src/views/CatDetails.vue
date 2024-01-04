@@ -12,6 +12,8 @@ import getMedalColor from "../utils/getMedalColor";
 import UserListItem from "../components/UserListItem.vue";
 import ImageGallery from "../components/ImageGallery.vue";
 import { toast } from "vue-sonner";
+//@ts-ignore
+import { user } from "../store/userStore";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -37,6 +39,10 @@ const catMutation = useMutation({
   mutationFn: (imageUrl: string) => catAPI.editCat({ ...cat.value!, imageUrl }),
   onSuccess: () => refetch(),
 });
+
+const requestOwnershipTransfer = async () => {
+  await catAPI.requestOwnershipTransfer(cat.value!.id);
+};
 
 const navigateToCatShow = (catShowId: number) => router.push(`/catshows/${catShowId}`);
 
@@ -79,6 +85,7 @@ watch(route, () => refetch());
           </p>
           <p>{{ cat.birthDate }}</p>
         </div>
+        <button @click="requestOwnershipTransfer" class="border rounded-3 px-5 py-2 btn-border me-auto focus-ring">yes</button>
       </div>
 
       <div v-if="cat.results && cat.results.length > 0">

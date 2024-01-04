@@ -18,6 +18,7 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
     public DbSet<Permission> Permissions { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<CatBreed> CatBreeds { get; set; }
+    public DbSet<CatTransfer> CatTransfers { get; set; }
     public DbSet<CatRelation> CatRelations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,20 +44,24 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .HasForeignKey(r => r.CatId);
 
         modelBuilder
+            .Entity<CatTransfer>()
+            .HasOne(ct => ct.Cat)
+            .WithOne()
+            .HasForeignKey<CatTransfer>(ct => ct.CatId);
+
+        modelBuilder
             .Entity<Cat>()
             .HasMany(c => c.Parents)
             .WithOne(cr => cr.ChildCat)
             .HasForeignKey(cr => cr.KittenId)
-        .OnDelete(DeleteBehavior.NoAction);
-
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder
             .Entity<Cat>()
             .HasMany(c => c.Kittens)
             .WithOne(cr => cr.ParentCat)
             .HasForeignKey(cr => cr.ParentId)
-             .OnDelete(DeleteBehavior.NoAction);
-
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder
             .Entity<CatShow>()

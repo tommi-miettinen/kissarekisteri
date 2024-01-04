@@ -136,10 +136,10 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
   <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
-  <div v-if="catShow" class="p-2 w-100 h-100 d-flex flex-column align-items-center p-sm-5">
-    <div class="col-12 col-sm-8 p-sm-5 d-flex flex-column gap-5">
-      <div class="d-flex gap-4" style="height: 300px">
-        <div class="border image-container rounded-4" style="position: relative; min-width: 400px; overflow: hidden">
+  <div v-if="catShow" class="p-2 w-100 h-100 d-flex flex-column align-items-center p-xl-5">
+    <div class="col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5">
+      <div class="d-flex flex-column flex-md-row gap-sm-4 hero-container">
+        <div class="border image-container rounded-4 hero-image" style="position: relative; width: 100%; height: 100%; overflow: hidden">
           <img
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
             src="https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg"
@@ -151,11 +151,11 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
             {{ catShow.description }}
           </p>
           <span>{{ catShow.location }}</span>
-          <div v-if="user" class="mt-auto ms-auto">
-            <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary px-5" @click="joiningEvent = true">
+          <div v-if="user" class="mt-auto ms-auto w-sm-100">
+            <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary px-5 w-sm-100" @click="joiningEvent = true">
               {{ t("CatShowDetails.joinEvent") }}
             </button>
-            <button v-else @click="leavingEvent = true" type="button" class="btn btn-danger rounded-3 py-2 px-5">
+            <button v-else @click="leavingEvent = true" type="button" class="w-sm-100 btn btn-danger rounded-3 py-2 px-5">
               {{ t("CatShowDetails.leaveEvent") }}
             </button>
           </div>
@@ -200,7 +200,7 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
                         tabindex="0"
                         @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
                         @click="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
-                        class="dropdown-item focus-ring"
+                        class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                       >
                         Ensimmäinen
                       </li>
@@ -208,7 +208,7 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
                         tabindex="0"
                         @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
                         @click="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
-                        class="dropdown-item focus-ring"
+                        class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                       >
                         Toinen
                       </li>
@@ -216,7 +216,7 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
                         tabindex="0"
                         @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
                         @click="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
-                        class="dropdown-item focus-ring"
+                        class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                       >
                         Kolmas
                       </li>
@@ -263,3 +263,30 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
     </Modal>
   </div>
 </template>
+
+<style>
+.hero-container {
+  min-height: 400px;
+}
+
+.hero-image {
+  max-width: 100%;
+}
+
+.w-sm-100 {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .hero-container {
+    min-height: 300px;
+  }
+  .hero-image {
+    max-width: 400px;
+  }
+
+  .w-sm-100 {
+    width: auto;
+  }
+}
+</style>

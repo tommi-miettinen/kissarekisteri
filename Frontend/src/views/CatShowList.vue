@@ -8,21 +8,13 @@ import catShowAPI from "../api/catShowAPI";
 import { useQuery, useMutation } from "@tanstack/vue-query";
 import { toast } from "vue-sonner";
 import { userHasPermission } from "../store/userStore";
-import { getCurrentFormattedDate } from "../utils/formatDate";
 import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
 import { useWindowSize } from "@vueuse/core";
+import CatShowForm from "../components/CatShowForm.vue";
 
 const router = useRouter();
 const { t } = useI18n();
-
-const newEvent = ref({
-  name: "",
-  description: "",
-  location: "",
-  startDate: getCurrentFormattedDate(),
-  endDate: getCurrentFormattedDate(),
-});
 
 const addingEvent = ref(false);
 
@@ -32,7 +24,7 @@ const { data: catShows, refetch: refetchCatShows } = useQuery({
 });
 
 const createCatShowMutation = useMutation({
-  mutationFn: () => catShowAPI.createCatShowEvent(newEvent.value),
+  mutationFn: (newEvent: CatShowEvent) => catShowAPI.createCatShowEvent(newEvent),
   onSuccess: () => {
     toast.info("Tapahtuma luotu"), refetchCatShows();
   },
@@ -80,75 +72,11 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
     </div>
   </div>
   <Drawer :fullsize="true" :visible="addingEvent && isMobile">
-    <div class="d-flex flex-column p-4 gap-4">
-      <div>
-        <label for="event-name" class="form-label cursor-pointer">{{ t("CatShowList.eventNameInput") }}</label>
-        <input id="event-name" type="text" class="form-control" v-model="newEvent.name" />
-      </div>
-      <div>
-        <label for="event-description" class="form-label cursor-pointer">{{ t("CatShowList.eventDescriptionInput") }}</label>
-        <input id="event-description" type="text" class="form-control" v-model="newEvent.description" />
-      </div>
-      <div>
-        <label for="event-location" class="form-label cursor-pointer">{{ t("CatShowList.eventLocationInput") }}</label>
-        <input id="event-location" type="text" class="form-control" v-model="newEvent.location" />
-      </div>
-      <div>
-        <label for="start-date" class="form-label cursor-pointer">Start Date</label>
-        <input id="start-date" type="date" class="form-control" v-model="newEvent.startDate" />
-      </div>
-      <div>
-        <label for="end-date" class="form-label cursor-pointer">End Date</label>
-        <input id="end-date" type="date" class="form-control" v-model="newEvent.endDate" />
-      </div>
-
-      <button
-        @click="
-          () => {
-            createCatShowMutation.mutate(), (addingEvent = false);
-          }
-        "
-        type="button"
-        class="btn btn-primary ms-auto px-5"
-      >
-        Luo tapahtuma +
-      </button>
-    </div>
+    <CatShowForm @onSave="createCatShowMutation.mutate" />
   </Drawer>
   <Modal :modalId="'event-modal'" @onCancel="addingEvent = false" :visible="addingEvent && !isMobile">
-    <div style="width: 500px" class="d-flex flex-column p-4 gap-4">
-      <div>
-        <label for="event-name" class="form-label cursor-pointer">{{ t("CatShowList.eventNameInput") }}</label>
-        <input id="event-name" type="text" class="form-control" v-model="newEvent.name" />
-      </div>
-      <div>
-        <label for="event-description" class="form-label cursor-pointer">{{ t("CatShowList.eventDescriptionInput") }}</label>
-        <input id="event-description" type="text" class="form-control" v-model="newEvent.description" />
-      </div>
-      <div>
-        <label for="event-location" class="form-label cursor-pointer">{{ t("CatShowList.eventLocationInput") }}</label>
-        <input id="event-location" type="text" class="form-control" v-model="newEvent.location" />
-      </div>
-      <div>
-        <label for="start-date" class="form-label cursor-pointer">Start Date</label>
-        <input id="start-date" type="date" class="form-control" v-model="newEvent.startDate" />
-      </div>
-      <div>
-        <label for="end-date" class="form-label cursor-pointer">End Date</label>
-        <input id="end-date" type="date" class="form-control" v-model="newEvent.endDate" />
-      </div>
-
-      <button
-        @click="
-          () => {
-            createCatShowMutation.mutate(), (addingEvent = false);
-          }
-        "
-        type="button"
-        class="btn btn-primary ms-auto px-5"
-      >
-        Luo tapahtuma +
-      </button>
+    <div style="width: 550px">
+      <CatShowForm @onSave="createCatShowMutation.mutate" />
     </div>
   </Modal>
 </template>
