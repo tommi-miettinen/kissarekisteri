@@ -1,5 +1,6 @@
 ﻿using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
+using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -178,6 +179,22 @@ public class UserService(
             Console.ResetColor();
             return null;
         }
+    }
+
+    public async Task<Result<bool>> DeleteUserByIdAsync(string userId)
+    {
+        var result = new Result<bool>();
+        await _graphClient.Users[userId].DeleteAsync();
+
+        var user = await GetUserById(userId);
+
+        if (user != null)
+        {
+            return result.AddError(new Error("User deletion failed", "DeleteFail"));
+
+        }
+
+        return result.Success(true);
     }
 
     public async Task<List<Role>> GetRoles()

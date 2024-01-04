@@ -1,4 +1,5 @@
 ﻿using Kissarekisteri.DTOs;
+using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -100,15 +101,17 @@ public class UserController(
         return Json(user);
     }
 
-
-    [Authorize]
-    [HttpPost]
-    public async Task<ActionResult<UserResponse>> CreateUser()
+    [HttpDelete("{userId}")]
+    public async Task<ActionResult<Result<bool>>> DeleteUser([FromRoute] string userId)
     {
-        var user = await userService.CreateUser(new UserCreatePayloadDTO
-        {
+        var result = await userService.DeleteUserByIdAsync(userId);
+        return result;
+    }
 
-        });
+    [HttpPost]
+    public async Task<ActionResult<UserResponse>> CreateUser([FromBody] UserCreatePayloadDTO userPayload)
+    {
+        var user = await userService.CreateUser(userPayload);
         return Json(user);
     }
 

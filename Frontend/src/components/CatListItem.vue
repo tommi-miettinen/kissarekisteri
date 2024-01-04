@@ -14,6 +14,8 @@ const router = useRouter();
 
 const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
 const getTextColor = (sex: string) => (sex === "Male" ? "#60a5fa" : "#fb7185");
+
+const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainecoon_jb2.jpg/250px-Mainecoon_jb2.jpg";
 </script>
 
 <template>
@@ -27,7 +29,7 @@ const getTextColor = (sex: string) => (sex === "Male" ? "#60a5fa" : "#fb7185");
       <div class="d-flex w-100 align-items-center justify-content-start gap-3">
         <slot name="medal"></slot>
         <img
-          :src="cat.imageUrl"
+          :src="cat.imageUrl || altUrl"
           class="rounded-circle"
           height="30"
           width="30"

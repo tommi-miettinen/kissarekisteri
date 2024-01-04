@@ -16,7 +16,7 @@ const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
 </script>
 
 <template>
-  <div class="border-bottom py-1 w-100">
+  <div v-if="user" class="border-bottom py-1 w-100">
     <div
       tabindex="0"
       @keyup.enter="() => navigateToUser(user.id)"
@@ -34,6 +34,9 @@ const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
       </div>
       <div class="col"></div>
       <span class="badge rounded-pill text-bg-primary">{{ user.isBreeder ? t("Users.breeder") : t("Users.breeder") }}</span>
+      <div class="col">
+        <slot name="actions"></slot>
+      </div>
     </div>
   </div>
 </template>

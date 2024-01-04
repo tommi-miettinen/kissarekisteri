@@ -14,6 +14,7 @@ import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
 import { useWindowSize } from "@vueuse/core";
 import Dropdown from "../components/Dropdown.vue";
+import { popAction, pushAction, isCurrentAction } from "../store/actionStore";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -30,18 +31,19 @@ enum ActionType {
 }
 
 const toggleAction = (actionType: ActionType, item = null) => {
-  if (currentAction.value === actionType && currentItem.value === item) {
-    currentAction.value = ActionType.NONE;
+  if (actionType === ActionType.NONE) {
+    popAction();
+  }
+  if (actionType !== ActionType.NONE) {
+    pushAction(actionType);
+  }
+  if (currentItem.value === item) {
     currentItem.value = null;
   } else {
-    currentAction.value = actionType;
     currentItem.value = item;
   }
 };
 
-const isCurrentAction = (actionType: ActionType) => currentAction.value === actionType;
-
-const currentAction = ref<ActionType>(ActionType.NONE);
 const currentItem = ref<any>(null);
 
 const {
@@ -92,11 +94,7 @@ watch([route, user], () => {
 });
 
 const width = useWindowSize().width;
-const isMobile = computed(() => {
-  const mobile = width.value < 768;
-  console.log("Is Mobile:", mobile);
-  return mobile;
-});
+const isMobile = computed(() => width.value < 768);
 
 const editCat = async (updatedCat: EditCatPayload) => {
   await catAPI.editCat(updatedCat);

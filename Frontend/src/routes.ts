@@ -5,6 +5,7 @@ import Cats from "./views/Cats.vue";
 import Users from "./views/Users.vue";
 import CatDetails from "./views/CatDetails.vue";
 import UserDetails from "./views/UserDetails.vue";
+import { actionStack, popAction } from "./store/actionStore";
 
 const routes = [
   { path: "/catshows", component: CatShowList },
@@ -23,6 +24,15 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((_, __, next) => {
+  if (actionStack.value.length > 0) {
+    popAction();
+    next(false);
+  } else {
+    next();
+  }
 });
 
 export default router;

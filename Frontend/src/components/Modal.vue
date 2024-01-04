@@ -11,7 +11,12 @@ const modal = ref<Modal>();
 const modalRef = ref<HTMLDivElement>();
 const emit = defineEmits(["onCancel"]);
 
-onMounted(() => (modal.value = new Modal(modalRef.value as HTMLDivElement)));
+onMounted(() => {
+  if (!modalRef.value) return console.error("Modal ref is null");
+
+  modal.value = new Modal(modalRef.value);
+  modalRef.value.addEventListener("hide.bs.modal", () => emit("onCancel"));
+});
 
 watch(
   () => props.visible,

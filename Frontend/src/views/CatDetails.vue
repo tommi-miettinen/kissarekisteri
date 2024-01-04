@@ -51,7 +51,7 @@ const inputRef = ref();
 const triggerFileInput = () => inputRef.value?.click();
 
 const catPhotos = computed(() => (cat.value ? cat.value.photos.map((photo) => photo.url) : []));
-
+const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainecoon_jb2.jpg/450px-Mainecoon_jb2.jpg?20070329082601";
 watch(route, () => refetch());
 </script>
 
@@ -68,7 +68,7 @@ watch(route, () => refetch());
         >
           <img
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
-            :src="cat.imageUrl"
+            :src="cat.imageUrl || altUrl"
             alt="Cat image"
           />
         </div>
