@@ -4,7 +4,6 @@ import { Modal } from "bootstrap";
 
 const props = defineProps({
   visible: Boolean,
-  modalId: String,
 });
 
 const modal = ref<Modal>();
@@ -25,14 +24,13 @@ watch(
       modal.value?.show();
     } else {
       modal.value?.hide();
-      emit("onCancel");
     }
   }
 );
 </script>
 
 <template>
-  <div ref="modalRef" class="modal fade" tabindex="-1" :id="props.modalId">
+  <div ref="modalRef" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div
         style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: min-content"

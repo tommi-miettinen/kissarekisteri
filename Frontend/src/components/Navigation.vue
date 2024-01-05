@@ -8,9 +8,12 @@ import { login, logout } from "../auth";
 import { useWindowSize } from "@vueuse/core";
 import Drawer from "./Drawer.vue";
 import { pushAction, isCurrentAction, popAction } from "../store/actionStore";
-import { useQuery } from "@tanstack/vue-query";
+import { useMutation, useQuery } from "@tanstack/vue-query";
 import catAPI from "../api/catAPI";
 import Dropdown from "./Dropdown.vue";
+import { toast } from "vue-sonner";
+import { useQueryClient } from "@tanstack/vue-query";
+import { QueryKeys } from "../api/queryKeys";
 
 enum ActionType {
   NONE = "NONE",
@@ -37,10 +40,11 @@ const currentItem = ref<any>(null);
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
+const queryClient = useQueryClient();
 
 const avatarLoadError = ref(false);
 
-const { data: confirmationRequestsData } = useQuery({
+const { data: confirmationRequestsData, refetch } = useQuery({
   queryKey: ["confirmationRequests"],
   queryFn: () => catAPI.getConfirmationRequests(),
   refetchInterval: 5000,
@@ -48,6 +52,15 @@ const { data: confirmationRequestsData } = useQuery({
 
 const confirmationRequests = computed(() => confirmationRequestsData.value?.data);
 
+const confirmationRequestMutation = useMutation({
+  mutationFn: (requestId: number) => catAPI.confirmTransferRequest(requestId),
+  onSuccess: () => {
+    toast.success("Omistajuuspyyntö hyväksytty");
+
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.CAT] });
+    refetch();
+  },
+});
 const handleLocaleClick = () => (locale.value === "fi" ? (locale.value = "en") : (locale.value = "fi"));
 const localeString = computed(() => (locale.value === "fi" ? "In English" : "Suomeksi"));
 
@@ -164,15 +177,26 @@ const requestsRef = ref<HTMLDivElement>();
         <template v-if="user">
           <div class="d-flex flex-column z-100 bg-white" style="max-width: 600px">
             <div v-if="confirmationRequests && confirmationRequests.length > 0">
-              <div class="py-1 text-break">
-                <div v-for="request in confirmationRequests" class="p-3">
-                  <div>Käyttäjä {{ request.requesterId }}</div>
-                  Pyytää omistajuutta kissalle {{ request.cat?.name }}
-                  <button class="btn btn-primary">hyväksy</button>
+              <div class="text-break">
+                <div v-for="request in confirmationRequests">
+                  <div class="p-3 d-flex align-items-center gap-2">
+                    <span>
+                      <a class="cursor-pointer link-underline-primary" @click="navigateTo(`/users/${request.requester.id}`)">{{
+                        request.requester.givenName
+                      }}</a>
+                      pyytää omistajuutta kissalle
+                      <a class="cursor-pointer link-underline-primary" @click="navigateTo(`/cats/${request.cat.id}`)">{{
+                        request.cat?.name
+                      }}</a></span
+                    >
+                    <button @click="confirmationRequestMutation.mutate(request.id)" class="btn btn-primary px-2 py-1 ms-auto">
+                      Hyväksy
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-            <div v-else class="p-2">Ei pyyntöjä</div>
+            <div v-else class="p-2">Ei ilmoituksia</div>
           </div>
         </template>
       </Dropdown>

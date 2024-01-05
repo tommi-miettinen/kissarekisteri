@@ -100,3 +100,12 @@ interface ApiResponse<T> {
   data: T;
   errors: any[];
 }
+
+interface CatTransferRequest {
+  id: number;
+  cat: Cat;
+  confirmerId: string;
+  requester: User;
+  requesterId: string;
+  confirmed: boolean;
+}

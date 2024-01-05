@@ -33,7 +33,6 @@ onMounted(() => {
 watch(
   () => props.visible,
   (newValue) => {
-    console.log(newValue);
     if (newValue) {
       sideOffCanvas.value?.show();
     } else {

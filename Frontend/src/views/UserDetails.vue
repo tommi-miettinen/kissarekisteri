@@ -15,6 +15,7 @@ import Drawer from "../components/Drawer.vue";
 import { useWindowSize } from "@vueuse/core";
 import Dropdown from "../components/Dropdown.vue";
 import { popAction, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { QueryKeys } from "../api/queryKeys";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -51,7 +52,7 @@ const {
   isError: isUserError,
   refetch: refetchUser,
 } = useQuery({
-  queryKey: ["user" + route.params.userId],
+  queryKey: [QueryKeys.USER_BY_ID(route.params.userId as string)],
   queryFn: () => userAPI.getUserById(route.params.userId as string),
 });
 
@@ -171,7 +172,7 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
               @keyup.enter.stop="toggleAction(isMobile ? ActionType.ADDING_CAT_MOBILE : ActionType.ADDING_CAT)"
               data-testid="add-new-cat-btn"
               type="button"
-              class="btn btn-primary ms-auto px-5"
+              class="btn btn-primary ms-auto px-5 rounded-3"
             >
               {{ t("Profile.addCat") }} +
             </button>
@@ -204,16 +205,12 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
   <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.ADDING_CAT_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
     <CatForm @onSave="addCatMutation.mutate" />
   </Drawer>
-  <Modal
-    :modalId="'add-cat-modal'"
-    :visible="isCurrentAction(ActionType.ADDING_CAT) && !isMobile"
-    @onCancel="toggleAction(ActionType.NONE)"
-  >
+  <Modal :visible="isCurrentAction(ActionType.ADDING_CAT) && !isMobile" @onCancel="toggleAction(ActionType.NONE)">
     <div style="width: 550px">
       <CatForm @onSave="addCatMutation.mutate" />
     </div>
   </Modal>
-  <Modal :modalId="'edit-modal'" :visible="isCurrentAction(ActionType.EDITING_CAT) && !isMobile" @onCancel="toggleAction(ActionType.NONE)">
+  <Modal :visible="isCurrentAction(ActionType.EDITING_CAT) && !isMobile" @onCancel="toggleAction(ActionType.NONE)">
     <div style="width: 550px">
       <CatForm :cat="currentItem" @onSave="editCat" />
     </div>
@@ -221,7 +218,7 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
   <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.EDITING_CAT_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
     <CatForm :cat="currentItem" @onSave="editCat" />
   </Drawer>
-  <Modal :modalId="'delete-modal'" @onCancel="toggleAction(ActionType.NONE)" :visible="isCurrentAction(ActionType.DELETING_CAT)">
+  <Modal @onCancel="toggleAction(ActionType.NONE)" :visible="isCurrentAction(ActionType.DELETING_CAT)">
     <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
       <p>Poistetaanko kissan tiedot?</p>
       <div class="d-flex gap-2 justify-content-end">

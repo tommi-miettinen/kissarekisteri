@@ -80,12 +80,22 @@ const requestOwnershipTransfer = async (catId: number) => {
 
 const getConfirmationRequests = async () => {
   try {
-    const result = await apiClient.get<ApiResponse<any[]>>(`/cats/transfer-requests`);
+    const result = await apiClient.get<ApiResponse<CatTransferRequest[]>>(`/cats/transfer-requests`);
     return result.data;
   } catch (err) {
     console.log(err);
   }
 };
+
+const confirmTransferRequest = async (requestId: number) => {
+  try {
+    const result = await apiClient.post<ApiResponse<Cat>>(`/cats/transfer-requests/${requestId}/confirm`);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const getCatBreeds = async () => {
   try {
     const result = await apiClient.get<ApiResponse<CatBreed[]>>(`/cats/breeds`);
@@ -106,4 +116,5 @@ export default {
   getCatBreeds,
   requestOwnershipTransfer,
   getConfirmationRequests,
+  confirmTransferRequest,
 };

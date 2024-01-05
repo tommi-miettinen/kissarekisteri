@@ -63,7 +63,7 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
             v-if="userHasPermission('CreateEvent')"
             @click="addingEvent = true"
             type="button"
-            class="btn btn-primary ms-auto px-5 mt-2"
+            class="btn btn-primary ms-auto px-5 mt-2 rounded-3"
           >
             {{ t("CatShowList.addCatShow") }} +
           </button>
@@ -74,7 +74,7 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
   <Drawer :fullsize="true" :visible="addingEvent && isMobile">
     <CatShowForm @onSave="createCatShowMutation.mutate" />
   </Drawer>
-  <Modal :modalId="'event-modal'" @onCancel="addingEvent = false" :visible="addingEvent && !isMobile">
+  <Modal @onCancel="addingEvent = false" :visible="addingEvent && !isMobile">
     <div style="width: 550px">
       <CatShowForm @onSave="createCatShowMutation.mutate" />
     </div>

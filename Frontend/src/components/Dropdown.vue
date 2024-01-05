@@ -15,6 +15,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(["onCancel"]);
+
 const dropdown = ref<Dropdown>();
 const dropdownContentRef = ref<HTMLDivElement>();
 
@@ -33,24 +35,29 @@ watch(
     if (dropdown.value) return console.log("Dropdown already initialized");
 
     dropdown.value = new Dropdown(props.triggerRef!, {
-      autoClose: true,
       reference: props.triggerRef,
       popperConfig: {
         placement: props.placement,
       },
     });
 
-    props.triggerRef.onclick = () => dropdown.value?.toggle();
+    props.triggerRef.onclick = () => (props.visible ? dropdown.value?.toggle() : null);
 
     props.triggerRef.onkeyup = (e) => {
       if (e.key === "Enter" || e.key === "Escape") {
         dropdown.value?.toggle();
       }
     };
+
+    props.triggerRef?.addEventListener("hide.bs.dropdown", () => {
+      console.log("HIDING");
+      emit("onCancel");
+    });
   }
 );
 
 onMounted(() => {
+  console.log("mounted");
   document.addEventListener("click", closeDropdownIfClickedOutside);
 });
 
@@ -60,7 +67,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="dropdownContentRef" tabIndex="0" @blur="dropdown?.toggle()" class="dropdown-menu border p-1 rounded-3">
+  <div
+    :class="{ invisible: !props.visible }"
+    ref="dropdownContentRef"
+    tabIndex="0"
+    @blur="dropdown?.toggle()"
+    class="dropdown-menu border p-1 rounded-3"
+  >
     <slot></slot>
   </div>
 </template>

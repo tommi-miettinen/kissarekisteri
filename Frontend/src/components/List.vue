@@ -82,7 +82,7 @@ watchEffect(() => {
             tabindex="0"
             @keyup.enter="goToPage(page)"
             @click="goToPage(page)"
-            class="btn border focus-ring hover-bg"
+            class="btn border focus-ring hover-bg rounded-3"
             v-for="page in totalPages"
             :key="page"
             :class="{ 'border-primary': currentPage === page, 'bg-primary': currentPage === page, 'text-white': currentPage === page }"

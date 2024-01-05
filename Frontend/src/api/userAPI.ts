@@ -54,6 +54,20 @@ const getPermissions = async (userId: string) => {
   }
 };
 
+const deleteUserById = async (userId: string) => {
+  await apiClient.delete(`/users/${userId}`);
+  return true;
+};
+
+const createUser = async (userPayload: any) => {
+  try {
+    const result = await apiClient.post(`/users`, userPayload);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export default {
   getUserById,
   getUsers,
@@ -61,4 +75,6 @@ export default {
   getCatsByUserId,
   getCurrentUser,
   getPermissions,
+  deleteUserById,
+  createUser,
 };

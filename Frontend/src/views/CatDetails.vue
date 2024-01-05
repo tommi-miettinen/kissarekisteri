@@ -12,7 +12,6 @@ import getMedalColor from "../utils/getMedalColor";
 import UserListItem from "../components/UserListItem.vue";
 import ImageGallery from "../components/ImageGallery.vue";
 import { toast } from "vue-sonner";
-//@ts-ignore
 import { user } from "../store/userStore";
 
 const { t } = useI18n();
@@ -24,7 +23,7 @@ const {
   refetch,
   isError: isCatError,
 } = useQuery({
-  queryKey: [route.params.catId],
+  queryKey: ["cat", route.params.catId],
   queryFn: () => catAPI.getCatById(+route.params.catId),
 });
 
@@ -58,6 +57,9 @@ const triggerFileInput = () => inputRef.value?.click();
 
 const catPhotos = computed(() => (cat.value ? cat.value.photos.map((photo) => photo.url) : []));
 const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainecoon_jb2.jpg/450px-Mainecoon_jb2.jpg?20070329082601";
+
+const userIsCatOwner = computed(() => user.value && cat.value && user.value.id === cat.value.ownerId);
+
 watch(route, () => refetch());
 </script>
 
@@ -84,8 +86,14 @@ watch(route, () => refetch());
             {{ cat.breed }}
           </p>
           <p>{{ cat.birthDate }}</p>
+          <button
+            v-if="!userIsCatOwner"
+            @click="requestOwnershipTransfer"
+            class="btn border rounded-3 px-5 py-2 btn-border focus-ring mt-auto ms-auto"
+          >
+            Pyydä omistajuutta
+          </button>
         </div>
-        <button @click="requestOwnershipTransfer" class="border rounded-3 px-5 py-2 btn-border me-auto focus-ring">yes</button>
       </div>
 
       <div v-if="cat.results && cat.results.length > 0">

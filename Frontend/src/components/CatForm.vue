@@ -167,7 +167,7 @@ const isFormValid = computed(() => {
       :disabled="!isFormValid"
       data-testid="add-new-cat-btn-save"
       @click="$emit('onSave', newCat)"
-      class="btn btn-primary ms-auto px-5"
+      class="btn btn-primary ms-auto px-5 rounded-3"
     >
       Lisää kissa +
     </button>
