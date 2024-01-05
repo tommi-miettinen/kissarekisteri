@@ -16,30 +16,26 @@ public class CatService(
     UserService userService
 )
 {
-    private readonly KissarekisteriDbContext _dbContext = dbContext;
-    private readonly UploadService _uploadService = uploadService;
-    private readonly UserService _userService = userService;
-
     public async Task<Result<Cat>> UploadCatPhoto(int catId, IFormFile file)
     {
         var result = new Result<Cat>();
 
-        var cat = await _dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
+        var cat = await dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
 
-        var uploadedPhoto = await _uploadService.UploadFile(file);
+        var uploadedPhoto = await uploadService.UploadFile(file);
 
         if (uploadedPhoto == null)
         {
             return result.AddError(CatErrors.PhotoUploadError);
         }
 
-        await _dbContext.CatPhotos.AddAsync(
+        await dbContext.CatPhotos.AddAsync(
             new CatPhoto { CatId = cat.Id, Url = uploadedPhoto.Uri.AbsoluteUri }
         );
 
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
-        var catWithPhotos = await _dbContext.Cats
+        var catWithPhotos = await dbContext.Cats
             .Include(c => c.Photos)
             .FirstOrDefaultAsync(cat => cat.Id == catId);
 
@@ -49,7 +45,7 @@ public class CatService(
     public async Task<Result<Cat>> UpdateCatByIdAsync(int catId, CatRequest catPayload)
     {
         var result = new Result<Cat>();
-        var cat = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == catId);
+        var cat = await dbContext.Cats.FirstOrDefaultAsync(c => c.Id == catId);
 
         if (cat == null)
         {
@@ -61,7 +57,7 @@ public class CatService(
         cat.BirthDate = catPayload.BirthDate;
         cat.ImageUrl = catPayload.ImageUrl;
 
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return result.Success(cat);
     }
@@ -71,7 +67,7 @@ public class CatService(
     {
         var result = new Result<Cat>();
 
-        var cat = await _dbContext.Cats
+        var cat = await dbContext.Cats
             .Include(c => c.Photos)
             .Include(c => c.Results)
             .ThenInclude(Results => Results.CatShow)
@@ -84,8 +80,8 @@ public class CatService(
         if (cat == null)
             return result.AddError(CatErrors.NotFound);
 
-        cat.Owner = await _userService.GetUserById(cat.OwnerId);
-        cat.Breeder = await _userService.GetUserById(cat.BreederId);
+        cat.Owner = await userService.GetUserById(cat.OwnerId);
+        cat.Breeder = await userService.GetUserById(cat.BreederId);
 
 
         return result.Success(cat);
@@ -95,7 +91,7 @@ public class CatService(
     {
         var result = new Result<CatTransfer>();
 
-        var cat = await _dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
+        var cat = await dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
 
         if (cat == null)
         {
@@ -109,30 +105,72 @@ public class CatService(
             ConfirmerId = cat.OwnerId,
         };
 
-        await _dbContext.CatTransfers.AddAsync(catTransfer);
-        await _dbContext.SaveChangesAsync();
+        await dbContext.CatTransfers.AddAsync(catTransfer);
+        await dbContext.SaveChangesAsync();
 
         return result.Success(catTransfer);
     }
 
-    public async Task<Result<List<CatTransfer>>> GetTransferRequests(string userId)
+    public async Task<Result<List<CatTransferResultDTO>>> GetTransferRequests(string userId)
     {
-        var result = new Result<List<CatTransfer>>();
+        var result = new Result<List<CatTransferResultDTO>>();
 
-        var catTransfers = await _dbContext.CatTransfers
+        var catTransfers = await dbContext.CatTransfers
             .Include(ct => ct.Cat)
-            .Where(ct => ct.ConfirmerId == userId)
+            .Where(ct => ct.ConfirmerId == userId && !ct.Confirmed)
             .ToListAsync();
 
-        return result.Success(catTransfers);
+        var catTransferResultDTOs = new List<CatTransferResultDTO>();
+
+        foreach (var transfer in catTransfers)
+        {
+            var dto = new CatTransferResultDTO
+            {
+                Id = transfer.Id,
+                CatId = transfer.CatId,
+                Cat = transfer.Cat,
+                RequesterId = transfer.RequesterId,
+                ConfirmerId = transfer.ConfirmerId,
+                Confirmed = transfer.Confirmed,
+                Requester = await userService.GetUserById(transfer.RequesterId)
+            };
+
+            catTransferResultDTOs.Add(dto);
+        }
+
+        return result.Success(catTransferResultDTOs);
     }
+
+
+    public async Task<Result<bool>> ConfirmTransferRequest(string userId, int transferId)
+    {
+        var result = new Result<bool>();
+
+        var transfer = await dbContext.CatTransfers
+       .FirstOrDefaultAsync(ct => ct.Id == transferId && ct.ConfirmerId == userId);
+
+        if (transfer == null)
+        {
+            return result.AddError(CatErrors.NotFound);
+        }
+
+        transfer.Confirmed = true;
+        await dbContext.SaveChangesAsync();
+
+        var updatedCat = dbContext.Cats.FirstOrDefault(c => c.Id == transfer.CatId);
+        updatedCat.OwnerId = transfer.RequesterId;
+        await dbContext.SaveChangesAsync();
+
+        return result.Success(true);
+    }
+
 
     public async Task<Result<List<Cat>>> GetCatsAsync(CatQueryParamsDTO queryParams = null)
     {
         var result = new Result<List<Cat>>();
         queryParams ??= new CatQueryParamsDTO();
 
-        var queryableCats = _dbContext.Cats.AsQueryable();
+        var queryableCats = dbContext.Cats.AsQueryable();
 
 
         if (!string.IsNullOrEmpty(queryParams.Name))
@@ -167,16 +205,16 @@ public class CatService(
     public async Task<Result<List<CatBreed>>> GetBreedsAsync()
     {
         var result = new Result<List<CatBreed>>();
-        var breeds = await _dbContext.CatBreeds.ToListAsync();
+        var breeds = await dbContext.CatBreeds.ToListAsync();
         return result.Success(breeds);
     }
 
     public async Task<Result<bool>> DeleteCatByIdAsync(int catId)
     {
         var result = new Result<bool>();
-        var cat = await _dbContext.Cats.FirstOrDefaultAsync(c => c.Id == catId);
-        _dbContext.Cats.Remove(cat);
-        await _dbContext.SaveChangesAsync();
+        var cat = await dbContext.Cats.FirstOrDefaultAsync(c => c.Id == catId);
+        dbContext.Cats.Remove(cat);
+        await dbContext.SaveChangesAsync();
 
 
         return result.Success(true);
@@ -196,8 +234,8 @@ public class CatService(
             ImageUrl = newCatRequest.ImageUrl
         };
 
-        await _dbContext.Cats.AddAsync(cat);
-        await _dbContext.SaveChangesAsync();
+        await dbContext.Cats.AddAsync(cat);
+        await dbContext.SaveChangesAsync();
 
         if (newCatRequest.MotherId.HasValue)
         {
@@ -209,7 +247,7 @@ public class CatService(
                     ParentId = newCatRequest.MotherId.Value,
                     KittenId = cat.Id
                 };
-                _dbContext.CatRelations.Add(motherRelation);
+                dbContext.CatRelations.Add(motherRelation);
             }
             else
             {
@@ -227,7 +265,7 @@ public class CatService(
                     ParentId = newCatRequest.FatherId.Value,
                     KittenId = cat.Id
                 };
-                _dbContext.CatRelations.Add(fatherRelation);
+                dbContext.CatRelations.Add(fatherRelation);
             }
             else
             {
@@ -235,7 +273,7 @@ public class CatService(
             }
         }
 
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return result.Success(cat);
     }
@@ -244,7 +282,7 @@ public class CatService(
     public async Task<Result<List<Cat>>> GetCatByUserIdAsync(string userId)
     {
         var result = new Result<List<Cat>>();
-        var cats = await _dbContext.Cats.Where(cat => cat.OwnerId == userId).ToListAsync();
+        var cats = await dbContext.Cats.Where(cat => cat.OwnerId == userId).ToListAsync();
         return result.Success(cats);
     }
 }
