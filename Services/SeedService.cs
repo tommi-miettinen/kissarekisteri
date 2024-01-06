@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using CountryData.Bogus;
 using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
@@ -86,53 +87,6 @@ namespace Kissarekisteri.Services
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task SeedUsers()
-        {
-            var userData = new List<UserCreatePayloadDTO>
-            {
-                new()
-                {
-                    MailNickname = "johndoe",
-                    GivenName = "John",
-                    Surname = "Doe",
-                    DisplayName = "John Doe",
-                    Password = "John1234!",
-                    Email = "john.doe@example.com"
-                },
-                new()
-                {
-                    MailNickname = "janedoe",
-                    GivenName = "Jane",
-                    Surname = "Doe",
-                    DisplayName = "Jane Doe",
-                    Password = "Jane1234!",
-                    Email = "jane.doe@example.com"
-                },
-                new()
-                {
-                    MailNickname = "alexsmith",
-                    GivenName = "Alex",
-                    Surname = "Smith",
-                    DisplayName = "Alex Smith",
-                    Password = "Alex1234!",
-                    Email = "alex.smith@example.com"
-                }
-            };
-
-            var existingUsers = await userService.GetUsers();
-
-            var usersToCreate = userData
-                .Where(
-                    newUser =>
-                        !existingUsers.Any(existingUser => existingUser.Email == newUser.Email)
-                )
-                .ToList();
-
-            foreach (var userPayload in usersToCreate)
-            {
-                var createdUser = await userService.CreateUser(userPayload);
-            }
-        }
 
         public async Task SeedCatBreeds()
         {
@@ -153,35 +107,23 @@ namespace Kissarekisteri.Services
             }
         }
 
-        public async Task SeedCatShows()
+        public async Task SeedCatShows(bool deleteExisting = false, int amount = 10)
         {
-            var catShowData = new List<CatShow>
+            if (deleteExisting)
             {
-                new()
-                {
-                    Name = "Kissakilpailu 2021",
-                    Location = "Helsinki",
-                    StartDate = new DateTime(2021, 1, 1),
-                    EndDate = new DateTime(2021, 1, 2),
-                    Description = "Kissakilpailu 2021",
-                },
-                new()
-                {
-                    Name = "Kissakilpailu 2022",
-                    Location = "Helsinki",
-                    StartDate = new DateTime(2022, 1, 1),
-                    EndDate = new DateTime(2022, 1, 2),
-                    Description = "Kissakilpailu 2022",
-                },
-                new()
-                {
-                    Name = "Kissakilpailu 2023",
-                    Location = "Helsinki",
-                    StartDate = new DateTime(2023, 1, 1),
-                    EndDate = new DateTime(2023, 1, 2),
-                    Description = "Kissakilpailu 2023",
-                }
-            };
+                var allCatShows = await dbContext.CatShows.ToListAsync();
+                dbContext.CatShows.RemoveRange(allCatShows);
+                await dbContext.SaveChangesAsync();
+            }
+
+            var catShowFaker = new Faker<CatShow>("fi")
+                .RuleFor(cs => cs.Name, f => f.Country().Finland().Place().Name)
+                .RuleFor(cs => cs.Location, f => f.Address.StreetAddress())
+                .RuleFor(cs => cs.StartDate, f => f.Date.Future(10))
+                .RuleFor(cs => cs.EndDate, f => f.Date.Future(11))
+                .RuleFor(cs => cs.Description, f => f.Lorem.Sentence());
+
+            var catShowData = catShowFaker.Generate(amount);
 
             foreach (CatShow catShow in catShowData)
             {
@@ -199,9 +141,9 @@ namespace Kissarekisteri.Services
             }
 
             var users = await userService.GetUsers();
+            var catBreeds = await dbContext.CatBreeds.ToListAsync();
             var catFaker = new Faker<CatRequest>("fi").CustomInstantiator(f =>
             {
-
                 var gender = f.PickRandom(
                     Bogus.DataSets.Name.Gender.Male,
                     Bogus.DataSets.Name.Gender.Female
@@ -211,7 +153,7 @@ namespace Kissarekisteri.Services
                     OwnerId = users.Any() ? f.PickRandom(users).Id : null,
                     BreederId = users.Any() ? f.PickRandom(users).Id : null,
                     Name = f.Name.FirstName(gender),
-                    Breed = f.Lorem.Word(),
+                    Breed = catBreeds.Any() ? f.PickRandom(catBreeds).Name : "Siamese",
                     BirthDate = f.Date.Past(10),
                     Sex = gender == Bogus.DataSets.Name.Gender.Male ? "Male" : "Female",
                     ImageUrl =

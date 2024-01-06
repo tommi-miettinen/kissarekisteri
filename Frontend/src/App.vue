@@ -17,7 +17,7 @@ const focusMainContent = () => document.querySelector("main")?.focus();
   <button @keyup.enter="focusMainContent" @click="focusMainContent" class="skip-link rounded-3 focus-ring btn bg-white">
     Skip to Main Content
   </button>
-  <div style="height: 100vh; max-height: 100vh" class="d-flex flex-column align-items-center">
+  <div style="height: 100dvh" class="d-flex flex-column align-items-center flex-grow-1">
     <Navigation />
     <Toaster closeButton :expand="true" :position="toastPosition" />
     <main id="maincontent" tabIndex="-1" class="d-flex flex-column overflow-auto w-100 h-100 overflow-auto">

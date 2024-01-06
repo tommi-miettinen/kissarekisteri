@@ -175,7 +175,7 @@ const requestsRef = ref<HTMLDivElement>();
       </div>
       <Dropdown :placement="'bottom-end'" :triggerRef="requestsRef">
         <template v-if="user">
-          <div class="d-flex flex-column z-100 bg-white" style="width: 450px; max-width: 800px">
+          <div class="d-flex flex-column z-100 bg-white" style="max-width: 450px">
             <div v-if="confirmationRequests && confirmationRequests.length > 0">
               <div style="max-height: 600px" class="text-break overflow-auto d-flex flex-column">
                 <div v-for="request in confirmationRequests">

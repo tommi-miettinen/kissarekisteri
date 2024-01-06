@@ -76,7 +76,6 @@ public class UserController(
     [HttpPost("seed")]
     public async Task<ActionResult<List<UserResponse>>> SeedUsers()
     {
-        await seedService.SeedUsers();
         await seedService.SeedCatBreeds();
         await seedService.SeedCats();
         await seedService.SeedCatShows();

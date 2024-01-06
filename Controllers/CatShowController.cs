@@ -14,7 +14,7 @@ namespace Kissarekisteribackend.Controllers;
 
 [ApiController]
 [Route("api/catshows")]
-public class CatShowController(CatShowService catShowService) : Controller
+public class CatShowController(CatShowService catShowService, SeedService seedService) : Controller
 {
     [Authorize]
     [HttpPost("{catShowId}/join")]
@@ -37,6 +37,20 @@ public class CatShowController(CatShowService catShowService) : Controller
         await catShowService.LeaveCatShowAsync(catShowId, userId);
 
         return Ok("Left cat show successfully");
+    }
+
+    [HttpPost("seed")]
+    public async Task<ActionResult> Seed()
+    {
+        try
+        {
+            await seedService.SeedCatShows(true, 20);
+            return Ok();
+        }
+        catch (System.Exception e)
+        {
+            return Json(e.ToString());
+        }
     }
 
     [HttpGet]

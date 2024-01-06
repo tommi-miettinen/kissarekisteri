@@ -75,9 +75,9 @@ watchEffect(() => {
         <slot :item="item"></slot>
       </div>
     </div>
-    <div class="d-flex m-2 mt-auto">
+    <div class="d-flex m-2 mt-auto flex-wrap">
       <nav aria-label="Page navigation" class="me-auto mt-auto">
-        <div class="d-flex gap-1">
+        <div class="d-flex flex-wrap gap-1">
           <li
             tabindex="0"
             @keyup.enter="goToPage(page)"

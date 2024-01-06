@@ -106,22 +106,21 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
 
 <template>
   <h3 v-if="isUserError" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
-  <div v-if="user" class="w-100 h-100 d-flex justify-content-center sm-p-5">
-    <div class="p-4 p-sm-5 rounded col-12 col-lg-8">
-      <div class="d-flex flex-column" v-if="user">
-        <div class="d-flex align-items-center gap-2 mb-4">
-          <div class="d-flex align-items-center">
-            <div
-              style="width: 32px; height: 32px; font-size: 14px"
-              class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
-            >
-              {{ user.givenName[0] + user.surname[0] }}
-            </div>
+  <div v-if="user" class="w-100 h-100 flex-column d-flex p-sm-5">
+    <div class="p-sm-5 rounded col-12 col-lg-8 h-100 d-flex flex-column p-3 mx-auto">
+      <div v-if="user" class="d-flex align-items-center gap-2 mb-4">
+        <div class="d-flex align-items-center">
+          <div
+            style="width: 32px; height: 32px; font-size: 14px"
+            class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
+          >
+            {{ user.givenName[0] + user.surname[0] }}
           </div>
-          <h3>{{ `${user.givenName}  ${user.surname}` }}</h3>
         </div>
+        <h3>{{ `${user.givenName}  ${user.surname}` }}</h3>
       </div>
-      <div class="d-flex flex-column rounded h-100 pb-5">
+
+      <div class="d-flex flex-column rounded h-100 flex-grow-1">
         <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
         <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats" :items="cats" :itemsPerPage="6">
           <template v-slot="{ item: cat }">
@@ -155,7 +154,7 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
                       tabIndex="0"
                       class="dropdown-item"
                       data-testid="start-cat-delete"
-                      @keyup.enter.stop="toggleAction(ActionType.DELETING_CAT, cat.id)"
+                      @keyup.enter="toggleAction(ActionType.DELETING_CAT, cat.id)"
                       @click.stop="toggleAction(ActionType.DELETING_CAT, cat.id)"
                     >
                       Poista
