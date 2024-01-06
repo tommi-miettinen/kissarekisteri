@@ -120,7 +120,7 @@ const requestsRef = ref<HTMLDivElement>();
           />
           <div
             style="width: 32px; height: 32px; font-size: 14px"
-            class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
+            class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold text-uppercase"
             v-else
           >
             {{ user.givenName[0] + user.surname[0] }}
@@ -175,14 +175,14 @@ const requestsRef = ref<HTMLDivElement>();
       </div>
       <Dropdown :placement="'bottom-end'" :triggerRef="requestsRef">
         <template v-if="user">
-          <div class="d-flex flex-column z-100 bg-white" style="max-width: 600px">
+          <div class="d-flex flex-column z-100 bg-white" style="width: 450px; max-width: 800px">
             <div v-if="confirmationRequests && confirmationRequests.length > 0">
-              <div class="text-break">
+              <div style="max-height: 600px" class="text-break overflow-auto d-flex flex-column">
                 <div v-for="request in confirmationRequests">
                   <div class="p-3 d-flex align-items-center gap-2">
                     <span>
                       <a class="cursor-pointer link-underline-primary" @click="navigateTo(`/users/${request.requester.id}`)">{{
-                        request.requester.givenName
+                        request.requester?.givenName
                       }}</a>
                       pyytää omistajuutta kissalle
                       <a class="cursor-pointer link-underline-primary" @click="navigateTo(`/cats/${request.cat.id}`)">{{

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watchEffect } from "vue";
+import { ref, watchEffect, computed } from "vue";
 
 const roles = ["Admin", "EventOrganizer", "User"];
 
@@ -24,6 +24,19 @@ watchEffect(() => {
     };
   }
 });
+
+const createUserPayload = computed(() => {
+  const name = newUser.value.name.split(" ");
+  const payload: UserPayload = {
+    MailNickname: name[0] + name[1],
+    GivenName: name[0],
+    Surname: name[1],
+    DisplayName: newUser.value.name,
+    Password: newUser.value.password,
+    Email: name[0] + "." + name[1] + "@gmail.com",
+  };
+  return payload;
+});
 </script>
 
 <template>
@@ -45,6 +58,6 @@ watchEffect(() => {
       </select>
     </div>
 
-    <button @click="$emit('onSave', newUser)" class="btn btn-primary">Lisää käyttäjä</button>
+    <button @click="$emit('onSave', createUserPayload)" class="btn btn-primary">Lisää käyttäjä</button>
   </div>
 </template>

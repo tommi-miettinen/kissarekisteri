@@ -196,7 +196,7 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
                     <li
                       tabindex="0"
                       @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
-                      @click="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
+                      @click.stop="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
                       class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                     >
                       Ensimmäinen
@@ -204,7 +204,7 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
                     <li
                       tabindex="0"
                       @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
-                      @click="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
+                      @click.stop="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
                       class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                     >
                       Toinen
@@ -212,7 +212,7 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
                     <li
                       tabindex="0"
                       @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
-                      @click="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
+                      @click.stop="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
                       class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                     >
                       Kolmas

@@ -14,10 +14,13 @@ namespace Kissarekisteri.Services
         KissarekisteriDbContext dbContext,
         UserService userService,
         UploadService uploadService
-        )
+    )
     {
-
-        public async Task<Result<bool>> JoinCatShowAsync(int catShowId, string userId, CatShowCatAttendeeIds catIds)
+        public async Task<Result<bool>> JoinCatShowAsync(
+            int catShowId,
+            string userId,
+            CatShowCatAttendeeIds catIds
+        )
         {
             var result = new Result<bool>();
             var catShow = dbContext.CatShows.FirstOrDefault(e => e.Id == catShowId);
@@ -25,32 +28,25 @@ namespace Kissarekisteri.Services
             {
                 return result.AddError(CatShowErrors.NotFound);
             }
-            var attendee = new Attendee
-            {
-                UserId = userId,
-                EventId = catShowId
-
-            };
+            var attendee = new Attendee { UserId = userId, EventId = catShowId };
             dbContext.Attendees.Add(attendee);
             await dbContext.SaveChangesAsync();
-
 
             foreach (var catId in catIds.CatIds)
             {
                 var cat = dbContext.Cats.FirstOrDefault(c => c.Id == catId);
                 if (cat != null)
                 {
-                    dbContext.CatAttendees.Add(new CatAttendee
-                    {
-                        AttendeeId = attendee.Id,
-                        CatId = catId,
-                        EventId = catShowId,
-
-                    });
+                    dbContext.CatAttendees.Add(
+                        new CatAttendee
+                        {
+                            AttendeeId = attendee.Id,
+                            CatId = catId,
+                            EventId = catShowId,
+                        }
+                    );
                     await dbContext.SaveChangesAsync();
-
                 }
-
             }
             return result.Success(true);
         }
@@ -66,8 +62,9 @@ namespace Kissarekisteri.Services
                 return result.AddError(CatShowErrors.NotFound);
             }
 
-            var attendee = await dbContext.Attendees
-                .FirstOrDefaultAsync(a => a.UserId == userId && a.EventId == catShowId);
+            var attendee = await dbContext.Attendees.FirstOrDefaultAsync(
+                a => a.UserId == userId && a.EventId == catShowId
+            );
 
             if (attendee == null)
             {
@@ -93,22 +90,23 @@ namespace Kissarekisteri.Services
             return catShows;
         }
 
-
         public async Task<CatShow> UploadCatShowPhoto(int catShowId, IFormFile file)
         {
-            var cat = await dbContext.CatShows.FirstOrDefaultAsync(catShow => catShow.Id == catShowId);
+            var cat = await dbContext.CatShows.FirstOrDefaultAsync(
+                catShow => catShow.Id == catShowId
+            );
 
             var uploadedPhoto = await uploadService.UploadFile(file);
 
-            await dbContext.CatShowPhotos.AddAsync(new CatShowPhoto
-            {
-                CatShowId = cat.Id,
-                Url = uploadedPhoto.Uri.AbsoluteUri
-            });
+            await dbContext.CatShowPhotos.AddAsync(
+                new CatShowPhoto { CatShowId = cat.Id, Url = uploadedPhoto.Uri.AbsoluteUri }
+            );
 
             await dbContext.SaveChangesAsync();
 
-            var catShowWithPhotos = await dbContext.CatShows.Include(c => c.Photos).FirstOrDefaultAsync(catShow => catShow.Id == catShowId);
+            var catShowWithPhotos = await dbContext.CatShows
+                .Include(c => c.Photos)
+                .FirstOrDefaultAsync(catShow => catShow.Id == catShowId);
 
             return catShowWithPhotos;
         }
@@ -116,13 +114,15 @@ namespace Kissarekisteri.Services
         public async Task<CatShow> GetCatShowByIdAsync(int catShowId)
         {
             var catShow = await dbContext.CatShows
-                .Include(e => e.Attendees).ThenInclude(a => a.CatAttendees).ThenInclude(c => c.Cat)
+                .Include(e => e.Attendees)
+                .ThenInclude(a => a.CatAttendees)
+                .ThenInclude(c => c.Cat)
                 .Include(e => e.Photos)
                 .Include(e => e.Results)
                 .FirstOrDefaultAsync(e => e.Id == catShowId);
 
-            if (catShow == null) return null;
-
+            if (catShow == null)
+                return null;
 
             catShow.Attendees.ForEach(async attendee =>
             {
@@ -131,13 +131,15 @@ namespace Kissarekisteri.Services
                 {
                     attendee.User = user;
                 }
-
             });
 
             return catShow;
         }
 
-        public async Task<Result<CatShowResult>> AssignCatPlacing(int catShowId, CatShowResultDTO newPlacing)
+        public async Task<Result<CatShowResult>> AssignCatPlacing(
+            int catShowId,
+            CatShowResultDTO newPlacing
+        )
         {
             var result = new Result<CatShowResult>();
             var catShow = await dbContext.CatShows.AnyAsync(e => e.Id == catShowId);
@@ -147,21 +149,36 @@ namespace Kissarekisteri.Services
                 return result.AddError(CatShowErrors.NotFound);
             }
 
-            var catShowResult = await dbContext.CatShowResults.AddAsync(new CatShowResult
-            {
-                CatId = newPlacing.CatId,
-                Breed = newPlacing.Breed,
-                CatShowId = catShowId,
-                Place = (Place)newPlacing.Place
-            });
-            await dbContext.SaveChangesAsync();
+            var existingCatShowResult = await dbContext.CatShowResults.FirstOrDefaultAsync(
+                e => e.CatId == newPlacing.CatId && e.CatShowId == catShowId
+            );
 
-            return result.Success(catShowResult.Entity);
+            if (existingCatShowResult != null)
+            {
+                existingCatShowResult.Place = (Place)newPlacing.Place;
+                result.Success(existingCatShowResult);
+            }
+            else
+            {
+                var catShowResult = await dbContext.CatShowResults.AddAsync(
+                    new CatShowResult
+                    {
+                        CatId = newPlacing.CatId,
+                        Breed = newPlacing.Breed,
+                        CatShowId = catShowId,
+                        Place = (Place)newPlacing.Place
+                    }
+                );
+
+                result = result.Success(catShowResult.Entity);
+            }
+
+            await dbContext.SaveChangesAsync();
+            return result;
         }
 
         public async Task<CatShow> CreateCatShow(CatShow newCatShow)
         {
-
             var catShow = await dbContext.CatShows.AddAsync(newCatShow);
             await dbContext.SaveChangesAsync();
 
@@ -169,4 +186,3 @@ namespace Kissarekisteri.Services
         }
     }
 }
-

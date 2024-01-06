@@ -115,9 +115,12 @@ public class CatService(
     {
         var result = new Result<List<CatTransferResultDTO>>();
 
+        var user = await userService.GetUserById(userId);
+
         var catTransfers = await dbContext.CatTransfers
             .Include(ct => ct.Cat)
-            .Where(ct => ct.ConfirmerId == userId && !ct.Confirmed)
+            .Where(ct => !ct.Confirmed)
+            .Where(ct => ct.ConfirmerId == userId || user.UserRole.Role.Name == "Admin")
             .ToListAsync();
 
         var catTransferResultDTOs = new List<CatTransferResultDTO>();
@@ -146,8 +149,13 @@ public class CatService(
     {
         var result = new Result<bool>();
 
+        var user = await userService.GetUserById(userId);
+
         var transfer = await dbContext.CatTransfers
-       .FirstOrDefaultAsync(ct => ct.Id == transferId && ct.ConfirmerId == userId);
+           .FirstOrDefaultAsync(ct =>
+               (ct.Id == transferId && ct.ConfirmerId == userId) ||
+               (ct.Id == transferId && user.UserRole.Role.Name == "Admin")
+           );
 
         if (transfer == null)
         {

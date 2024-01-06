@@ -109,3 +109,12 @@ interface CatTransferRequest {
   requesterId: string;
   confirmed: boolean;
 }
+
+interface UserPayload {
+  MailNickname: string;
+  GivenName: string;
+  Surname: string;
+  DisplayName: string;
+  Password: string;
+  Email: string;
+}

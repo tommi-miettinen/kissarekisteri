@@ -26,7 +26,7 @@ const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
       <div class="col d-flex align-items-center gap-2 col-8">
         <div
           style="width: 32px; height: 32px; font-size: 14px"
-          class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
+          class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold text-uppercase"
         >
           {{ user.givenName[0] + user.surname[0] }}
         </div>

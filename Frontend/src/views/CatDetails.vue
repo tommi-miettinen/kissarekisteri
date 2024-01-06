@@ -91,7 +91,7 @@ watch(route, () => refetch());
             @click="requestOwnershipTransfer"
             class="btn border rounded-3 px-5 py-2 btn-border focus-ring mt-auto ms-auto"
           >
-            Pyydä omistajuutta
+            {{ cat.owner ? "Pyydä omistajuutta" : "Ilmottaudu omistajaksi" }}
           </button>
         </div>
       </div>

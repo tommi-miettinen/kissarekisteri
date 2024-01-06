@@ -22,6 +22,7 @@ const dropdownContentRef = ref<HTMLDivElement>();
 
 const closeDropdownIfClickedOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
+  console.log("closing");
   if (!dropdownContentRef.value?.contains(target) && !props.triggerRef?.contains(target)) {
     dropdown.value?.hide();
   }
@@ -31,7 +32,6 @@ watch(
   () => props.triggerRef,
   () => {
     if (!props.triggerRef) return console.error("Trigger ref is null");
-
     if (dropdown.value) return console.log("Dropdown already initialized");
 
     dropdown.value = new Dropdown(props.triggerRef!, {
@@ -41,18 +41,9 @@ watch(
       },
     });
 
-    props.triggerRef.onclick = () => (props.visible ? dropdown.value?.toggle() : null);
-
-    props.triggerRef.onkeyup = (e) => {
-      if (e.key === "Enter" || e.key === "Escape") {
-        dropdown.value?.toggle();
-      }
-    };
-
-    props.triggerRef?.addEventListener("hide.bs.dropdown", () => {
-      console.log("HIDING");
-      emit("onCancel");
-    });
+    props.triggerRef.onclick = () => dropdown.value?.toggle();
+    props.triggerRef.onkeyup = (e) => e.key === "Escape" && dropdown.value?.toggle();
+    props.triggerRef?.addEventListener("hide.bs.dropdown", () => emit("onCancel"));
   }
 );
 
@@ -67,13 +58,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div
-    :class="{ invisible: !props.visible }"
-    ref="dropdownContentRef"
-    tabIndex="0"
-    @blur="dropdown?.toggle()"
-    class="dropdown-menu border p-1 rounded-3"
-  >
+  <div :class="{ invisible: !props.visible }" ref="dropdownContentRef" tabIndex="0" class="dropdown-menu border p-1 rounded-3">
     <slot></slot>
   </div>
 </template>

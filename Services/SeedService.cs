@@ -1,7 +1,9 @@
-﻿using Kissarekisteri.Database;
+﻿using Bogus;
+using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
 using Kissarekisteri.RBAC;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -47,8 +49,6 @@ namespace Kissarekisteri.Services
             await dbContext.SaveChangesAsync();
         }
 
-
-
         public async Task SeedRolePermissions()
         {
             var roles = RolePermissionSeed.GetSeedData();
@@ -65,7 +65,8 @@ namespace Kissarekisteri.Services
 
                     if (
                         !dbContext.RolePermissions.Any(
-                            rp => rp.RoleId == roleEntity.Id && rp.PermissionId == permissionEntity.Id
+                            rp =>
+                                rp.RoleId == roleEntity.Id && rp.PermissionId == permissionEntity.Id
                         )
                     )
                     {
@@ -84,6 +85,7 @@ namespace Kissarekisteri.Services
 
             await dbContext.SaveChangesAsync();
         }
+
         public async Task SeedUsers()
         {
             var userData = new List<UserCreatePayloadDTO>
@@ -126,11 +128,9 @@ namespace Kissarekisteri.Services
                 )
                 .ToList();
 
-
             foreach (var userPayload in usersToCreate)
             {
                 var createdUser = await userService.CreateUser(userPayload);
-
             }
         }
 
@@ -189,46 +189,38 @@ namespace Kissarekisteri.Services
             }
         }
 
-        public async Task<List<Cat>> SeedCats()
+        public async Task<List<Cat>> SeedCats(bool deleteExisting = false, int amount = 10)
         {
-            var users = await userService.GetUsers();
-            var random = new Random();
-            var catData = new List<CatRequest>
+            if (deleteExisting)
             {
-                new()
+                var allCats = await dbContext.Cats.ToListAsync();
+                dbContext.Cats.RemoveRange(allCats);
+                await dbContext.SaveChangesAsync();
+            }
+
+            var users = await userService.GetUsers();
+            var catFaker = new Faker<CatRequest>("fi").CustomInstantiator(f =>
+            {
+
+                var gender = f.PickRandom(
+                    Bogus.DataSets.Name.Gender.Male,
+                    Bogus.DataSets.Name.Gender.Female
+                );
+                var catRequest = new CatRequest
                 {
-                    OwnerId = users[random.Next(users.Count)].Id,
-                    BreederId = users[random.Next(users.Count)].Id,
-                    Name = "Misse",
-                    Breed = "Persian",
-                    BirthDate = new DateTime(2019, 1, 1),
-                    Sex = "male",
+                    OwnerId = users.Any() ? f.PickRandom(users).Id : null,
+                    BreederId = users.Any() ? f.PickRandom(users).Id : null,
+                    Name = f.Name.FirstName(gender),
+                    Breed = f.Lorem.Word(),
+                    BirthDate = f.Date.Past(10),
+                    Sex = gender == Bogus.DataSets.Name.Gender.Male ? "Male" : "Female",
                     ImageUrl =
                         "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg"
-                },
-                new()
-                {
-                    OwnerId = users[random.Next(users.Count)].Id,
-                    BreederId = users[random.Next(users.Count)].Id,
-                    Name = "Mouru",
-                    Breed = "Maine Coon",
-                    BirthDate = new DateTime(2019, 1, 1),
-                    Sex = "female",
-                    ImageUrl =
-                        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg"
-                },
-                new()
-                {
-                    OwnerId = users[random.Next(users.Count)].Id,
-                    BreederId = users[random.Next(users.Count)].Id,
-                    Name = "Mauku",
-                    Breed = "Maine Coon",
-                    BirthDate = new DateTime(2019, 1, 1),
-                    Sex = "female",
-                    ImageUrl =
-                        "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg"
-                }
-            };
+                };
+                return catRequest;
+            });
+
+            var catData = catFaker.Generate(amount);
 
             var existingCats = await catService.GetCatsAsync();
 

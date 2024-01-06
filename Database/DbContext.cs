@@ -47,7 +47,8 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .Entity<CatTransfer>()
             .HasOne(ct => ct.Cat)
             .WithOne()
-            .HasForeignKey<CatTransfer>(ct => ct.CatId);
+            .HasForeignKey<CatTransfer>(ct => ct.CatId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder
             .Entity<Cat>()

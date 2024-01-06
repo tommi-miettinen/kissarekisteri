@@ -14,7 +14,7 @@ namespace Kissarekisteribackend.Controllers;
 
 [ApiController]
 [Route("api/cats")]
-public class CatController(CatService catService) : Controller
+public class CatController(CatService catService, SeedService seedService) : Controller
 {
     /// <summary>
     /// Retrieves all cats with optional filters.
@@ -33,6 +33,20 @@ public class CatController(CatService catService) : Controller
     {
         var cats = await catService.GetCatsAsync(queryParameters);
         return Json(cats);
+    }
+
+    [HttpPost("seed")]
+    public async Task<ActionResult> Seed()
+    {
+        try
+        {
+            await seedService.SeedCats(true, 200);
+            return Ok();
+        }
+        catch (System.Exception e)
+        {
+            return Json(e.ToString());
+        }
     }
 
     /// <summary>

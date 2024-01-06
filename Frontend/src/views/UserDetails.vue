@@ -144,7 +144,7 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
                   </button>
                   <Dropdown :visible="!isMobile" :placement="'left-start'" :triggerRef="catListItemRefs[cat.id]">
                     <li
-                      @keyup.enter="toggleAction(ActionType.EDITING_CAT, cat)"
+                      @keyup.enter.stop="toggleAction(ActionType.EDITING_CAT, cat)"
                       @click.stop="toggleAction(ActionType.EDITING_CAT, cat)"
                       tabIndex="0"
                       class="dropdown-item"
@@ -155,7 +155,7 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
                       tabIndex="0"
                       class="dropdown-item"
                       data-testid="start-cat-delete"
-                      @keyup.enter="toggleAction(ActionType.DELETING_CAT, cat.id)"
+                      @keyup.enter.stop="toggleAction(ActionType.DELETING_CAT, cat.id)"
                       @click.stop="toggleAction(ActionType.DELETING_CAT, cat.id)"
                     >
                       Poista

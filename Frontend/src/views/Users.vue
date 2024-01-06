@@ -59,6 +59,20 @@ const deleteUserMutation = useMutation({
   },
 });
 
+const createUserMutation = useMutation({
+  mutationFn: (user: UserPayload) => userAPI.createUser(user),
+  onSuccess: () => {
+    toast.info("Käyttäjä lisätty");
+    userQuery.refetch();
+    removeAction(ActionType.ADDING_USER_MOBILE);
+    removeAction(ActionType.ADDING_USER);
+  },
+  onError: () => {
+    removeAction(ActionType.ADDING_USER_MOBILE);
+    removeAction(ActionType.ADDING_USER);
+  },
+});
+
 const isMobile = computed(() => useWindowSize().width.value < 768);
 
 const startDeletingUser = (user: User) => {
@@ -87,24 +101,33 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
         <template v-slot="{ item: user }">
           <UserListItem :user="user">
             <template v-slot:actions>
-              <div @click.stop="startSelectingUserAction(user)" :ref="el => userListItemRefs[user.id] = el as HTMLElement">
-                <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1" type="button">
-                  <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                    <path
-                      d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                    />
-                  </svg>
-                </button>
-                <Dropdown
-                  @onCancel="removeAction(ActionType.SELECTING_USER_ACTION)"
-                  :visible="!isMobile"
-                  :triggerRef="userListItemRefs[user.id]"
-                  :placement="'left-start'"
-                >
-                  <li @click="startEditingUser(user)" tabIndex="0" class="dropdown-item">Muokkaa</li>
-                  <li @click="startDeletingUser(user)" tabIndex="0" class="dropdown-item" data-testid="start-cat-delete">Poista</li>
-                </Dropdown>
-              </div>
+              <button
+                @keyup.enter.stop="startSelectingUserAction(user)"
+                @click.stop="startSelectingUserAction(user)"
+                :ref="el => userListItemRefs[user.id] = el as HTMLElement"
+                tabindex="0"
+                class="btn py-1 px-2 accordion d-flex focus-ring rounded-1"
+                type="button"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
+                  <path
+                    d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
+                  />
+                </svg>
+              </button>
+              <Dropdown
+                @onCancel="removeAction(ActionType.SELECTING_USER_ACTION)"
+                :visible="!isMobile"
+                :triggerRef="userListItemRefs[user.id]"
+                :placement="'left-start'"
+              >
+                <li tabIndex="0" @keydown.enter.stop="startEditingUser(user)" @click="startEditingUser(user)" class="dropdown-item">
+                  Muokkaa
+                </li>
+                <li tabIndex="0" @keydown.enter.stop="startDeletingUser(user)" @click="startDeletingUser(user)" class="dropdown-item">
+                  Poista
+                </li>
+              </Dropdown>
             </template>
           </UserListItem>
         </template>
@@ -138,25 +161,36 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.ADDING_USER) && !isMobile" @onCancel="removeAction(ActionType.ADDING_USER)">
     <div style="width: 550px">
-      <UserForm @onSave="isCurrentAction(ActionType.NONE)" />
+      <UserForm @onSave="createUserMutation.mutate" />
     </div>
   </Modal>
   <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.ADDING_USER_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
-    <UserForm @onSave="isCurrentAction(ActionType.NONE)" />
+    <UserForm @onSave="createUserMutation.mutate" />
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.EDITING_USER) && !isMobile" @onCancel="removeAction(ActionType.EDITING_USER)">
     <div style="width: 550px">
       <UserForm :user="userToBeEdited" @onSave="isCurrentAction(ActionType.NONE)" />
     </div>
   </Modal>
-  <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.EDITING_USER_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
+  <Drawer
+    :fullsize="true"
+    :visible="isCurrentAction(ActionType.EDITING_USER_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionType.EDITING_USER_MOBILE)"
+  >
     <UserForm :user="userToBeEdited" @onSave="isCurrentAction(ActionType.NONE)" />
   </Drawer>
-  <Modal :visible="isCurrentAction(ActionType.DELETING_USER)" @onCancel="toggleAction(ActionType.NONE)">
+  <Modal :visible="isCurrentAction(ActionType.DELETING_USER)" @onCancel="removeAction(ActionType.DELETING_USER)">
     <div v-if="userToBeDeleted" style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
       <p>Poistetaanko käyttäjä? {{ userToBeDeleted.givenName }}</p>
       <div class="d-flex gap-2 justify-content-end">
-        <button type="button" class="btn btn-secondary" @click="toggleAction(ActionType.NONE)">Peruuta</button>
+        <button
+          @keyup.enter="removeAction(ActionType.DELETING_USER)"
+          type="button"
+          class="btn btn-secondary"
+          @click.stop="removeAction(ActionType.DELETING_USER)"
+        >
+          Peruuta
+        </button>
         <button @click="deleteUserMutation.mutate" type="button" class="btn btn-danger">Poista</button>
       </div>
     </div>
