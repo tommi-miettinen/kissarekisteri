@@ -26,11 +26,7 @@ onMounted(() => {
 
 watch(
   () => props.visible,
-  (newVal) => {
-    if (modal.value) {
-      newVal ? modal.value.show() : modal.value.hide();
-    }
-  }
+  (newVal) => (newVal ? modal.value?.show() : modal.value?.hide())
 );
 
 onUnmounted(() => modalRef.value?.removeEventListener("hide.bs.modal", close));

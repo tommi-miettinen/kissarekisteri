@@ -87,7 +87,7 @@ builder.Services
     });
 
 builder.Services.AddDbContext<KissarekisteriDbContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DevelopmentSQL"))
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSQL"))
 );
 
 builder.Services
@@ -128,9 +128,7 @@ if (app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
-
         context.Database.EnsureCreated();
-
     }
 }
 

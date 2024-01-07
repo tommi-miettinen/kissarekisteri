@@ -4,6 +4,10 @@ import { Dropdown } from "bootstrap";
 import { Placement } from "@popperjs/core/lib/enums";
 
 const props = defineProps({
+  autoClose: {
+    type: Boolean,
+    default: true,
+  },
   triggerRef: HTMLElement,
   visible: {
     type: Boolean,
@@ -22,6 +26,7 @@ const dropdownContentRef = ref<HTMLDivElement>();
 
 const closeDropdownIfClickedOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
+
   if (!dropdownContentRef.value?.contains(target) && !props.triggerRef?.contains(target)) {
     dropdown.value?.hide();
   }
@@ -46,17 +51,18 @@ watch(
   }
 );
 
-onMounted(() => {
-  document.addEventListener("click", closeDropdownIfClickedOutside);
-});
-
-onBeforeUnmount(() => {
-  document.removeEventListener("click", closeDropdownIfClickedOutside);
-});
+onMounted(() => document.addEventListener("click", closeDropdownIfClickedOutside));
+onBeforeUnmount(() => document.removeEventListener("click", closeDropdownIfClickedOutside));
 </script>
 
 <template>
-  <div :class="{ invisible: !props.visible }" ref="dropdownContentRef" tabIndex="0" class="dropdown-menu border p-1 rounded-3">
+  <div
+    @click.stop="props.autoClose && triggerRef?.click()"
+    :class="{ invisible: !props.visible }"
+    ref="dropdownContentRef"
+    tabIndex="0"
+    class="dropdown-menu border p-1 rounded-3"
+  >
     <slot></slot>
   </div>
 </template>

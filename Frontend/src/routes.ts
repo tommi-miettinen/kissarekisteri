@@ -27,6 +27,7 @@ const router = createRouter({
 });
 
 router.beforeEach((_, __, next) => {
+  console.log(actionStack.value);
   if (actionStack.value.length > 0) {
     popAction();
     next(false);

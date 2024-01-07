@@ -14,7 +14,7 @@ import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
 import { useWindowSize } from "@vueuse/core";
 import Dropdown from "../components/Dropdown.vue";
-import { popAction, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { QueryKeys } from "../api/queryKeys";
 
 const { t } = useI18n();
@@ -28,24 +28,13 @@ enum ActionType {
   ADDING_CAT = "ADDING_CAT",
   ADDING_CAT_MOBILE = "ADDING_CAT_MOBILE",
   EDITING_AVATAR = "EDITING_AVATAR",
-  SELECTING_ACTION = "SELECTING_ACTION",
+  SELECTING_CAT_ACTION = "SELECTING_CAT_ACTION",
+  SELECTING_CAT_ACTION_MOBILE = "SELECTING_CAT_ACTION_MOBILE",
 }
 
-const toggleAction = (actionType: ActionType, item = null) => {
-  if (actionType === ActionType.NONE) {
-    popAction();
-  }
-  if (actionType !== ActionType.NONE) {
-    if (!isCurrentAction(actionType)) pushAction(actionType);
-  }
-  if (currentItem.value === item) {
-    currentItem.value = null;
-  } else {
-    currentItem.value = item;
-  }
-};
-
-const currentItem = ref<any>(null);
+const catToBeDeleted = ref<Cat>();
+const catToBeEdited = ref<Cat>();
+const catForActionToBeSelected = ref<Cat>();
 
 const {
   data: user,
@@ -74,17 +63,18 @@ const addCatMutation = useMutation({
   onSuccess: () => {
     toast.success("Kissan tiedot lisätty");
     refetchCats();
-    toggleAction(ActionType.NONE);
+    removeAction(ActionType.ADDING_CAT);
+    removeAction(ActionType.ADDING_CAT_MOBILE);
   },
   onError: () => toast.error("Jokin meni vikaan."),
 });
 
 const deleteMutation = useMutation({
-  mutationFn: (catId: number) => catAPI.deleteCatById(catId),
+  mutationFn: () => catAPI.deleteCatById(catToBeDeleted.value!.id),
   onSuccess: () => {
     toast.success("Kissan tiedot poistettu");
     refetchCats();
-    toggleAction(ActionType.NONE);
+    removeAction(ActionType.DELETING_CAT);
   },
   onError: () => toast.error("Jokin meni vikaan."),
 });
@@ -102,6 +92,25 @@ const editCat = async (updatedCat: EditCatPayload) => {
 };
 
 const catListItemRefs = ref<Record<number, HTMLElement>>({});
+
+const startDeletingCat = (cat: Cat) => {
+  catToBeDeleted.value = cat;
+  pushAction(ActionType.DELETING_CAT);
+};
+
+const startSelectingCatAction = (cat: Cat) => {
+  catForActionToBeSelected.value = cat;
+  pushAction(isMobile.value ? ActionType.SELECTING_CAT_ACTION_MOBILE : ActionType.SELECTING_CAT_ACTION);
+};
+
+const startEditingCat = (cat: Cat) => {
+  catToBeEdited.value = cat;
+  pushAction(isMobile.value ? ActionType.EDITING_CAT_MOBILE : ActionType.EDITING_CAT);
+};
+
+const startAddingCat = () => {
+  pushAction(isMobile.value ? ActionType.ADDING_CAT_MOBILE : ActionType.ADDING_CAT);
+};
 </script>
 
 <template>
@@ -122,7 +131,7 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
 
       <div class="d-flex flex-column rounded h-100 flex-grow-1">
         <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
-        <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats" :items="cats" :itemsPerPage="6">
+        <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats" :items="cats" :itemsPerPage="isMobile ? 8 : 6">
           <template v-slot="{ item: cat }">
             <CatListItem :key="cat.id" :cat="cat">
               <template #actions>
@@ -131,7 +140,7 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
                   @keyup.enter.stop
                   v-if="userIsLoggedInUser"
                   data-testid="cat-options"
-                  @click.stop="toggleAction(ActionType.SELECTING_ACTION, cat)"
+                  @click.stop="startSelectingCatAction(cat)"
                   class="d-flex"
                 >
                   <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1" type="button">
@@ -141,21 +150,26 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
                       />
                     </svg>
                   </button>
-                  <Dropdown :visible="!isMobile" :placement="'left-start'" :triggerRef="catListItemRefs[cat.id]">
+                  <Dropdown
+                    @onCancel="removeAction(ActionType.SELECTING_CAT_ACTION)"
+                    :visible="!isMobile"
+                    :placement="'left-start'"
+                    :triggerRef="catListItemRefs[cat.id]"
+                  >
                     <li
-                      @keyup.enter.stop="toggleAction(ActionType.EDITING_CAT, cat)"
-                      @click.stop="toggleAction(ActionType.EDITING_CAT, cat)"
+                      @keyup.enter.stop="startEditingCat(cat)"
+                      @click="startEditingCat(cat)"
                       tabIndex="0"
-                      class="dropdown-item"
+                      class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                     >
                       Muokkaa
                     </li>
                     <li
                       tabIndex="0"
-                      class="dropdown-item"
+                      class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                       data-testid="start-cat-delete"
-                      @keyup.enter="toggleAction(ActionType.DELETING_CAT, cat.id)"
-                      @click.stop="toggleAction(ActionType.DELETING_CAT, cat.id)"
+                      @keyup.enter="startDeletingCat(cat)"
+                      @click="startDeletingCat(cat)"
                     >
                       Poista
                     </li>
@@ -167,11 +181,11 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
           <template #action>
             <button
               v-if="userIsLoggedInUser"
-              @click.stop="toggleAction(isMobile ? ActionType.ADDING_CAT_MOBILE : ActionType.ADDING_CAT)"
-              @keyup.enter.stop="toggleAction(isMobile ? ActionType.ADDING_CAT_MOBILE : ActionType.ADDING_CAT)"
+              @click.stop="startAddingCat"
+              @keyup.enter.stop="startAddingCat"
               data-testid="add-new-cat-btn"
               type="button"
-              class="btn btn-primary ms-auto px-5 rounded-3"
+              class="btn btn-primary ms-auto px-5 rounded-3 mt-2 w-100"
             >
               {{ t("Profile.addCat") }} +
             </button>
@@ -180,11 +194,14 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
       </div>
     </div>
   </div>
-  <Drawer :visible="isMobile && isCurrentAction(ActionType.SELECTING_ACTION)" @onCancel="removeAction(ActionType.SELECTING_ACTION)">
+  <Drawer
+    :visible="isMobile && isCurrentAction(ActionType.SELECTING_CAT_ACTION_MOBILE)"
+    @onCancel="removeAction(ActionType.SELECTING_CAT_ACTION_MOBILE)"
+  >
     <div class="gap-2 p-2 d-flex flex-column list-unstyled">
       <li
-        @keyup.enter="toggleAction(ActionType.EDITING_CAT_MOBILE, currentItem)"
-        @click.stop="toggleAction(ActionType.EDITING_CAT_MOBILE, currentItem)"
+        @keyup.enter="startEditingCat(catForActionToBeSelected!)"
+        @click.stop="startEditingCat(catForActionToBeSelected!)"
         tabIndex="0"
         class="p-2 hover-bg rounded-3"
       >
@@ -194,37 +211,43 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
         tabIndex="0"
         data-testid="start-cat-delete"
         class="p-2 hover-bg rounded-3"
-        @keyup.enter="toggleAction(ActionType.DELETING_CAT, currentItem.id)"
-        @click.stop="toggleAction(ActionType.DELETING_CAT, currentItem.id)"
+        @keyup.enter="startDeletingCat(catForActionToBeSelected!)"
+        @click.stop="startDeletingCat(catForActionToBeSelected!)"
       >
         Poista
       </li>
     </div>
   </Drawer>
-  <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.ADDING_CAT_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
+  <Drawer
+    :fullsize="true"
+    :visible="isCurrentAction(ActionType.ADDING_CAT_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionType.ADDING_CAT_MOBILE)"
+  >
     <CatForm @onSave="addCatMutation.mutate" />
   </Drawer>
-  <Modal :visible="isCurrentAction(ActionType.ADDING_CAT) && !isMobile" @onCancel="toggleAction(ActionType.NONE)">
+  <Modal :visible="isCurrentAction(ActionType.ADDING_CAT) && !isMobile" @onCancel="removeAction(ActionType.ADDING_CAT)">
     <div style="width: 550px">
       <CatForm @onSave="addCatMutation.mutate" />
     </div>
   </Modal>
-  <Modal :visible="isCurrentAction(ActionType.EDITING_CAT) && !isMobile" @onCancel="toggleAction(ActionType.NONE)">
+  <Modal :visible="isCurrentAction(ActionType.EDITING_CAT) && !isMobile" @onCancel="removeAction(ActionType.EDITING_CAT)">
     <div style="width: 550px">
-      <CatForm :cat="currentItem" @onSave="editCat" />
+      <CatForm :cat="catToBeEdited" @onSave="editCat" />
     </div>
   </Modal>
-  <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.EDITING_CAT_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
-    <CatForm :cat="currentItem" @onSave="editCat" />
+  <Drawer
+    :fullsize="true"
+    :visible="isCurrentAction(ActionType.EDITING_CAT_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionType.EDITING_CAT_MOBILE)"
+  >
+    <CatForm :cat="catToBeEdited" @onSave="editCat" />
   </Drawer>
-  <Modal @onCancel="toggleAction(ActionType.NONE)" :visible="isCurrentAction(ActionType.DELETING_CAT)">
+  <Modal @onCancel="removeAction(ActionType.DELETING_CAT)" :visible="isCurrentAction(ActionType.DELETING_CAT)">
     <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
       <p>Poistetaanko kissan tiedot?</p>
       <div class="d-flex gap-2 justify-content-end">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
-        <button data-testid="confirm-cat-delete" @click="() => deleteMutation.mutate(currentItem)" type="button" class="btn btn-danger">
-          Poista
-        </button>
+        <button type="button" class="btn btn-secondary" @click="removeAction(ActionType.DELETING_CAT)">Peruuta</button>
+        <button data-testid="confirm-cat-delete" @click="deleteMutation.mutate" type="button" class="btn btn-danger">Poista</button>
       </div>
     </div>
   </Modal>

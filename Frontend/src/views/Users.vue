@@ -121,10 +121,20 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
                 :triggerRef="userListItemRefs[user.id]"
                 :placement="'left-start'"
               >
-                <li tabIndex="0" @keydown.enter.stop="startEditingUser(user)" @click="startEditingUser(user)" class="dropdown-item">
+                <li
+                  tabIndex="0"
+                  @keydown.enter.stop="startEditingUser(user)"
+                  @click="startEditingUser(user)"
+                  class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                >
                   Muokkaa
                 </li>
-                <li tabIndex="0" @keydown.enter.stop="startDeletingUser(user)" @click="startDeletingUser(user)" class="dropdown-item">
+                <li
+                  tabIndex="0"
+                  @keydown.enter.stop="startDeletingUser(user)"
+                  @click="startDeletingUser(user)"
+                  class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                >
                   Poista
                 </li>
               </Dropdown>
@@ -153,7 +163,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
       v-if="userForActionToBeSelected"
       @click="startDeletingUser(userForActionToBeSelected)"
       tabIndex="0"
-      class="dropdown-item"
+      class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
       data-testid="start-cat-delete"
     >
       Poista
@@ -164,12 +174,16 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
       <UserForm @onSave="createUserMutation.mutate" />
     </div>
   </Modal>
-  <Drawer :fullsize="true" :visible="isCurrentAction(ActionType.ADDING_USER_MOBILE) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
+  <Drawer
+    :fullsize="true"
+    :visible="isCurrentAction(ActionType.ADDING_USER_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionType.ADDING_USER_MOBILE)"
+  >
     <UserForm @onSave="createUserMutation.mutate" />
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.EDITING_USER) && !isMobile" @onCancel="removeAction(ActionType.EDITING_USER)">
     <div style="width: 550px">
-      <UserForm :user="userToBeEdited" @onSave="isCurrentAction(ActionType.NONE)" />
+      <UserForm :user="userToBeEdited" @onSave="removeAction(ActionType.EDITING_USER)" />
     </div>
   </Modal>
   <Drawer
@@ -177,7 +191,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
     :visible="isCurrentAction(ActionType.EDITING_USER_MOBILE) && isMobile"
     @onCancel="removeAction(ActionType.EDITING_USER_MOBILE)"
   >
-    <UserForm :user="userToBeEdited" @onSave="isCurrentAction(ActionType.NONE)" />
+    <UserForm :user="userToBeEdited" @onSave="removeAction(ActionType.EDITING_USER_MOBILE)" />
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.DELETING_USER)" @onCancel="removeAction(ActionType.DELETING_USER)">
     <div v-if="userToBeDeleted" style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">

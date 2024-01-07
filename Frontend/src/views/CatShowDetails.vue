@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch, nextTick } from "vue";
+import { ref, computed, watch, nextTick, watchEffect } from "vue";
 import userAPI from "../api/userAPI";
 import { userHasPermission, user } from "../store/userStore";
 import { useRoute } from "vue-router";
@@ -14,7 +14,6 @@ import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
 import ImageGallery from "../components/ImageGallery.vue";
 import Dropdown from "../components/Dropdown.vue";
-import { watchEffect } from "vue";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -34,7 +33,8 @@ const joinEventMutation = useMutation({
 const updatePlacingMutation = useMutation({
   mutationFn: (payload: CatShowResultPayload) => catShowAPI.assignCatPlacing(eventId, payload),
   onSuccess: () => {
-    toast.info("Näyttelytulos tallennettu"), refetch();
+    toast.info("Näyttelytulos tallennettu");
+    refetch();
   },
   onError: () => toast.error("Toiminto epäonnistui"),
 });
@@ -119,10 +119,10 @@ const toggleCheckbox = (catId: number) => {
   const catExists = selectedCatIds.value.includes(catId);
 
   if (catExists) {
-    selectedCatIds.value = selectedCatIds.value.filter((id) => id !== catId);
-  } else {
-    selectedCatIds.value = [...selectedCatIds.value, catId];
+    return (selectedCatIds.value = selectedCatIds.value.filter((id) => id !== catId));
   }
+
+  selectedCatIds.value = [...selectedCatIds.value, catId];
 };
 
 const handleDropdownItemClick = (result: CatShowResultPayload) => {
@@ -191,47 +191,45 @@ watchEffect(() => {
                 </div>
               </template>
               <template v-if="userHasPermission('CreateCatShowResult')" #actions>
-                <div>
-                  <div
-                    :ref="el => (dropdownRefs[cat.id] = el as HTMLDivElement)"
-                    :id="cat.id.toString()"
-                    @click.stop
-                    tabindex="0"
-                    class="btn py-1 px-2 accordion d-flex focus-ring rounded-1"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                      <path
-                        d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                      />
-                    </svg>
-                  </div>
-                  <Dropdown :placement="'left-start'" :triggerRef="dropdownRefs[cat.id]">
-                    <li
-                      tabindex="0"
-                      @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
-                      @click.stop="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
-                      class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
-                    >
-                      Ensimmäinen
-                    </li>
-                    <li
-                      tabindex="0"
-                      @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
-                      @click.stop="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
-                      class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
-                    >
-                      Toinen
-                    </li>
-                    <li
-                      tabindex="0"
-                      @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
-                      @click.stop="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
-                      class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
-                    >
-                      Kolmas
-                    </li>
-                  </Dropdown>
+                <div
+                  :ref="el => (dropdownRefs[cat.id] = el as HTMLDivElement)"
+                  :id="cat.id.toString()"
+                  tabindex="0"
+                  @click.stop
+                  class="btn py-1 px-2 accordion d-flex focus-ring rounded-1"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
+                    <path
+                      d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
+                    />
+                  </svg>
                 </div>
+                <Dropdown :placement="'left-start'" :triggerRef="dropdownRefs[cat.id]">
+                  <li
+                    tabindex="0"
+                    @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
+                    @click="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
+                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                  >
+                    Ensimmäinen
+                  </li>
+                  <li
+                    tabindex="0"
+                    @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
+                    @click="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
+                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                  >
+                    Toinen
+                  </li>
+                  <li
+                    tabindex="0"
+                    @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
+                    @click="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
+                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                  >
+                    Kolmas
+                  </li>
+                </Dropdown>
               </template>
             </CatListItem>
           </div>
@@ -282,20 +280,12 @@ watchEffect(() => {
   max-width: 100%;
 }
 
-.w-sm-100 {
-  width: 100%;
-}
-
 @media (min-width: 768px) {
   .hero-container {
     min-height: 300px;
   }
   .hero-image {
     max-width: 400px;
-  }
-
-  .w-sm-100 {
-    width: auto;
   }
 }
 </style>
