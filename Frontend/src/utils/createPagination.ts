@@ -1,4 +1,6 @@
 export const createPagination = (currentPage: number, totalPages: number, sliceSize: number) => {
+  if (totalPages === 1) return [1];
+
   const pageItems = Array.from({ length: totalPages }, (_, i) => i);
 
   const displayOnLeft = Math.floor(sliceSize / 2);
@@ -11,6 +13,8 @@ export const createPagination = (currentPage: number, totalPages: number, sliceS
   let itemsToDisplay: string | number[] = [];
   let leftEllipsis;
   let rightEllipsis;
+
+  console.log(leftItems, middleItems, rightItems);
 
   if (currentPage < leftItems[leftItems.length - 1]) itemsToDisplay = leftItems;
 
@@ -26,5 +30,7 @@ export const createPagination = (currentPage: number, totalPages: number, sliceS
     rightEllipsis = "...";
   }
 
-  return [1, leftEllipsis, ...itemsToDisplay, rightEllipsis, totalPages].filter(Boolean);
+  const result = [...new Set([1, ...itemsToDisplay, totalPages])];
+
+  return [result[0], leftEllipsis, ...result.slice(1, -1), rightEllipsis, result[result.length - 1]].filter(Boolean) as string | number[];
 };

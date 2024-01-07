@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { watchEffect } from "vue";
+import { watchEffect, watch, onMounted } from "vue";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { createPagination } from "../utils/createPagination";
@@ -34,6 +34,8 @@ const displayedItems = computed(() => {
   return filteredItems.value.slice(startIndex, startIndex + props.itemsPerPage);
 });
 
+const pages = ref<string | number[]>([]);
+
 const goToPage = (pageNumber: number) => {
   if (pageNumber >= 1 && pageNumber <= totalPages.value) {
     currentPage.value = pageNumber;
@@ -42,7 +44,6 @@ const goToPage = (pageNumber: number) => {
 
 const valueMatchesSearchQuery = (value: any) => {
   if (value) {
-    console.log(value);
     return value.toString().toLowerCase().includes(searchQuery.value.toLowerCase());
   }
   return false;
@@ -57,7 +58,13 @@ watchEffect(() => {
   }
 });
 
-const pages = computed(() => createPagination(currentPage.value, totalPages.value, 5));
+onMounted(() => {
+  pages.value = createPagination(currentPage.value, totalPages.value, 3);
+});
+
+watch([() => props.itemsPerPage, () => currentPage.value], () => {
+  pages.value = createPagination(currentPage.value, totalPages.value, 3);
+});
 </script>
 
 <template>
