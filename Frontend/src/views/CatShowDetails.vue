@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import userAPI from "../api/userAPI";
 import { userHasPermission, user } from "../store/userStore";
 import { useRoute } from "vue-router";
@@ -14,6 +14,7 @@ import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
 import ImageGallery from "../components/ImageGallery.vue";
 import Dropdown from "../components/Dropdown.vue";
+import { watchEffect } from "vue";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -129,6 +130,18 @@ const handleDropdownItemClick = (result: CatShowResultPayload) => {
 };
 
 const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
+
+watchEffect(() => {
+  if (!isLoading.value) {
+    console.log(isLoading);
+    nextTick(() => {
+      const catElement = document.getElementById(("cat-list-item" + route.query.focusedCatId) as string);
+      console.log(catElement);
+      catElement?.scrollIntoView({ behavior: "smooth", block: "center" });
+      catElement?.focus();
+    });
+  }
+});
 </script>
 
 <template>

@@ -142,39 +142,36 @@ namespace Kissarekisteri.Services
         )
         {
             var result = new Result<CatShowResult>();
-            var catShow = await dbContext.CatShows.AnyAsync(e => e.Id == catShowId);
+            var catShowExists = await dbContext.CatShows.AnyAsync(e => e.Id == catShowId);
 
-            if (!catShow)
+            if (!catShowExists)
             {
                 return result.AddError(CatShowErrors.NotFound);
             }
 
-            var existingCatShowResult = await dbContext.CatShowResults.FirstOrDefaultAsync(
-                e => e.CatId == newPlacing.CatId && e.CatShowId == catShowId
-            );
+            var conflictingResults = await dbContext.CatShowResults
+            .Where(v => v.CatShowId == catShowId)
+            .Where(v => v.Breed == newPlacing.Breed && v.Place == (Place)newPlacing.Place ||
+                        v.CatId == newPlacing.CatId)
+            .ToListAsync();
 
-            if (existingCatShowResult != null)
+            if (conflictingResults.Count != 0)
             {
-                existingCatShowResult.Place = (Place)newPlacing.Place;
-                result.Success(existingCatShowResult);
+                dbContext.CatShowResults.RemoveRange(conflictingResults);
+                await dbContext.SaveChangesAsync();
             }
-            else
-            {
-                var catShowResult = await dbContext.CatShowResults.AddAsync(
-                    new CatShowResult
-                    {
-                        CatId = newPlacing.CatId,
-                        Breed = newPlacing.Breed,
-                        CatShowId = catShowId,
-                        Place = (Place)newPlacing.Place
-                    }
-                );
 
-                result = result.Success(catShowResult.Entity);
-            }
+            var newCatShowResult = new CatShowResult
+            {
+                CatId = newPlacing.CatId,
+                Breed = newPlacing.Breed,
+                CatShowId = catShowId,
+                Place = (Place)newPlacing.Place
+            };
+            dbContext.CatShowResults.Add(newCatShowResult);
 
             await dbContext.SaveChangesAsync();
-            return result;
+            return result.Success(newCatShowResult);
         }
 
         public async Task<CatShow> CreateCatShow(CatShow newCatShow)

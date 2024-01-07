@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, defineProps, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { Dropdown } from "bootstrap";
 import { Placement } from "@popperjs/core/lib/enums";
 
@@ -22,7 +22,6 @@ const dropdownContentRef = ref<HTMLDivElement>();
 
 const closeDropdownIfClickedOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement;
-  console.log("closing");
   if (!dropdownContentRef.value?.contains(target) && !props.triggerRef?.contains(target)) {
     dropdown.value?.hide();
   }
@@ -48,7 +47,6 @@ watch(
 );
 
 onMounted(() => {
-  console.log("mounted");
   document.addEventListener("click", closeDropdownIfClickedOutside);
 });
 

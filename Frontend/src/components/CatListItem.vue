@@ -21,6 +21,7 @@ const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainec
 <template>
   <div class="border-bottom py-1 w-100">
     <div
+      :id="'cat-list-item' + cat.id"
       tabindex="0"
       @keyup.enter="navigateToCat(cat.id)"
       @click="navigateToCat(cat.id)"

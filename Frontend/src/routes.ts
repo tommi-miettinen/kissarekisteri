@@ -9,7 +9,7 @@ import { actionStack, popAction } from "./store/actionStore";
 
 const routes = [
   { path: "/catshows", component: CatShowList },
-  { path: "/catshows/:eventId", component: CatShowDetails },
+  { path: "/catshows/:eventId", component: CatShowDetails, props: true },
   { path: "/cats", component: Cats },
   { path: "/cats/:catId", component: CatDetails },
   { path: "/users", component: Users },

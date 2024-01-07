@@ -43,7 +43,7 @@ const requestOwnershipTransfer = async () => {
   await catAPI.requestOwnershipTransfer(cat.value!.id);
 };
 
-const navigateToCatShow = (catShowId: number) => router.push(`/catshows/${catShowId}`);
+const navigateToCatShow = (catShowId: number) => router.push(`/catshows/${catShowId}?focusedCatId=${cat.value!.id}`);
 
 const handleFileChange = async (event: Event) => {
   const input = event.target as HTMLInputElement;

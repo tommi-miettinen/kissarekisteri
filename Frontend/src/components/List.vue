@@ -2,6 +2,7 @@
 import { watchEffect } from "vue";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { createPagination } from "../utils/createPagination";
 
 const props = defineProps({
   items: {
@@ -55,6 +56,8 @@ watchEffect(() => {
     filteredItems.value = props.items.filter((item) => Object.values(item).some((value) => valueMatchesSearchQuery(value)));
   }
 });
+
+const pages = computed(() => createPagination(currentPage.value, totalPages.value, 5));
 </script>
 
 <template>
@@ -80,10 +83,10 @@ watchEffect(() => {
         <div class="d-flex flex-wrap gap-1">
           <li
             tabindex="0"
-            @keyup.enter="goToPage(page)"
-            @click="goToPage(page)"
+            @keyup.enter="typeof page === 'number' && goToPage(page)"
+            @click="typeof page === 'number' && goToPage(page)"
             class="btn border focus-ring hover-bg rounded-3"
-            v-for="page in totalPages"
+            v-for="page in pages"
             :key="page"
             :class="{ 'border-primary': currentPage === page, 'bg-primary': currentPage === page, 'text-white': currentPage === page }"
           >
