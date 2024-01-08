@@ -38,7 +38,7 @@ export const initializeMsalInstance = async () => {
   msalInstance = await PublicClientApplication.createPublicClientApplication(msalConfig);
 
   msalInstance.addEventCallback(async (event) => {
-    if (event.eventType === EventType.LOGIN_SUCCESS) {
+    if (event.eventType === EventType.HANDLE_REDIRECT_END) {
       await fetchUser();
       await fetchPermissions();
     }

@@ -5,15 +5,24 @@ import { userHasPermission, user } from "../store/userStore";
 import { useRoute } from "vue-router";
 import { toast } from "vue-sonner";
 import { useMutation, useQuery } from "@tanstack/vue-query";
-import { useI18n } from "vue-i18n";
 import Modal from "../components/Modal.vue";
 import catShowAPI from "../api/catShowAPI";
+import { useI18n } from "vue-i18n";
 //@ts-ignore doesnt have types
 import FsLightbox from "fslightbox-vue/v3";
 import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
 import ImageGallery from "../components/ImageGallery.vue";
 import Dropdown from "../components/Dropdown.vue";
+import { isCurrentAction, removeAction, pushAction } from "../store/actionStore";
+
+enum ActionType {
+  JOINING_EVENT = "JOINING_EVENT",
+  JOINING_EVENT_MOBILE = "JOINING_EVENT_MOBILE",
+  LEAVING_EVENT = "LEAVING_EVENT",
+  SELECTING_CAT_ACTION = "SELECTING_CAT_ACTION",
+  SELECTING_CAT_ACTION_MOBILE = "SELECTING_CAT_ACTION_MOBILE",
+}
 
 const route = useRoute();
 const { t } = useI18n();
@@ -50,6 +59,7 @@ const leaveEventMutation = useMutation({
   mutationFn: () => catShowAPI.leaveEvent(eventId),
   onSuccess: () => {
     toast.info("Osallistuminen peruttu"), refetch();
+    removeAction(ActionType.LEAVING_EVENT);
   },
 });
 
@@ -125,18 +135,12 @@ const toggleCheckbox = (catId: number) => {
   selectedCatIds.value = [...selectedCatIds.value, catId];
 };
 
-const handleDropdownItemClick = (result: CatShowResultPayload) => {
-  updatePlacingMutation.mutate(result);
-};
-
 const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
 
 watchEffect(() => {
   if (!isLoading.value) {
-    console.log(isLoading);
     nextTick(() => {
       const catElement = document.getElementById(("cat-list-item" + route.query.focusedCatId) as string);
-      console.log(catElement);
       catElement?.scrollIntoView({ behavior: "smooth", block: "center" });
       catElement?.focus();
     });
@@ -165,10 +169,15 @@ watchEffect(() => {
           </p>
           <span>{{ catShow.location }}</span>
           <div v-if="user" class="mt-auto ms-auto w-sm-100">
-            <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary px-5 w-sm-100" @click="joiningEvent = true">
+            <button
+              v-if="!isUserAnAttendee"
+              type="button"
+              class="btn btn-primary px-5 w-sm-100"
+              @click="pushAction(ActionType.JOINING_EVENT)"
+            >
               {{ t("CatShowDetails.joinEvent") }}
             </button>
-            <button v-else @click="leavingEvent = true" type="button" class="w-sm-100 btn btn-danger rounded-3 py-2 px-5">
+            <button v-else @click="pushAction(ActionType.LEAVING_EVENT)" type="button" class="w-sm-100 btn btn-danger rounded-3 py-2 px-5">
               {{ t("CatShowDetails.leaveEvent") }}
             </button>
           </div>
@@ -196,7 +205,7 @@ watchEffect(() => {
                   :id="cat.id.toString()"
                   tabindex="0"
                   @click.stop
-                  class="btn py-1 px-2 accordion d-flex focus-ring rounded-1"
+                  class="btn py-1 px-2 accordion d-flex focus-ring rounded-1 border-0"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
                     <path
@@ -207,24 +216,24 @@ watchEffect(() => {
                 <Dropdown :placement="'left-start'" :triggerRef="dropdownRefs[cat.id]">
                   <li
                     tabindex="0"
-                    @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
-                    @click="handleDropdownItemClick({ catId: cat.id, place: 1, breed: cat.breed })"
+                    @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
+                    @click="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
                     class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                   >
                     Ensimmäinen
                   </li>
                   <li
                     tabindex="0"
-                    @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
-                    @click="handleDropdownItemClick({ catId: cat.id, place: 2, breed: cat.breed })"
+                    @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
+                    @click="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
                     class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                   >
                     Toinen
                   </li>
                   <li
                     tabindex="0"
-                    @keyup.enter="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
-                    @click="handleDropdownItemClick({ catId: cat.id, place: 3, breed: cat.breed })"
+                    @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
+                    @click="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
                     class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                   >
                     Kolmas
@@ -244,7 +253,7 @@ watchEffect(() => {
         </template>
       </ImageGallery>
     </div>
-    <Modal :visible="joiningEvent" @onCancel="joiningEvent = false">
+    <Modal :visible="isCurrentAction(ActionType.JOINING_EVENT)" @onCancel="removeAction(ActionType.JOINING_EVENT)">
       <div style="width: 90vw; max-width: 500px" class="d-flex flex-column bg-white p-4 gap-4 rounded">
         <div v-if="userCats && userCats.length > 0">
           <h5>Osallistuvat kissat:</h5>
@@ -259,11 +268,11 @@ watchEffect(() => {
         <button @click="joinEvent" type="button" class="btn btn-primary">Osallistu</button>
       </div>
     </Modal>
-    <Modal :visible="leavingEvent" @onCancel="leavingEvent = false">
+    <Modal :visible="isCurrentAction(ActionType.LEAVING_EVENT)" @onCancel="removeAction(ActionType.LEAVING_EVENT)">
       <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
         <p>Perutaanko osallistuminen?</p>
         <div class="d-flex gap-2 justify-content-end">
-          <button @click="leavingEvent = false" type="button" class="btn btn-secondary">Peruuta</button>
+          <button @click="removeAction(ActionType.LEAVING_EVENT)" type="button" class="btn btn-secondary">Peruuta</button>
           <button data-testid="confirm-cat-delete" @click="leaveEvent" type="button" class="btn btn-danger">Peru osallistuminen</button>
         </div>
       </div>

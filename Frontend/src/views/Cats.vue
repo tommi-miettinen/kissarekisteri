@@ -21,7 +21,7 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
   <div class="w-100 h-100 p-0 p-sm-5 d-flex flex-column align-items-center">
     <div class="p-2 p-sm-5 rounded col-12 col-lg-8 h-100 d-flex flex-column">
       <h3 class="m-0">{{ t("Cats.cats") }}</h3>
-      <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="data" :items="data" :itemsPerPage="isMobile ? 10 : 7">
+      <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="data" :items="data" :itemsPerPage="20">
         <template v-slot="{ item }">
           <CatListItem :cat="item" />
         </template>

@@ -1,7 +1,13 @@
 <script lang="ts" setup>
 //@ts-ignore doesnt have types
 import FsLightbox from "fslightbox-vue/v3";
-import { ref } from "vue";
+import { ref, nextTick } from "vue";
+import { isCurrentAction, pushAction, removeAction } from "../store/actionStore";
+import { useMutationObserver } from "@vueuse/core";
+
+enum ActionType {
+  FULLSCREEN_IMAGE = "FULLSCREEN_IMAGE",
+}
 
 defineProps({
   photos: {
@@ -10,8 +16,29 @@ defineProps({
   },
 });
 
-const selectedImageIndex = ref(0);
 const toggler = ref(false);
+
+useMutationObserver(
+  document.documentElement,
+  () => {
+    const isOpen = document.documentElement.classList.contains("fslightbox-open");
+    if (!isOpen) removeAction(ActionType.FULLSCREEN_IMAGE);
+  },
+  {
+    attributes: true,
+    attributeFilter: ["class"],
+  }
+);
+
+const selectedImageIndex = ref(0);
+
+const handleImageClick = (index: number) => {
+  pushAction(ActionType.FULLSCREEN_IMAGE);
+  selectedImageIndex.value = index;
+
+  //toggler needs to be toggled after the lightbox has attached to the DOM
+  nextTick(() => (toggler.value = !toggler.value));
+};
 </script>
 
 <template>
@@ -24,8 +51,8 @@ const toggler = ref(false);
         :key="photo"
         class="border image-container rounded-4 d-flex focus-ring"
         style="position: relative; width: 100%; overflow: hidden"
-        @keyup.enter="(selectedImageIndex = index), (toggler = !toggler)"
-        @click="(selectedImageIndex = index), (toggler = !toggler)"
+        @keyup.enter="handleImageClick(index)"
+        @click="handleImageClick(index)"
       >
         <div style="width: 100%; padding-top: 100%; position: relative"></div>
         <img
@@ -39,5 +66,11 @@ const toggler = ref(false);
       </div>
     </div>
   </div>
-  <FsLightbox :key="photos.length" :toggler="toggler" :sources="photos" :slide="selectedImageIndex + 1" />
+  <FsLightbox
+    v-if="isCurrentAction(ActionType.FULLSCREEN_IMAGE)"
+    :key="photos.length"
+    :toggler="toggler"
+    :sources="photos"
+    :slide="selectedImageIndex + 1"
+  />
 </template>

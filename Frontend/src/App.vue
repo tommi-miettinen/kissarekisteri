@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import Navigation from "./components/Navigation.vue";
 import { Toaster } from "vue-sonner";
-import { onMounted } from "vue";
+import { onMounted, computed } from "vue";
 import { fetchPermissions, fetchUser } from "./store/userStore";
 import { toastPosition } from "./store/toasterStore";
+import BottomNavigation from "./components/BottomNavigation.vue";
+import { useWindowSize } from "@vueuse/core";
 
-onMounted(async () => {
-  await fetchUser();
-  await fetchPermissions();
+onMounted(() => {
+  fetchUser().then(fetchPermissions);
 });
 
 const focusMainContent = () => document.querySelector("main")?.focus();
+
+const isMobile = computed(() => useWindowSize().width.value < 768);
 </script>
 
 <template>
@@ -23,6 +26,7 @@ const focusMainContent = () => document.querySelector("main")?.focus();
     <main id="maincontent" tabIndex="-1" class="d-flex flex-column overflow-auto w-100 h-100 overflow-auto">
       <RouterView />
     </main>
+    <BottomNavigation v-if="isMobile" />
   </div>
 </template>
 

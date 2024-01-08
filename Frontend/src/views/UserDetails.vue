@@ -131,7 +131,7 @@ const startAddingCat = () => {
 
       <div class="d-flex flex-column rounded h-100 flex-grow-1">
         <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
-        <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats" :items="cats" :itemsPerPage="isMobile ? 8 : 6">
+        <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats" :items="cats" :itemsPerPage="cats.length">
           <template v-slot="{ item: cat }">
             <CatListItem :key="cat.id" :cat="cat">
               <template #actions>
@@ -143,7 +143,7 @@ const startAddingCat = () => {
                   @click.stop="startSelectingCatAction(cat)"
                   class="d-flex"
                 >
-                  <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1" type="button">
+                  <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1 border-0" type="button">
                     <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
                       <path
                         d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"

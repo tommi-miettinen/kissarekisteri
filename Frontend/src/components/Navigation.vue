@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script async lang="ts" setup>
 import { ref, onMounted, computed } from "vue";
 import { msalInstance } from "../auth";
 import { user } from "../store/userStore";
@@ -74,8 +74,6 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
 onMounted(async () => {
   await msalInstance.handleRedirectPromise();
 });
-
-onMounted(() => {});
 
 const handleAvatarClick = async () => {
   if (isMobile.value) toggleAction(ActionType.BOTTOM_SHEET);
@@ -173,7 +171,7 @@ const requestsRef = ref<HTMLDivElement>();
           >{{ confirmationRequests.length }}</span
         >
       </div>
-      <Dropdown :placement="'bottom-end'" :triggerRef="requestsRef">
+      <Dropdown :autoClose="false" :placement="'bottom-end'" :triggerRef="requestsRef">
         <template v-if="user">
           <div class="d-flex flex-column z-100 bg-white" style="max-width: 450px">
             <div v-if="confirmationRequests && confirmationRequests.length > 0">
@@ -208,54 +206,8 @@ const requestsRef = ref<HTMLDivElement>();
         class="focus-ring p-2 rounded-3"
         >{{ localeString }}</a
       >
-
-      <button @click="toggleAction(ActionType.SIDE_SHEET)" type="button" v-if="isMobile" class="navbar-toggler focus-ring p-2 rounded-3">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="{1.5}"
-          stroke="currentColor"
-          style="width: 24px; height: 24px"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-        </svg>
-      </button>
     </ul>
   </nav>
-  <Drawer
-    :fullsize="true"
-    :placement="'end'"
-    :visible="isCurrentAction(ActionType.SIDE_SHEET) && isMobile"
-    @onCancel="toggleAction(ActionType.NONE)"
-  >
-    <div @click.stop class="d-flex flex-column p-3 gap-1 list-unstyled">
-      <li
-        @click="navigateTo('/catshows')"
-        class="cursor-pointer nav-item rounded-3 nav-link rounded-3 p-2"
-        :class="{ 'nav-item-active': route.path.includes('catshows') }"
-      >
-        {{ t("Navigation.catShows") }}
-      </li>
-      <li
-        @click="navigateTo('/cats')"
-        class="cursor-pointer nav-item rounded-3 nav-link rounded-3 p-2"
-        :class="{ 'nav-item-active': route.path === '/cats' || route.path.startsWith('/cats/') }"
-      >
-        {{ t("Navigation.cats") }}
-      </li>
-      <li
-        @click="navigateTo('/users')"
-        class="cursor-pointer nav-item rounded-3 nav-link rounded-3 p-2"
-        :class="{ 'nav-item-active': route.path.includes('users') }"
-      >
-        {{ t("Navigation.members") }}
-      </li>
-      <li class="hover-bg cursor-pointer nav-item rounded-3 nav-link rounded-3 p-2" tabIndex="0" @click="logoutFromApp">
-        {{ t("Navigation.logout") }}
-      </li>
-    </div>
-  </Drawer>
   <Drawer :visible="isCurrentAction(ActionType.BOTTOM_SHEET) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
     <div class="p-2">
       <div tabindex="0" @click="navigateToProfile" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.profile") }}</div>

@@ -106,7 +106,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
                 @click.stop="startSelectingUserAction(user)"
                 :ref="el => userListItemRefs[user.id] = el as HTMLElement"
                 tabindex="0"
-                class="btn py-1 px-2 accordion d-flex focus-ring rounded-1"
+                class="btn py-1 px-2 accordion d-flex focus-ring rounded-1 border-0"
                 type="button"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">

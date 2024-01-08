@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using CountryData.Bogus;
 using Kissarekisteri.Database;
-using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
 using Kissarekisteri.RBAC;
 using Microsoft.EntityFrameworkCore;
@@ -142,13 +141,13 @@ namespace Kissarekisteri.Services
 
             var users = await userService.GetUsers();
             var catBreeds = await dbContext.CatBreeds.ToListAsync();
-            var catFaker = new Faker<CatRequest>("fi").CustomInstantiator(f =>
+            var catFaker = new Faker<Cat>("fi").CustomInstantiator(f =>
             {
                 var gender = f.PickRandom(
                     Bogus.DataSets.Name.Gender.Male,
                     Bogus.DataSets.Name.Gender.Female
                 );
-                var catRequest = new CatRequest
+                var catRequest = new Cat
                 {
                     OwnerId = users.Any() ? f.PickRandom(users).Id : null,
                     BreederId = users.Any() ? f.PickRandom(users).Id : null,
@@ -184,11 +183,9 @@ namespace Kissarekisteri.Services
                 .ToList();
 
             var createdCats = new List<Cat>();
-            foreach (var catRequest in catsToCreate)
-            {
-                var createdCat = await catService.CreateCat(catRequest);
-                createdCats.Add(createdCat.Data);
-            }
+
+            dbContext.Cats.AddRange(catsToCreate);
+            await dbContext.SaveChangesAsync();
 
             return createdCats;
         }
