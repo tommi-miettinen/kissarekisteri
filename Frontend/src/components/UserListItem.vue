@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import Avatar from "./Avatar.vue";
 
 defineProps({
   user: {
@@ -24,12 +25,7 @@ const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
       class="hover-bg p-3 d-flex rounded-3 p-2 flex align-items-center focus-ring"
     >
       <div class="col d-flex align-items-center gap-2 col-8">
-        <div
-          style="width: 32px; height: 32px; font-size: 14px"
-          class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold text-uppercase"
-        >
-          {{ user.givenName[0] + user.surname[0] }}
-        </div>
+        <Avatar :displayText="user.givenName[0] + user.surname[0]" />
         <div>{{ `${user.givenName}  ${user.surname}` }}</div>
       </div>
       <div class="col justify-content-end d-flex gap-2 align-items-center">

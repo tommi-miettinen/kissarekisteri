@@ -29,6 +29,7 @@ variable "sql_admin_password" {
 
 locals {
   #https://learn.microsoft.com/en-us/graph/permissions-reference
+  user_read_write_all_scope_id = "741f803b-c850-494e-b5df-cde7c675a1ca"
   openid_scope_id = "37f7f235-527c-4136-accd-4a02d197296e"
   offline_access_scope_id = "7427e0e9-2fba-42fe-b0c0-848c9e6a8182"
 }
@@ -55,6 +56,11 @@ resource "azuread_application" "kissarekisteriAuth" {
   
   required_resource_access {
     resource_app_id = data.azuread_application_published_app_ids.well_known.result.MicrosoftGraph
+
+    resource_access {
+      id   = local.user_read_write_all_scope_id
+      type = "Scope"
+    }
 
     resource_access {
       id   = local.offline_access_scope_id

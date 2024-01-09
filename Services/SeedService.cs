@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using CountryData.Bogus;
+using Kissarekisteri.Data;
 using Kissarekisteri.Database;
 using Kissarekisteri.Models;
 using Kissarekisteri.RBAC;
@@ -21,91 +22,83 @@ namespace Kissarekisteri.Services
     {
         public async Task SeedPermissions()
         {
-            var permissions = PermissionSeed.GetSeedData();
+            var existingPermissions = dbContext.Permissions.Select(p => p.Name).ToList();
+            var permissionsToAdd = Permissions.GetPermissions()
+                .Where(p => !existingPermissions.Contains(p.Name))
+                .ToList();
 
-            foreach (var permission in permissions)
-            {
-                if (!dbContext.Permissions.Any(p => p.Name == permission.Name))
-                {
-                    dbContext.Permissions.Add(permission);
-                }
-            }
-
+            dbContext.Permissions.AddRange(permissionsToAdd);
             await dbContext.SaveChangesAsync();
         }
 
         public async Task SeedRoles()
         {
-            var roles = RoleSeed.GetSeedData();
+            var existingRoles = dbContext.Roles.Select(r => r.Name).ToList();
+            var rolesToAdd = Roles.GetRoles().Where(r => !existingRoles.Contains(r.Name)).ToList();
 
-            foreach (var role in roles)
-            {
-                if (!dbContext.Roles.Any(r => r.Name == role.Name))
-                {
-                    dbContext.Roles.Add(new Role { Name = role.Name, });
-                }
-            }
-
+            dbContext.Roles.AddRange(rolesToAdd);
             await dbContext.SaveChangesAsync();
         }
 
         public async Task SeedRolePermissions()
         {
-            var roles = RolePermissionSeed.GetSeedData();
+            var roles = RolePermissions.RolesWithPermissions;
 
             foreach (var role in roles)
             {
                 var roleEntity = dbContext.Roles.FirstOrDefault(r => r.Name == role.Name);
 
-                foreach (var permission in role.Permissions)
+                if (roleEntity != null)
                 {
-                    var permissionEntity = dbContext.Permissions.FirstOrDefault(
-                        p => p.Name == permission.ToString()
-                    );
+                    var existingRolePermissions = dbContext.RolePermissions
+                        .Where(rp => rp.RoleId == roleEntity.Id)
+                        .Select(rp => rp.PermissionId)
+                        .ToList();
 
-                    if (
-                        !dbContext.RolePermissions.Any(
-                            rp =>
-                                rp.RoleId == roleEntity.Id && rp.PermissionId == permissionEntity.Id
+                    var permissionsToAdd = role.Permissions
+                        .Select(
+                            p =>
+                                dbContext.Permissions.FirstOrDefault(
+                                    perm => perm.Name == p.ToString()
+                                )
                         )
-                    )
-                    {
-                        dbContext.RolePermissions.Add(
-                            new RolePermission
-                            {
-                                RoleId = roleEntity.Id,
-                                RoleName = roleEntity.Name,
-                                PermissionName = permissionEntity.Name,
-                                PermissionId = permissionEntity.Id
-                            }
-                        );
-                    }
+                        .Where(p => p != null && !existingRolePermissions.Contains(p.Id))
+                        .Select(
+                            p =>
+                                new RolePermission
+                                {
+                                    RoleId = roleEntity.Id,
+                                    RoleName = roleEntity.Name,
+                                    PermissionName = p.Name,
+                                    PermissionId = p.Id
+                                }
+                        )
+                        .ToList();
+
+                    dbContext.RolePermissions.AddRange(permissionsToAdd);
                 }
             }
 
             await dbContext.SaveChangesAsync();
         }
 
-
         public async Task SeedCatBreeds()
         {
-            var breedsToAdd = new List<CatBreed>
-            {
-                new() { Name = "Siamese" },
-                new() { Name = "Persian" },
-                new() { Name = "Maine Coon" }
-            };
+            var existingBreedNames = dbContext.CatBreeds
+                .Select(b => b.Name)
+                .ToList();
 
-            foreach (var breed in breedsToAdd)
+            var breedsToAdd = CatBreeds.Breeds
+                .Where(b => !existingBreedNames.Contains(b.Name))
+                .Select(b => new CatBreed { Name = b.Name })
+                .ToList();
+
+            if (breedsToAdd.Count != 0)
             {
-                if (!dbContext.CatBreeds.Any(b => b.Name == breed.Name))
-                {
-                    dbContext.CatBreeds.Add(breed);
-                    await dbContext.SaveChangesAsync();
-                }
+                dbContext.CatBreeds.AddRange(breedsToAdd);
+                await dbContext.SaveChangesAsync();
             }
         }
-
         public async Task SeedCatShows(bool deleteExisting = false, int amount = 10)
         {
             if (deleteExisting)
@@ -124,10 +117,8 @@ namespace Kissarekisteri.Services
 
             var catShowData = catShowFaker.Generate(amount);
 
-            foreach (CatShow catShow in catShowData)
-            {
-                await catShowService.CreateCatShow(catShow);
-            }
+            dbContext.CatShows.AddRange(catShowData);
+            await dbContext.SaveChangesAsync();
         }
 
         public async Task<List<Cat>> SeedCats(bool deleteExisting = false, int amount = 10)
@@ -140,7 +131,7 @@ namespace Kissarekisteri.Services
             }
 
             var users = await userService.GetUsers();
-            var catBreeds = await dbContext.CatBreeds.ToListAsync();
+            var catBreeds = CatBreeds.Breeds;
             var catFaker = new Faker<Cat>("fi").CustomInstantiator(f =>
             {
                 var gender = f.PickRandom(
@@ -149,10 +140,10 @@ namespace Kissarekisteri.Services
                 );
                 var catRequest = new Cat
                 {
-                    OwnerId = users.Any() ? f.PickRandom(users).Id : null,
-                    BreederId = users.Any() ? f.PickRandom(users).Id : null,
+                    OwnerId = users.Count != 0 ? f.PickRandom(users).Id : null,
+                    BreederId = users.Count != 0 ? f.PickRandom(users).Id : null,
                     Name = f.Name.FirstName(gender),
-                    Breed = catBreeds.Any() ? f.PickRandom(catBreeds).Name : "Siamese",
+                    Breed = f.PickRandom(catBreeds).Name,
                     BirthDate = f.Date.Past(10),
                     Sex = gender == Bogus.DataSets.Name.Gender.Male ? "Male" : "Female",
                     ImageUrl =
@@ -188,23 +179,6 @@ namespace Kissarekisteri.Services
             await dbContext.SaveChangesAsync();
 
             return createdCats;
-        }
-
-        public async Task SeedUserRolesForUsers()
-        {
-            var users = await userService.GetUsers();
-            var roles = await userService.GetRoles();
-
-            var userRoles = new List<UserRole>
-            {
-                new() { UserId = users[0].Id, RoleId = roles[0].Id },
-                new() { UserId = users[1].Id, RoleId = roles[1].Id },
-            };
-
-            foreach (var userRole in userRoles)
-            {
-                await userService.CreateUserRole(userRole);
-            }
         }
     }
 }

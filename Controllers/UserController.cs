@@ -20,7 +20,6 @@ namespace Kissarekisteri.Controllers;
 public class UserController(
     UserService userService,
     CatService catService,
-    SeedService seedService,
     PermissionService permissionService,
     IConfiguration config,
     IWebHostEnvironment env
@@ -71,19 +70,6 @@ public class UserController(
     {
         var users = await userService.GetUsers();
         return Json(users);
-    }
-
-    [HttpPost("seed")]
-    public async Task<ActionResult<List<UserResponse>>> SeedUsers()
-    {
-        await seedService.SeedCatBreeds();
-        await seedService.SeedCats();
-        await seedService.SeedCatShows();
-        await seedService.SeedRoles();
-        await seedService.SeedPermissions();
-        await seedService.SeedRolePermissions();
-        await seedService.SeedUserRolesForUsers();
-        return Ok();
     }
 
     /// <summary>

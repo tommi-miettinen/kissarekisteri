@@ -15,6 +15,7 @@ import getMedalColor from "../utils/getMedalColor";
 import ImageGallery from "../components/ImageGallery.vue";
 import Dropdown from "../components/Dropdown.vue";
 import { isCurrentAction, removeAction, pushAction } from "../store/actionStore";
+import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 
 enum ActionType {
   JOINING_EVENT = "JOINING_EVENT",
@@ -207,11 +208,7 @@ watchEffect(() => {
                   @click.stop
                   class="btn py-1 px-2 accordion d-flex focus-ring rounded-1 border-0"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                    <path
-                      d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                    />
-                  </svg>
+                  <ThreeDotsIcon />
                 </div>
                 <Dropdown :placement="'left-start'" :triggerRef="dropdownRefs[cat.id]">
                   <li
@@ -244,14 +241,11 @@ watchEffect(() => {
           </div>
         </div>
       </div>
-      <ImageGallery v-if="catShow" :photos="lightboxPhotos">
-        <template v-if="userHasPermission('CreateCatShowResult')" #upload>
-          <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto focus-ring">
-            <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
-            Lisää kuva +
-          </button>
-        </template>
-      </ImageGallery>
+      <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto focus-ring">
+        <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
+        Lisää kuva +
+      </button>
+      <ImageGallery v-if="catShow" :photos="lightboxPhotos" />
     </div>
     <Modal :visible="isCurrentAction(ActionType.JOINING_EVENT)" @onCancel="removeAction(ActionType.JOINING_EVENT)">
       <div style="width: 90vw; max-width: 500px" class="d-flex flex-column bg-white p-4 gap-4 rounded">

@@ -7,8 +7,9 @@ import { toastPosition } from "./store/toasterStore";
 import BottomNavigation from "./components/BottomNavigation.vue";
 import { useWindowSize } from "@vueuse/core";
 
-onMounted(() => {
-  fetchUser().then(fetchPermissions);
+onMounted(async () => {
+  await fetchUser();
+  await fetchPermissions();
 });
 
 const focusMainContent = () => document.querySelector("main")?.focus();

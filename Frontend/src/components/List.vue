@@ -70,7 +70,7 @@ watch([() => props.itemsPerPage, () => currentPage.value], () => {
 <template>
   <div class="w-100 h-100 d-flex flex-column">
     <div class="d-flex gap-3 py-3 bg-white align-items-center">
-      <div class="col-12 col-sm-4">
+      <div class="col-12 col-md-4">
         <input
           data-testid="cat-search-input"
           class="form-control"
@@ -85,8 +85,8 @@ watch([() => props.itemsPerPage, () => currentPage.value], () => {
         <slot :item="item"></slot>
       </div>
     </div>
-    <div class="d-flex m-2 mt-auto flex-wrap">
-      <nav aria-label="Page navigation" class="me-auto mt-auto">
+    <div class="d-flex mt-auto flex-wrap flex-column flex-sm-row gap-2 py-2">
+      <nav v-if="totalPages > 1" aria-label="Page navigation" class="me-auto mt-auto">
         <div class="d-flex flex-wrap gap-1">
           <li
             tabindex="0"
@@ -101,6 +101,7 @@ watch([() => props.itemsPerPage, () => currentPage.value], () => {
           </li>
         </div>
       </nav>
+
       <slot name="action"></slot>
     </div>
   </div>

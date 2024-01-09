@@ -1,9 +1,9 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, watch } from "vue";
 import catAPI from "../api/catAPI";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery, useMutation } from "@tanstack/vue-query";
-//@ts-ignore doesnt have types
+// @ts-ignore doesn't have types
 import FsLightbox from "fslightbox-vue/v3";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -66,13 +66,13 @@ watch(route, () => refetch());
 <template>
   <h3 v-if="isCatError" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
 
-  <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4 p-sm-5">
+  <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4">
     <div class="p-1 p-sm-5 rounded overflow-auto col-12 col-lg-8 gap-5 d-flex flex-column">
       <div class="d-flex flex-column flex-sm-row gap-4" style="min-height: 300px">
         <div
           @click="toast.error('test')"
-          class="border image-container rounded-4"
-          style="position: relative; min-width: 400px; min-height: 300px; overflow: hidden"
+          class="border rounded-4 hero-image"
+          style="position: relative; min-height: 300px; overflow: hidden; width: 100%"
         >
           <img
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
@@ -89,7 +89,7 @@ watch(route, () => refetch());
           <button
             v-if="!userIsCatOwner"
             @click="requestOwnershipTransfer"
-            class="btn border rounded-3 px-5 py-2 btn-border focus-ring mt-auto ms-auto"
+            class="btn border rounded-3 px-5 py-2 btn-border focus-ring mt-auto ms-auto w-sm-100"
           >
             {{ cat.owner ? "Pyydä omistajuutta" : "Ilmottaudu omistajaksi" }}
           </button>
@@ -134,23 +134,33 @@ watch(route, () => refetch());
         <UserListItem :user="cat.breeder" />
       </div>
       <div class="d-flex flex-column gap-2">
-        <button @click="triggerFileInput" class="border rounded-3 px-5 py-2 btn-border me-auto focus-ring">
+        <button @click="triggerFileInput" class="border rounded-3 px-5 py-2 btn-border me-auto focus-ring w-sm-100">
           <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
           {{ t("CatDetails.uploadImage") }} +
         </button>
-        <ImageGallery :photos="catPhotos">
-          <template v-for="(_, index) in cat.photos" v-slot:[`custom-content-${index}`]="{ photo }">
-            <button
-              style="width: 93%"
-              @keyup.enter.stop="catMutation.mutate(photo)"
-              @click.stop="catMutation.mutate(photo)"
-              class="rounded-3 border btn-border focus-ring py-2 position-absolute z-2 bottom-0 m-2"
-            >
-              {{ t("CatDetails.setAsProfilePicture") }}
-            </button>
-          </template>
-        </ImageGallery>
+        <ImageGallery
+          :thumbnailActionButtonText="t('CatDetails.setAsProfilePicture')"
+          showThumbnailActionButton
+          :photos="catPhotos"
+          @onThumbnailActionClick="catMutation.mutate"
+        />
       </div>
     </div>
   </div>
 </template>
+
+<style>
+.hero-container {
+  min-height: 400px;
+}
+
+.cat-image {
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .cat-image {
+    max-width: 300px;
+  }
+}
+</style>

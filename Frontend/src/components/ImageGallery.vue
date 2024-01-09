@@ -10,6 +10,15 @@ enum ActionType {
 }
 
 defineProps({
+  thumbnailActionButtonText: {
+    type: String,
+    required: false,
+  },
+  showThumbnailActionButton: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
   photos: {
     type: Array as () => string[],
     required: true,
@@ -61,8 +70,11 @@ const handleImageClick = (index: number) => {
           class="image thumbnail"
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
         />
-
-        <slot :name="'custom-content-' + index" :photo="photo"></slot>
+        <div v-if="showThumbnailActionButton" class="d-flex position-absolute w-100 bottom-0">
+          <button @click.stop="$emit('onThumbnailActionClick', photo)" class="w-100 rounded-3 border btn-border focus-ring py-2 m-2">
+            {{ thumbnailActionButtonText }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

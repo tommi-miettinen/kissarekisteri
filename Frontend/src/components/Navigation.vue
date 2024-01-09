@@ -14,6 +14,8 @@ import Dropdown from "./Dropdown.vue";
 import { toast } from "vue-sonner";
 import { useQueryClient } from "@tanstack/vue-query";
 import { QueryKeys } from "../api/queryKeys";
+import Avatar from "./Avatar.vue";
+import NotificationIcon from "../icons/NotificationIcon.vue";
 
 enum ActionType {
   NONE = "NONE",
@@ -42,8 +44,6 @@ const router = useRouter();
 const { t, locale } = useI18n();
 const queryClient = useQueryClient();
 
-const avatarLoadError = ref(false);
-
 const { data: confirmationRequestsData, refetch } = useQuery({
   queryKey: ["confirmationRequests"],
   queryFn: () => catAPI.getConfirmationRequests(),
@@ -71,9 +71,7 @@ const logoutFromApp = () => {
 
 const isMobile = computed(() => useWindowSize().width.value < 768);
 
-onMounted(async () => {
-  await msalInstance.handleRedirectPromise();
-});
+onMounted(async () => await msalInstance.handleRedirectPromise());
 
 const handleAvatarClick = async () => {
   if (isMobile.value) toggleAction(ActionType.BOTTOM_SHEET);
@@ -102,28 +100,10 @@ const requestsRef = ref<HTMLDivElement>();
         @click.stop="handleAvatarClick"
         @keyup.enter="handleAvatarClick"
         v-if="user"
-        class="focus-ring rounded-circle bg-danger"
+        class="focus-ring rounded-circle"
         ref="dropdownTriggerRef"
       >
-        <div class="rounded-circle" type="button">
-          <img
-            v-if="user.avatarUrl && !avatarLoadError"
-            class="rounded-circle"
-            height="32"
-            width="32"
-            style="object-fit: fill"
-            :src="user.avatarUrl"
-            alt="User avatar"
-            :onerror="(avatarLoadError = true)"
-          />
-          <div
-            style="width: 32px; height: 32px; font-size: 14px"
-            class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold text-uppercase"
-            v-else
-          >
-            {{ user.givenName[0] + user.surname[0] }}
-          </div>
-        </div>
+        <Avatar :avatarUrl="user.avatarUrl" :displayText="user.givenName[0] + user.surname[0]" />
       </div>
       <Dropdown :visible="!isMobile" :triggerRef="dropdownTriggerRef">
         <template v-if="user">
@@ -149,20 +129,7 @@ const requestsRef = ref<HTMLDivElement>();
       </li>
 
       <div ref="requestsRef" tabindex="0" role="button" class="cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          fill="none"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="3"
-          className="feather feather-bell"
-          viewBox="0 0 24 24"
-        >
-          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"></path>
-        </svg>
+        <NotificationIcon />
 
         <span
           style="margin-left: -8px"
@@ -199,6 +166,7 @@ const requestsRef = ref<HTMLDivElement>();
         </template>
       </Dropdown>
       <a
+        v-if="!isMobile"
         @keyup.enter="handleLocaleClick"
         @click="handleLocaleClick"
         tabindex="0"

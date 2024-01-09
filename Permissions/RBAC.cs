@@ -21,9 +21,9 @@ namespace Kissarekisteri.RBAC
         EditCat
     }
 
-    public static class PermissionSeed
+    public static class Permissions
     {
-        public static List<Permission> GetSeedData()
+        public static List<Permission> GetPermissions()
         {
             return Enum.GetValues(typeof(PermissionType))
                 .Cast<PermissionType>()
@@ -32,9 +32,9 @@ namespace Kissarekisteri.RBAC
         }
     }
 
-    public static class RoleSeed
+    public static class Roles
     {
-        public static List<Role> GetSeedData()
+        public static List<Role> GetRoles()
         {
             return Enum.GetValues(typeof(RoleType))
                 .Cast<RoleType>()
@@ -43,30 +43,31 @@ namespace Kissarekisteri.RBAC
         }
     }
 
-    public class RoleSeedData
+
+    public class RoleWithPermissions
     {
         public string Name { get; set; }
-        public List<PermissionType> Permissions { get; set; } = new List<PermissionType>();
+        public List<PermissionType> Permissions { get; set; } = [];
     }
 
 
-    public static class RolePermissionSeed
+    public static class RolePermissions
     {
-        public static List<RoleSeedData> GetSeedData()
-        {
-            var roles = new List<RoleSeedData>
-            {
-                new RoleSeedData {
+        public static readonly List<RoleWithPermissions> RolesWithPermissions =
+            [
+                new()
+                {
                     Name = RoleType.Admin.ToString(),
                     Permissions =
-                    {   PermissionType.CreateCatShowResult,
+                    [
+                        PermissionType.CreateCatShowResult,
                         PermissionType.CreateEvent,
                         PermissionType.DeleteEvent,
                         PermissionType.CreateCat,
                         PermissionType.EditCat
-                    }
+                    ]
                 },
-                new RoleSeedData
+                new()
                 {
                     Name = RoleType.EventOrganizer.ToString(),
                     Permissions =
@@ -77,10 +78,6 @@ namespace Kissarekisteri.RBAC
 
                     ]
                 }
-            };
-
-            return roles;
-        }
+            ];
     }
-}
-
+};

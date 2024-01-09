@@ -16,6 +16,7 @@ import { useWindowSize } from "@vueuse/core";
 import Dropdown from "../components/Dropdown.vue";
 import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { QueryKeys } from "../api/queryKeys";
+import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -115,85 +116,72 @@ const startAddingCat = () => {
 
 <template>
   <h3 v-if="isUserError" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
-  <div v-if="user" class="w-100 h-100 flex-column d-flex p-sm-5">
-    <div class="p-sm-5 rounded col-12 col-lg-8 h-100 d-flex flex-column p-3 mx-auto">
-      <div v-if="user" class="d-flex align-items-center gap-2 mb-4">
-        <div class="d-flex align-items-center">
-          <div
-            style="width: 32px; height: 32px; font-size: 14px"
-            class="rounded-circle d-flex align-items-center justify-content-center bg-primary fw-bold"
-          >
-            {{ user.givenName[0] + user.surname[0] }}
-          </div>
-        </div>
-        <h3>{{ `${user.givenName}  ${user.surname}` }}</h3>
-      </div>
+  <div style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
+    <div v-if="user" class="d-flex align-items-center gap-2">
+      <h3 class="m-0">{{ `${user.givenName}  ${user.surname}` }}</h3>
+    </div>
 
-      <div class="d-flex flex-column rounded h-100 flex-grow-1">
-        <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
-        <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats" :items="cats" :itemsPerPage="cats.length">
-          <template v-slot="{ item: cat }">
-            <CatListItem :key="cat.id" :cat="cat">
-              <template #actions>
-                <div
-                  :ref="(el) => (catListItemRefs[cat.id] = el as HTMLDivElement)"
-                  @keyup.enter.stop
-                  v-if="userIsLoggedInUser"
-                  data-testid="cat-options"
-                  @click.stop="startSelectingCatAction(cat)"
-                  class="d-flex"
+    <div class="d-flex flex-column rounded h-100 flex-grow-1">
+      <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
+      <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats" :items="cats" :itemsPerPage="cats.length">
+        <template v-slot="{ item: cat }">
+          <CatListItem :key="cat.id" :cat="cat">
+            <template #actions>
+              <div
+                :ref="(el) => (catListItemRefs[cat.id] = el as HTMLDivElement)"
+                @keyup.enter.stop
+                v-if="userIsLoggedInUser"
+                data-testid="cat-options"
+                @click.stop="startSelectingCatAction(cat)"
+                class="d-flex"
+              >
+                <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1 border-0" type="button">
+                  <ThreeDotsIcon />
+                </button>
+                <Dropdown
+                  @onCancel="removeAction(ActionType.SELECTING_CAT_ACTION)"
+                  :visible="!isMobile"
+                  :placement="'left-start'"
+                  :triggerRef="catListItemRefs[cat.id]"
                 >
-                  <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1 border-0" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                      <path
-                        d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                      />
-                    </svg>
-                  </button>
-                  <Dropdown
-                    @onCancel="removeAction(ActionType.SELECTING_CAT_ACTION)"
-                    :visible="!isMobile"
-                    :placement="'left-start'"
-                    :triggerRef="catListItemRefs[cat.id]"
+                  <li
+                    @keyup.enter.stop="startEditingCat(cat)"
+                    @click="startEditingCat(cat)"
+                    tabIndex="0"
+                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
                   >
-                    <li
-                      @keyup.enter.stop="startEditingCat(cat)"
-                      @click="startEditingCat(cat)"
-                      tabIndex="0"
-                      class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
-                    >
-                      Muokkaa
-                    </li>
-                    <li
-                      tabIndex="0"
-                      class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
-                      data-testid="start-cat-delete"
-                      @keyup.enter="startDeletingCat(cat)"
-                      @click="startDeletingCat(cat)"
-                    >
-                      Poista
-                    </li>
-                  </Dropdown>
-                </div>
-              </template>
-            </CatListItem>
-          </template>
-          <template #action>
-            <button
-              v-if="userIsLoggedInUser"
-              @click.stop="startAddingCat"
-              @keyup.enter.stop="startAddingCat"
-              data-testid="add-new-cat-btn"
-              type="button"
-              class="btn btn-primary ms-auto px-5 rounded-3 mt-2 w-100"
-            >
-              {{ t("Profile.addCat") }} +
-            </button>
-          </template>
-        </List>
-      </div>
+                    Muokkaa
+                  </li>
+                  <li
+                    tabIndex="0"
+                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                    data-testid="start-cat-delete"
+                    @keyup.enter="startDeletingCat(cat)"
+                    @click="startDeletingCat(cat)"
+                  >
+                    Poista
+                  </li>
+                </Dropdown>
+              </div>
+            </template>
+          </CatListItem>
+        </template>
+        <template #action>
+          <button
+            v-if="userIsLoggedInUser"
+            @click.stop="startAddingCat"
+            @keyup.enter.stop="startAddingCat"
+            data-testid="add-new-cat-btn"
+            type="button"
+            class="btn btn-primary ms-auto px-5 rounded-3 w-sm-100"
+          >
+            {{ t("Profile.addCat") }} +
+          </button>
+        </template>
+      </List>
     </div>
   </div>
+
   <Drawer
     :visible="isMobile && isCurrentAction(ActionType.SELECTING_CAT_ACTION_MOBILE)"
     @onCancel="removeAction(ActionType.SELECTING_CAT_ACTION_MOBILE)"

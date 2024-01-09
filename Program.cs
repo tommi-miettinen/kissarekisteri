@@ -23,6 +23,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
+
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
@@ -125,11 +126,15 @@ app.UseExceptionHandler(appBuilder =>
 
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
-        context.Database.EnsureCreated();
-    }
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
+    var seedService = scope.ServiceProvider.GetRequiredService<SeedService>();
+
+    dbContext.Database.EnsureCreated();
+    await seedService.SeedCatBreeds();
+    await seedService.SeedPermissions();
+    await seedService.SeedRoles();
+    await seedService.SeedRolePermissions();
 }
 
 app.UseSwagger();
