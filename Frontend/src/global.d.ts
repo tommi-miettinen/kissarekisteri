@@ -117,4 +117,5 @@ interface UserPayload {
   DisplayName: string;
   Password: string;
   Email: string;
+  Role: string;
 }

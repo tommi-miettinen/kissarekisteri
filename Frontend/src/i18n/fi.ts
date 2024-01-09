@@ -35,6 +35,8 @@ const fi = {
     deleteCat: "Poista kissa",
     setAsProfilePicture: "Aseta profiilikuvaksi",
     uploadImage: "Lisää kuva",
+    male: "Uros",
+    female: "Naaras",
   },
   CatShowList: {
     catShows: "Näyttelyt",

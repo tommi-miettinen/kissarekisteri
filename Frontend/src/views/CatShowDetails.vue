@@ -154,7 +154,10 @@ watchEffect(() => {
   <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
-  <div v-if="catShow" class="p-2 w-100 h-100 d-flex flex-column align-items-center p-xl-5">
+  <div
+    v-if="catShow"
+    class="p-2 w-100 h-100 d-flex flex-column align-items-center p-xl-5 col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5"
+  >
     <div class="col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5">
       <div class="d-flex flex-column flex-md-row gap-sm-4 hero-container">
         <div class="border image-container rounded-4 hero-image" style="position: relative; width: 100%; height: 100%; overflow: hidden">

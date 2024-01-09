@@ -2,7 +2,7 @@
 import { ref, watchEffect, nextTick, computed, watch } from "vue";
 import catAPI from "../api/catAPI";
 import { useQuery } from "@tanstack/vue-query";
-import { getCurrentFormattedDate } from "../utils/formatDate";
+import moment from "moment";
 
 const motherCatQuery = ref("");
 const fatherCatQuery = ref("");
@@ -35,7 +35,7 @@ const catBreeds = computed(() => catBreedData.value?.data);
 
 const newCat = ref<CatPayload>({
   name: "",
-  birthDate: getCurrentFormattedDate(),
+  birthDate: moment().format("YYYY-MM-DD"),
   breed: "",
   sex: "Female",
   fatherId: undefined,
@@ -85,7 +85,7 @@ watch(
 
 watchEffect(() => {
   if (props.cat) {
-    newCat.value = { ...newCat.value, ...props.cat };
+    newCat.value = { ...newCat.value, ...props.cat, birthDate: moment(props.cat.birthDate).format("YYYY-MM-DD") };
   }
 });
 

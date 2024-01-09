@@ -35,6 +35,8 @@ const en = {
     deleteCat: "Delete cat",
     setAsProfilePicture: "Set as profile picture",
     uploadImage: "Upload image",
+    male: "Male",
+    female: "Female",
   },
   CatShowList: {
     catShows: "Cat shows",

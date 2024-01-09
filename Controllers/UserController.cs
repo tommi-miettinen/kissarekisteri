@@ -72,6 +72,13 @@ public class UserController(
         return Json(users);
     }
 
+    [HttpGet("roles")]
+    public async Task<ActionResult<List<Role>>> GetRoles()
+    {
+        var roles = await permissionService.GetRoles();
+        return Json(roles);
+    }
+
     /// <summary>
     /// Endpoint for getting the currently logged in user.
     /// </summary>
@@ -94,10 +101,14 @@ public class UserController(
     }
 
     [HttpPost]
-    public async Task<ActionResult<UserResponse>> CreateUser([FromBody] UserCreatePayloadDTO userPayload)
+    public async Task<ActionResult<Result<UserResponse>>> CreateUser([FromBody] UserCreatePayloadDTO userPayload)
     {
-        var user = await userService.CreateUser(userPayload);
-        return Json(user);
+        var result = await userService.CreateUser(userPayload);
+        if (!result.IsSuccess)
+        {
+            return HttpStatusMapper.Map(result.Errors);
+        }
+        return Json(result);
     }
 
     /// <summary>

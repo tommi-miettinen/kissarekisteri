@@ -39,4 +39,9 @@ public class PermissionService(KissarekisteriDbContext dbContext)
             .Include(ur => ur.Role)
             .FirstOrDefaultAsync();
     }
+
+    public async Task<List<Role>> GetRoles()
+    {
+        return await dbContext.Roles.ToListAsync();
+    }
 }

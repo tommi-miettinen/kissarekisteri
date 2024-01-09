@@ -135,7 +135,7 @@ const startAddingCat = () => {
                 @click.stop="startSelectingCatAction(cat)"
                 class="d-flex"
               >
-                <button tabindex="0" class="btn py-1 px-2 accordion d-flex focus-ring rounded-1 border-0" type="button">
+                <button tabindex="0" class="btn p-2 accordion d-flex focus-ring rounded-1 border-0" type="button">
                   <ThreeDotsIcon />
                 </button>
                 <Dropdown

@@ -60,8 +60,18 @@ const deleteUserById = async (userId: string) => {
 };
 
 const createUser = async (userPayload: any) => {
+  console.log(userPayload);
   try {
     const result = await apiClient.post(`/users`, userPayload);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getRoles = async () => {
+  try {
+    const result = await apiClient.get<any[]>(`users/roles`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -77,4 +87,5 @@ export default {
   getPermissions,
   deleteUserById,
   createUser,
+  getRoles,
 };

@@ -3,7 +3,6 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import Modal from "../components/Modal.vue";
 import { useI18n } from "vue-i18n";
-import { formatDate } from "../utils/formatDate";
 import catShowAPI from "../api/catShowAPI";
 import { useQuery, useMutation } from "@tanstack/vue-query";
 import { toast } from "vue-sonner";
@@ -12,6 +11,8 @@ import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
 import { useWindowSize } from "@vueuse/core";
 import CatShowForm from "../components/CatShowForm.vue";
+import moment from "moment";
+moment.locale("fi");
 
 const router = useRouter();
 const { t } = useI18n();
@@ -30,6 +31,14 @@ const createCatShowMutation = useMutation({
   },
 });
 
+const formatDate = (start: string, end: string) => {
+  const startDate = moment(start).format("ll");
+  const endDate = moment(end).format("ll");
+  const startTime = moment(start).format("LT");
+  const endTime = moment(end).format("LT");
+  return `${startDate} - ${endDate}, ${startTime} - ${endTime}`;
+};
+
 const isMobile = computed(() => useWindowSize().width.value < 768);
 
 const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`);
@@ -46,9 +55,9 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
             @click="() => navigateToEvent(catShow.id!)"
             class="d-flex gap-4 rounded-3 p-2 align-items-center pointer hover-bg focus-ring"
           >
-            <div style="height: 60px" class="d-flex">
+            <div class="d-flex">
               <img
-                style="width: 100%; height: 100%; object-fit: contain"
+                style="width: 80px; height: 80px; object-fit: cover"
                 class="rounded-2"
                 src="https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg"
               />
@@ -56,12 +65,9 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
             <div class="d-flex flex-column gap-1">
               <div>{{ catShow.name }}</div>
               <div class="text-body-secondary">{{ catShow.location }}</div>
-              <div v-if="isMobile" style="font-size: 12px; font-weight: bold">
-                {{ `${formatDate(catShow.startDate)} -  ${formatDate(catShow.endDate)}` }}
+              <div class="ms-auto fw-bold" style="font-size: 13px; margin-top: auto">
+                {{ formatDate(catShow.startDate, catShow.endDate) }}
               </div>
-            </div>
-            <div v-if="!isMobile" class="ms-auto" style="font-size: 12px; font-weight: bold; margin-top: auto">
-              {{ `${formatDate(catShow.startDate)} -  ${formatDate(catShow.endDate)}` }}
             </div>
           </div>
         </div>

@@ -23,9 +23,6 @@ public class UserService(
 
     public async Task<List<UserResponse>> GetUsers()
     {
-        string extensionAppId = "a1caf0508ec746569ef7e0fe9a263127";
-        string avatarUrl = $"extension_{extensionAppId}_avatarUrl";
-
         var users = await graphClient.Users.GetAsync(requestConfiguration =>
         {
             requestConfiguration.QueryParameters.Select = new string[]
@@ -35,12 +32,8 @@ public class UserService(
                 "id",
                 "displayName",
                 "identities",
-                avatarUrl
             };
         });
-
-
-        Console.WriteLine(users);
 
         var responses = new List<UserResponse>();
 
@@ -57,7 +50,6 @@ public class UserService(
                     DisplayName = u.DisplayName,
                     Surname = u.Surname,
                     Email = u.Identities.FirstOrDefault().IssuerAssignedId,
-                    AvatarUrl = u.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null,
                     UserRole = await permissionService.GetUserRole(u.Id) ?? null,
                 };
                 responses.Add(userResponse);
@@ -95,13 +87,11 @@ public class UserService(
         return response;
     }
 
-    public async Task<User> CreateUser(UserCreatePayloadDTO userPayload)
+    public async Task<Result<User>> CreateUser(UserCreatePayloadDTO userPayload)
     {
+        var result = new Result<User>();
         try
         {
-            string extensionAppId = "a1caf0508ec746569ef7e0fe9a263127";
-            string avatarUrl = $"extension_{extensionAppId}_avatarUrl";
-
             var user = await graphClient.Users.PostAsync(new User
             {
                 AccountEnabled = true,
@@ -127,23 +117,31 @@ public class UserService(
                 PasswordPolicies = "DisablePasswordExpiration",
             });
 
-            dbContext.UserRoles.Add(
-                new Models.UserRole
+
+            if (!string.IsNullOrEmpty(userPayload.Role))
+            {
+                var role = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == userPayload.Role);
+
+                if (role != null)
                 {
-                    UserId = user.Id,
-                    RoleId = 1
+                    dbContext.UserRoles.Add(
+                        new UserRole
+                        {
+                            UserId = user.Id,
+                            RoleId = role.Id,
+                            RoleName = role.Name.ToString()
+                        }
+                        );
+
+                    await dbContext.SaveChangesAsync();
                 }
-                );
+            }
 
-
-            return user;
+            return result.Success(user);
         }
         catch (Exception ex)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(ex.Message);
-            Console.ResetColor();
-            return null;
+            return result.AddError(new Error(ex.Message, "CreateFail"));
         }
     }
 
@@ -151,13 +149,10 @@ public class UserService(
     {
         try
         {
-            string extensionAppId = "a1caf0508ec746569ef7e0fe9a263127";
-            string avatarUrl = $"extension_{extensionAppId}_avatarUrl";
-
             var user = await graphClient.Users[userId].GetAsync(requestConfiguration =>
             {
                 requestConfiguration.QueryParameters.Select =
-                new string[] { "givenName", "surname", "id", "displayName", "identities", avatarUrl };
+                new string[] { "givenName", "surname", "id", "displayName", "identities" };
             });
 
             var response = new UserResponse
@@ -167,7 +162,6 @@ public class UserService(
                 DisplayName = user.DisplayName,
                 Surname = user.Surname,
                 Email = user.Identities.FirstOrDefault().IssuerAssignedId,
-                AvatarUrl = user.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null,
                 UserRole = await permissionService.GetUserRole(user.Id) ?? null
             };
 

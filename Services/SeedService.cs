@@ -22,57 +22,46 @@ namespace Kissarekisteri.Services
     {
         public async Task SeedPermissions()
         {
-            var existingPermissions = dbContext.Permissions.Select(p => p.Name).ToList();
-            var permissionsToAdd = Permissions.GetPermissions()
-                .Where(p => !existingPermissions.Contains(p.Name))
-                .ToList();
+            dbContext.Permissions.RemoveRange(dbContext.Permissions);
+            await dbContext.SaveChangesAsync();
 
-            dbContext.Permissions.AddRange(permissionsToAdd);
+            dbContext.Permissions.AddRange(Permissions.GetPermissions());
             await dbContext.SaveChangesAsync();
         }
 
         public async Task SeedRoles()
         {
-            var existingRoles = dbContext.Roles.Select(r => r.Name).ToList();
-            var rolesToAdd = Roles.GetRoles().Where(r => !existingRoles.Contains(r.Name)).ToList();
 
-            dbContext.Roles.AddRange(rolesToAdd);
+            dbContext.Roles.RemoveRange(dbContext.Roles);
+            await dbContext.SaveChangesAsync();
+
+            dbContext.Roles.AddRange(Roles.GetRoles());
             await dbContext.SaveChangesAsync();
         }
 
         public async Task SeedRolePermissions()
         {
-            var roles = RolePermissions.RolesWithPermissions;
 
-            foreach (var role in roles)
+            dbContext.RolePermissions.RemoveRange(dbContext.RolePermissions);
+            await dbContext.SaveChangesAsync();
+
+
+
+            foreach (var role in RolePermissions.RolesWithPermissions)
             {
                 var roleEntity = dbContext.Roles.FirstOrDefault(r => r.Name == role.Name);
-
                 if (roleEntity != null)
                 {
-                    var existingRolePermissions = dbContext.RolePermissions
-                        .Where(rp => rp.RoleId == roleEntity.Id)
-                        .Select(rp => rp.PermissionId)
-                        .ToList();
-
                     var permissionsToAdd = role.Permissions
-                        .Select(
-                            p =>
-                                dbContext.Permissions.FirstOrDefault(
-                                    perm => perm.Name == p.ToString()
-                                )
-                        )
-                        .Where(p => p != null && !existingRolePermissions.Contains(p.Id))
-                        .Select(
-                            p =>
-                                new RolePermission
-                                {
-                                    RoleId = roleEntity.Id,
-                                    RoleName = roleEntity.Name,
-                                    PermissionName = p.Name,
-                                    PermissionId = p.Id
-                                }
-                        )
+                        .Select(p => dbContext.Permissions.FirstOrDefault(perm => perm.Name == p.ToString()))
+                        .Where(p => p != null)
+                        .Select(p => new RolePermission
+                        {
+                            RoleId = roleEntity.Id,
+                            RoleName = roleEntity.Name.ToString(),
+                            PermissionName = p.Name,
+                            PermissionId = p.Id
+                        })
                         .ToList();
 
                     dbContext.RolePermissions.AddRange(permissionsToAdd);
@@ -80,6 +69,11 @@ namespace Kissarekisteri.Services
             }
 
             await dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateUserRoles()
+        {
+            var existingUserRoles = await dbContext.UserRoles.ToListAsync();
         }
 
         public async Task SeedCatBreeds()

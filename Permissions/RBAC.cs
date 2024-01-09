@@ -8,6 +8,7 @@ namespace Kissarekisteri.RBAC
 {
     public enum RoleType
     {
+        User,
         Admin,
         EventOrganizer
     }
@@ -18,7 +19,9 @@ namespace Kissarekisteri.RBAC
         EditEvent,
         DeleteEvent,
         CreateCat,
-        EditCat
+        EditCat,
+        AddAdminRole,
+        AddEventOrganizerRole
     }
 
     public static class Permissions
@@ -55,6 +58,11 @@ namespace Kissarekisteri.RBAC
     {
         public static readonly List<RoleWithPermissions> RolesWithPermissions =
             [
+                   new()
+                   {
+                       Name = RoleType.User.ToString(),
+                       Permissions = []
+                   },
                 new()
                 {
                     Name = RoleType.Admin.ToString(),
@@ -64,7 +72,9 @@ namespace Kissarekisteri.RBAC
                         PermissionType.CreateEvent,
                         PermissionType.DeleteEvent,
                         PermissionType.CreateCat,
-                        PermissionType.EditCat
+                        PermissionType.EditCat,
+                        PermissionType.AddAdminRole,
+                        PermissionType.AddEventOrganizerRole
                     ]
                 },
                 new()

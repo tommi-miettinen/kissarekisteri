@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { formatDateNoHours } from "../utils/formatDate";
 import { useRouter } from "vue-router";
 import { useWindowSize } from "@vueuse/core";
-import { defineProps } from "vue";
+import moment from "moment";
+import { useI18n } from "vue-i18n";
 
-const { cat } = defineProps({
+defineProps({
   cat: {
     type: Object as () => Cat,
     required: true,
   },
 });
 
+const { t } = useI18n();
 const router = useRouter();
 
 const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
@@ -33,8 +34,7 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
     >
       <div class="d-flex gap-4 rounded-3 align-items-center pointer hover-bg focus-ring">
         <div style="position: relative; height: 60px" class="d-flex border-primary">
-          <img style="width: 100%; height: 100%; object-fit: contain" class="rounded-2 border" :src="cat.imageUrl || altUrl" />
-          <!-- Position medal slot on top corner of the image -->
+          <img style="width: 80px; height: 80px; object-fit: cover" class="rounded-2" :src="cat.imageUrl || altUrl" />
           <div class="position-absolute top-0 start-0 translate-middle">
             <slot name="medal"></slot>
           </div>
@@ -43,15 +43,15 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
           <div>{{ cat.name }}</div>
           <div class="text-body-secondary">{{ cat.breed }}</div>
           <div :style="{ backgroundColor: getTextColor(cat.sex), color: 'black' }" class="badge rounded-pill bg-opacity-10">
-            {{ cat.sex }}
+            {{ cat.sex === "Male" ? t("CatDetails.male") : t("CatDetails.female") }}
           </div>
 
-          <div v-if="isMobile" style="font-size: 12px; font-weight: bold">
-            {{ `${formatDateNoHours(cat.birthDate)}` }}
+          <div v-if="isMobile" style="font-size: 13px; font-weight: bold">
+            {{ `${moment(cat.birthDate).format("LLL")}` }}
           </div>
         </div>
-        <div v-if="!isMobile" class="ms-auto" style="font-size: 12px; font-weight: bold; margin-top: auto">
-          {{ `${formatDateNoHours(cat.birthDate)}` }}
+        <div v-if="!isMobile" class="ms-auto" style="font-size: 13px; font-weight: bold; margin-top: auto">
+          {{ `${moment(cat.birthDate).format("LLL")}` }}
         </div>
       </div>
       <div class="gap-2 align-items-center d-flex">

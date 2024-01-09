@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, watchEffect, computed } from "vue";
-
-const roles = ["Admin", "EventOrganizer", "User"];
+import { useQuery } from "@tanstack/vue-query";
+import userAPI from "../api/userAPI";
 
 const props = defineProps({
   user: {
@@ -9,19 +9,21 @@ const props = defineProps({
   },
 });
 
+const { data: roles } = useQuery({
+  queryKey: ["roles"],
+  queryFn: () => userAPI.getRoles(),
+});
+
 const newUser = ref({
   name: "",
   password: "",
-  role: "User",
+  role: roles.value ? roles.value[0].value : "",
 });
 
 watchEffect(() => {
   if (props.user) {
-    newUser.value = {
-      name: props.user.givenName + " " + props.user.surname,
-      password: "",
-      role: "User",
-    };
+    newUser.value.name = props.user.givenName + " " + props.user.surname;
+    //@ts-ignore
   }
 });
 
@@ -34,6 +36,7 @@ const createUserPayload = computed(() => {
     DisplayName: newUser.value.name,
     Password: newUser.value.password,
     Email: name[0] + "." + name[1] + "@gmail.com",
+    Role: newUser.value.role,
   };
   return payload;
 });
@@ -51,13 +54,12 @@ const createUserPayload = computed(() => {
     </div>
     <div>
       <label for="role" class="form-label w-100">Role</label>
-      <select v-model="newUser.role" class="form-select" id="role" aria-label="role">
-        <option v-for="role in roles" :key="role" :value="role">
-          {{ role }}
+      <select v-if="roles && roles.length > 0" v-model="newUser.role" class="form-select" id="role" aria-label="role">
+        <option v-for="role in roles" :key="role.name" :value="role.name">
+          {{ role.name }}
         </option>
       </select>
     </div>
-
     <button @click="$emit('onSave', createUserPayload)" class="btn btn-primary">Lisää käyttäjä</button>
   </div>
 </template>

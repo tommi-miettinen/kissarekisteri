@@ -1,5 +1,10 @@
 <script lang="ts" setup>
-console.log("test");
+defineProps({
+  size: {
+    type: [String, Number],
+    default: 24,
+  },
+});
 </script>
 
 <template>
