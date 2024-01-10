@@ -53,7 +53,7 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
             tabindex="0"
             @keyup.enter="() => navigateToEvent(catShow.id!)"
             @click="() => navigateToEvent(catShow.id!)"
-            class="d-flex gap-4 rounded-3 p-2 align-items-center pointer hover-bg focus-ring"
+            class="d-flex gap-4 rounded-3 p-2 align-items-center pointer hover-bg-1 cursor-pointer focus-ring"
           >
             <div class="d-flex">
               <img

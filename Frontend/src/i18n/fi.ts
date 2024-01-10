@@ -54,6 +54,11 @@ const fi = {
   List: {
     Search: "Hae...",
   },
+  Roles: {
+    Admin: "Ylläpitäjä",
+    EventOrganizer: "Tapahtuman järjestäjä",
+    User: "Käyttäjä",
+  },
 };
 
 export default fi;

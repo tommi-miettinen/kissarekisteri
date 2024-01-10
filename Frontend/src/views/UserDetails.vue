@@ -128,25 +128,34 @@ const startAddingCat = () => {
 <template>
   <h3 v-if="isUserError" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
   <div style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
-    <div v-if="user" class="d-flex gap-2 flex-column bg-1 rounded-3 p-3">
+    <div v-if="user" class="d-flex gap-2 flex-column border-bottom py-3">
       <div class="d-flex gap-2 align-items-center">
         <Avatar
-          @click="pushAction(ActionType.EDITING_AVATAR)"
-          @keyup.enter="pushAction(ActionType.EDITING_AVATAR)"
+          @click="userIsLoggedInUser && pushAction(ActionType.EDITING_AVATAR)"
+          @keyup.enter="userIsLoggedInUser && pushAction(ActionType.EDITING_AVATAR)"
           :avatarUrl="user.avatarUrl"
           :displayText="user.givenName[0] + user.surname[0]"
         />
 
         <h3 class="m-0">{{ `${user.givenName}  ${user.surname}` }}</h3>
       </div>
-      <div>{{ user.userRole?.roleName }}</div>
+      <div v-if="user.userRole && user.userRole.role.name !== 'User'">
+        {{ t(`Roles.${user.userRole.roleName}`) }}
+      </div>
       <div v-if="user.isBreeder">{{ "Kasvattaja" }}</div>
-      <button v-if="!user.isBreeder && userIsLoggedInUser" class="btn btn-primary me-auto px-5 w-sm-100">Rekisteröidy kasvattajaksi</button>
+      <button
+        tabIndex="0"
+        @click="console.log('test')"
+        v-if="!user.isBreeder && userIsLoggedInUser"
+        class="btn bg-black text-white focus-ring focus-ring-dark px-4 rounded-3 me-auto w-sm-100"
+      >
+        Rekisteröidy kasvattajaksi
+      </button>
     </div>
 
     <div class="d-flex flex-column rounded h-100 flex-grow-1">
       <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
-      <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats" :items="cats" :itemsPerPage="cats.length">
+      <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats && cats.length > 0" :items="cats" :itemsPerPage="cats.length">
         <template v-slot="{ item: cat }">
           <CatListItem :key="cat.id" :cat="cat">
             <template #actions>
@@ -196,7 +205,7 @@ const startAddingCat = () => {
             @keyup.enter.stop="startAddingCat"
             data-testid="add-new-cat-btn"
             type="button"
-            class="btn btn-primary ms-auto px-5 rounded-3 w-sm-100"
+            class="btn bg-black text-white focus-ring focus-ring-dark ms-auto py-2 px-5 rounded-3 w-sm-100"
           >
             {{ t("Profile.addCat") }} +
           </button>

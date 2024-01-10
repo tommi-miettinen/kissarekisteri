@@ -54,6 +54,12 @@ const en = {
   List: {
     Search: "Search...",
   },
+
+  Roles: {
+    Admin: "Admin",
+    EventOrganizer: "Event organizer",
+    User: "User",
+  },
 };
 
 export default en;

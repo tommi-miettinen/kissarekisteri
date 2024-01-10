@@ -13,6 +13,7 @@ import UserListItem from "../components/UserListItem.vue";
 import ImageGallery from "../components/ImageGallery.vue";
 import { toast } from "vue-sonner";
 import { user } from "../store/userStore";
+import moment from "moment";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -85,7 +86,9 @@ watch(route, () => refetch());
           <p>
             {{ cat.breed }}
           </p>
-          <p>{{ cat.birthDate }}</p>
+          <p>
+            syntynyt <span>{{ moment(cat.birthDate).format("LLL") }}</span>
+          </p>
           <button
             v-if="!userIsCatOwner"
             @click="requestOwnershipTransfer"
@@ -103,7 +106,7 @@ watch(route, () => refetch());
             tabindex="0"
             @keyup.enter="() => navigateToCatShow(result.catShowId)"
             @click="() => navigateToCatShow(result.catShowId)"
-            class="hover-bg p-3 d-flex rounded-3 p-2 flex align-items-center focus-ring"
+            class="hover-bg-1 p-3 d-flex rounded-3 p-2 flex align-items-center focus-ring cursor-pointer"
           >
             <div class="d-flex align-items-center gap-2">
               <span :style="{ backgroundColor: getMedalColor(result.place) }" class="badge rounded-pill text-black"

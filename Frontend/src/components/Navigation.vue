@@ -115,16 +115,16 @@ const requestsRef = ref<HTMLDivElement>();
       </Dropdown>
 
       <button @click="login" data-testid="login-btn" v-if="!user" class="btn btn-primary">{{ t("Navigation.login") }}</button>
-      <li class="nav-item rounded-3 hover-bg" :class="{ 'd-none': isMobile, 'nav-item-active': route.path.includes('catshows') }">
+      <li class="nav-item rounded-3 hover-bg-1" :class="{ 'd-none': isMobile, 'bg-1': route.path.includes('catshows') }">
         <router-link style="color: black" class="nav-link rounded-3" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
       </li>
       <li
-        class="nav-item rounded-3 hover-bg"
-        :class="{ 'd-none': isMobile, 'nav-item-active': route.path === '/cats' || route.path.startsWith('/cats/') }"
+        class="nav-item rounded-3 hover-bg-1"
+        :class="{ 'd-none': isMobile, 'bg-1': route.path === '/cats' || route.path.startsWith('/cats/') }"
       >
         <router-link ref="cats" style="color: black" class="nav-link rounded-3" to="/cats">{{ t("Navigation.cats") }}</router-link>
       </li>
-      <li class="nav-item rounded-3 hover-bg" :class="{ 'd-none': isMobile, 'nav-item-active': route.path.includes('users') }">
+      <li class="nav-item rounded-3 hover-bg-1" :class="{ 'd-none': isMobile, 'bg-1': route.path.includes('users') }">
         <router-link style="color: black" class="nav-link rounded-3" to="/users">{{ t("Navigation.members") }}</router-link>
       </li>
 
@@ -170,7 +170,7 @@ const requestsRef = ref<HTMLDivElement>();
         @click="handleLocaleClick"
         tabindex="0"
         style="cursor: pointer"
-        class="focus-ring p-2 rounded-3"
+        class="focus-ring p-2 rounded-3 text-black"
         >{{ localeString }}</a
       >
     </ul>
@@ -182,9 +182,3 @@ const requestsRef = ref<HTMLDivElement>();
     </div>
   </Drawer>
 </template>
-
-<style>
-.nav-item-active {
-  background-color: #f3f4f6;
-}
-</style>

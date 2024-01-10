@@ -94,6 +94,17 @@ const uploadAvatar = async (image: File) => {
   }
 };
 
+const registerAsBreeder = async () => {
+  try {
+    console.log("test");
+    return;
+    const result = await apiClient.post(`/users/breeder`);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export default {
   getUserById,
   getUsers,
@@ -105,4 +116,5 @@ export default {
   createUser,
   getRoles,
   uploadAvatar,
+  registerAsBreeder,
 };

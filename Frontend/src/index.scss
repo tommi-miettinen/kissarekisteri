@@ -12,6 +12,10 @@
   padding: 0px;
 }
 
+.bg-black:hover {
+  opacity: 0.8;
+}
+
 .cursor-pointer {
   cursor: pointer;
 }
@@ -20,12 +24,15 @@
   background-color: #f3f4f6;
 }
 
-.hover-bg:focus {
+.hover-bg-1:hover {
   background-color: #f3f4f6;
 }
 
-.hover-bg:hover {
-  cursor: pointer;
+.hover-bg-1:focus {
+  background-color: #f3f4f6;
+}
+
+.hover:bg-1:hover {
   background-color: #f3f4f6;
 }
 

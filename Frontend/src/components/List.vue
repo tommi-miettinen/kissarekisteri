@@ -92,10 +92,10 @@ watch([() => props.itemsPerPage, () => currentPage.value], () => {
             tabindex="0"
             @keyup.enter="typeof page === 'number' && goToPage(page)"
             @click="typeof page === 'number' && goToPage(page)"
-            class="btn border focus-ring hover-bg rounded-3"
+            class="btn border focus-ring focus-ring-dark hover-bg rounded-3"
             v-for="page in pages"
             :key="page"
-            :class="{ 'border-primary': currentPage === page, 'bg-primary': currentPage === page, 'text-white': currentPage === page }"
+            :class="{ 'bg-dark': currentPage === page, 'text-white': currentPage === page }"
           >
             {{ page }}
           </li>

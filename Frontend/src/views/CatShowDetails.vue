@@ -152,7 +152,7 @@ watchEffect(() => {
   }
 });
 
-const startJoiningCatShow = () => (isMobile ? pushAction(ActionType.JOINING_EVENT_MOBILE) : pushAction(ActionType.JOINING_EVENT));
+const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionType.JOINING_EVENT_MOBILE) : pushAction(ActionType.JOINING_EVENT));
 </script>
 
 <template>
@@ -179,10 +179,15 @@ const startJoiningCatShow = () => (isMobile ? pushAction(ActionType.JOINING_EVEN
           </p>
           <span>{{ catShow.location }}</span>
           <div v-if="user" class="mt-auto ms-auto w-sm-100">
-            <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary px-5 w-sm-100" @click="startJoiningCatShow">
+            <button v-if="!isUserAnAttendee" type="button" class="btn bg-black text-white py-2 px-5 w-sm-100" @click="startJoiningCatShow">
               {{ t("CatShowDetails.joinEvent") }}
             </button>
-            <button v-else @click="pushAction(ActionType.LEAVING_EVENT)" type="button" class="w-sm-100 btn btn-danger rounded-3 py-2 px-5">
+            <button
+              v-else
+              @click="pushAction(ActionType.LEAVING_EVENT)"
+              type="button"
+              class="w-sm-100 btn bg-black text-white rounded-3 py-2 px-5"
+            >
               {{ t("CatShowDetails.leaveEvent") }}
             </button>
           </div>
@@ -251,7 +256,7 @@ const startJoiningCatShow = () => (isMobile ? pushAction(ActionType.JOINING_EVEN
       </button>
       <ImageGallery v-if="catShow" :photos="lightboxPhotos" />
     </div>
-    <Modal :visible="isCurrentAction(ActionType.JOINING_EVENT)" @onCancel="removeAction(ActionType.JOINING_EVENT)">
+    <Modal :visible="isCurrentAction(ActionType.JOINING_EVENT) && !isMobile" @onCancel="removeAction(ActionType.JOINING_EVENT)">
       <div style="width: 90vw; max-width: 500px" class="d-flex flex-column bg-white p-4 gap-4 rounded">
         <div v-if="userCats && userCats.length > 0">
           <h5>Osallistuvat kissat:</h5>
@@ -266,7 +271,10 @@ const startJoiningCatShow = () => (isMobile ? pushAction(ActionType.JOINING_EVEN
         <button @click="joinEvent" type="button" class="btn btn-primary">Osallistu</button>
       </div>
     </Modal>
-    <Drawer :visible="isCurrentAction(ActionType.JOINING_EVENT_MOBILE) && isMobile">
+    <Drawer
+      :visible="isCurrentAction(ActionType.JOINING_EVENT_MOBILE) && isMobile"
+      @onCancel="removeAction(ActionType.JOINING_EVENT_MOBILE)"
+    >
       <div class="d-flex flex-column bg-white p-4 gap-4 rounded">
         <div v-if="userCats && userCats.length > 0">
           <h5>Osallistuvat kissat:</h5>
