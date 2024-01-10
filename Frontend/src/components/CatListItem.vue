@@ -30,10 +30,10 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
       tabindex="0"
       @keyup.enter="navigateToCat(cat.id)"
       @click="navigateToCat(cat.id)"
-      class="hover-bg rounded-3 p-2 focus-ring p-3 gap-3 d-flex justify-content-between align-items-center w-100"
+      class="hover-bg rounded-3 p-sm-2 focus-ring gap-3 d-flex justify-content-between align-items-center w-100"
     >
-      <div class="d-flex gap-4 rounded-3 align-items-center pointer hover-bg focus-ring">
-        <div style="position: relative; height: 60px" class="d-flex border-primary">
+      <div class="d-flex gap-2 rounded-3 align-items-center pointer hover-bg focus-ring w-100">
+        <div style="position: relative" class="d-flex border-primary">
           <img style="width: 80px; height: 80px; object-fit: cover" class="rounded-2" :src="cat.imageUrl || altUrl" />
           <div class="position-absolute top-0 start-0 translate-middle">
             <slot name="medal"></slot>

@@ -16,6 +16,8 @@ import ImageGallery from "../components/ImageGallery.vue";
 import Dropdown from "../components/Dropdown.vue";
 import { isCurrentAction, removeAction, pushAction } from "../store/actionStore";
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
+import Drawer from "../components/Drawer.vue";
+import { isMobile } from "../store/actionStore";
 
 enum ActionType {
   JOINING_EVENT = "JOINING_EVENT",
@@ -36,7 +38,10 @@ const { data: catShow, refetch, isLoading, isError } = useQuery({ queryKey: ["ca
 const joinEventMutation = useMutation({
   mutationFn: () => catShowAPI.joinEvent(eventId, selectedCatIds.value),
   onSuccess: () => {
-    toast.info("Osallistuminen rekisteröity"), refetch();
+    toast.info("Osallistuminen rekisteröity");
+    refetch();
+    removeAction(ActionType.JOINING_EVENT);
+    removeAction(ActionType.JOINING_EVENT_MOBILE);
   },
 });
 
@@ -59,7 +64,8 @@ const uploadMutation = useMutation({
 const leaveEventMutation = useMutation({
   mutationFn: () => catShowAPI.leaveEvent(eventId),
   onSuccess: () => {
-    toast.info("Osallistuminen peruttu"), refetch();
+    toast.info("Osallistuminen peruttu");
+    refetch();
     removeAction(ActionType.LEAVING_EVENT);
   },
 });
@@ -74,7 +80,6 @@ const userCats = computed(() => userCatsData.value?.data);
 
 watch(user, () => refetchUserCats());
 
-const joiningEvent = ref(false);
 const leavingEvent = ref(false);
 
 const isUserAnAttendee = computed(() => catShow.value && catShow.value.attendees?.some((attendee) => attendee.userId === user.value?.id));
@@ -118,7 +123,6 @@ const triggerFileInput = () => inputRef.value?.click();
 
 const joinEvent = () => {
   joinEventMutation.mutate();
-  joiningEvent.value = false;
 };
 
 const leaveEvent = () => {
@@ -147,6 +151,8 @@ watchEffect(() => {
     });
   }
 });
+
+const startJoiningCatShow = () => (isMobile ? pushAction(ActionType.JOINING_EVENT_MOBILE) : pushAction(ActionType.JOINING_EVENT));
 </script>
 
 <template>
@@ -158,7 +164,7 @@ watchEffect(() => {
     v-if="catShow"
     class="p-2 w-100 h-100 d-flex flex-column align-items-center p-xl-5 col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5"
   >
-    <div class="col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5">
+    <div class="col-12 col-xxl-8 flex-grow-1 p-sm-5 d-flex flex-column gap-2 p-2 gap-sm-5">
       <div class="d-flex flex-column flex-md-row gap-sm-4 hero-container">
         <div class="border image-container rounded-4 hero-image" style="position: relative; width: 100%; height: 100%; overflow: hidden">
           <img
@@ -173,12 +179,7 @@ watchEffect(() => {
           </p>
           <span>{{ catShow.location }}</span>
           <div v-if="user" class="mt-auto ms-auto w-sm-100">
-            <button
-              v-if="!isUserAnAttendee"
-              type="button"
-              class="btn btn-primary px-5 w-sm-100"
-              @click="pushAction(ActionType.JOINING_EVENT)"
-            >
+            <button v-if="!isUserAnAttendee" type="button" class="btn btn-primary px-5 w-sm-100" @click="startJoiningCatShow">
               {{ t("CatShowDetails.joinEvent") }}
             </button>
             <button v-else @click="pushAction(ActionType.LEAVING_EVENT)" type="button" class="w-sm-100 btn btn-danger rounded-3 py-2 px-5">
@@ -244,7 +245,7 @@ watchEffect(() => {
           </div>
         </div>
       </div>
-      <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto focus-ring">
+      <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto focus-ring w-sm-100">
         <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
         Lisää kuva +
       </button>
@@ -265,6 +266,21 @@ watchEffect(() => {
         <button @click="joinEvent" type="button" class="btn btn-primary">Osallistu</button>
       </div>
     </Modal>
+    <Drawer :visible="isCurrentAction(ActionType.JOINING_EVENT_MOBILE) && isMobile">
+      <div class="d-flex flex-column bg-white p-4 gap-4 rounded">
+        <div v-if="userCats && userCats.length > 0">
+          <h5>Osallistuvat kissat:</h5>
+          <div v-for="(cat, index) in userCats" :key="index">
+            <label>
+              <input @keyup.enter="toggleCheckbox(cat.id)" type="checkbox" v-model="selectedCatIds" :value="cat.id" />
+              {{ cat.name }}
+            </label>
+          </div>
+        </div>
+        <div v-else>No cats available.</div>
+        <button @click="joinEvent" type="button" class="btn btn-primary w-100">Osallistu</button>
+      </div>
+    </Drawer>
     <Modal :visible="isCurrentAction(ActionType.LEAVING_EVENT)" @onCancel="removeAction(ActionType.LEAVING_EVENT)">
       <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
         <p>Perutaanko osallistuminen?</p>

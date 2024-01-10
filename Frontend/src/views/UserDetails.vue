@@ -17,6 +17,8 @@ import Dropdown from "../components/Dropdown.vue";
 import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { QueryKeys } from "../api/queryKeys";
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
+import Avatar from "../components/Avatar.vue";
+import Cropper from "../components/Cropper.vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -80,6 +82,15 @@ const deleteMutation = useMutation({
   onError: () => toast.error("Jokin meni vikaan."),
 });
 
+const uploadAvatarMutation = useMutation({
+  mutationFn: (image: File) => userAPI.uploadAvatar(image),
+  onSuccess: () => {
+    toast.success("Profiilikuva päivitetty");
+    refetchUser();
+    removeAction(ActionType.EDITING_AVATAR);
+  },
+});
+
 watch([route, user], () => {
   refetchCats();
   refetchUser();
@@ -116,9 +127,21 @@ const startAddingCat = () => {
 
 <template>
   <h3 v-if="isUserError" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
-  <div style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
-    <div v-if="user" class="d-flex align-items-center gap-2">
-      <h3 class="m-0">{{ `${user.givenName}  ${user.surname}` }}</h3>
+  <div style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
+    <div v-if="user" class="d-flex gap-2 flex-column bg-1 rounded-3 p-3">
+      <div class="d-flex gap-2 align-items-center">
+        <Avatar
+          @click="pushAction(ActionType.EDITING_AVATAR)"
+          @keyup.enter="pushAction(ActionType.EDITING_AVATAR)"
+          :avatarUrl="user.avatarUrl"
+          :displayText="user.givenName[0] + user.surname[0]"
+        />
+
+        <h3 class="m-0">{{ `${user.givenName}  ${user.surname}` }}</h3>
+      </div>
+      <div>{{ user.userRole?.roleName }}</div>
+      <div v-if="user.isBreeder">{{ "Kasvattaja" }}</div>
+      <button v-if="!user.isBreeder && userIsLoggedInUser" class="btn btn-primary me-auto px-5 w-sm-100">Rekisteröidy kasvattajaksi</button>
     </div>
 
     <div class="d-flex flex-column rounded h-100 flex-grow-1">
@@ -213,6 +236,14 @@ const startAddingCat = () => {
   >
     <CatForm @onSave="addCatMutation.mutate" />
   </Drawer>
+  <Modal :visible="isCurrentAction(ActionType.EDITING_AVATAR)" @onCancel="removeAction(ActionType.EDITING_AVATAR)">
+    <div style="width: 500px; height: 500px">
+      <Cropper
+        @onCrop="uploadAvatarMutation.mutate"
+        :imageSrc="'https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg'"
+      />
+    </div>
+  </Modal>
   <Modal :visible="isCurrentAction(ActionType.ADDING_CAT) && !isMobile" @onCancel="removeAction(ActionType.ADDING_CAT)">
     <div style="width: 550px">
       <CatForm @onSave="addCatMutation.mutate" />

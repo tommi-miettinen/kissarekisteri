@@ -1,4 +1,5 @@
 import { reactive, computed } from "vue";
+import { useWindowSize } from "@vueuse/core";
 
 interface ActionStore {
   actionStack: any[];
@@ -24,3 +25,5 @@ export const removeAction = (actionType: any) =>
   (actionStore.actionStack = actionStore.actionStack.filter((action) => action !== actionType));
 
 export const addOpenDropdown = (dropdownId: string) => actionStore.openDropdowns.push(dropdownId);
+
+export const isMobile = computed(() => useWindowSize().width.value < 768);

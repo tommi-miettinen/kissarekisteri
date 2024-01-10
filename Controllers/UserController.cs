@@ -111,6 +111,19 @@ public class UserController(
         return Json(result);
     }
 
+    [HttpPatch("{userId}")]
+    public async Task<ActionResult<Result<UserResponse>>> UpdateUser([FromBody] UserUpdateRequestDTO userPayload)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var result = await userService.UpdateUser(userId, userPayload);
+        if (!result.IsSuccess)
+        {
+            return HttpStatusMapper.Map(result.Errors);
+        }
+        return Json(result);
+    }
+
+
     /// <summary>
     /// Endpoint for uploading a user avatar.
     /// </summary>

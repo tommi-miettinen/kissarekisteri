@@ -25,7 +25,7 @@ const navigateToUser = (userId: string) => router.push(`/users/${userId}`);
       class="hover-bg p-3 d-flex rounded-3 p-2 flex align-items-center focus-ring"
     >
       <div class="col d-flex align-items-center gap-2 col-8">
-        <Avatar :displayText="user.givenName[0] + user.surname[0]" />
+        <Avatar :avatarUrl="user.avatarUrl" :displayText="user.givenName[0] + user.surname[0]" />
         <div>{{ `${user.givenName}  ${user.surname}` }}</div>
       </div>
       <div class="col justify-content-end d-flex gap-2 align-items-center">

@@ -74,6 +74,17 @@ namespace Kissarekisteri.Services
         public async Task UpdateUserRoles()
         {
             var existingUserRoles = await dbContext.UserRoles.ToListAsync();
+
+            foreach (var existingRole in existingUserRoles)
+            {
+                var matchingNewRole = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == existingRole.RoleName);
+                if (matchingNewRole != null)
+                {
+                    existingRole.RoleId = matchingNewRole.Id;
+
+                }
+            }
+            await dbContext.SaveChangesAsync();
         }
 
         public async Task SeedCatBreeds()

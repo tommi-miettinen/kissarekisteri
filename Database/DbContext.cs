@@ -20,6 +20,7 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
     public DbSet<CatBreed> CatBreeds { get; set; }
     public DbSet<CatTransfer> CatTransfers { get; set; }
     public DbSet<CatRelation> CatRelations { get; set; }
+    public DbSet<UserInfo> UserInfos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

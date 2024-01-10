@@ -2,6 +2,7 @@
 using Kissarekisteri.DTOs;
 using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
+using Kissarekisteri.RBAC;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -116,22 +117,24 @@ public class CatService(
         var result = new Result<List<CatTransferResultDTO>>();
 
         var user = await userService.GetUserById(userId);
+        var userIsAdmin = user?.UserRole?.Role?.Name == RoleType.Admin.ToString();
 
         var catTransfers = await dbContext.CatTransfers
-            .Include(ct => ct.Cat)
             .Where(ct => !ct.Confirmed)
-            .Where(ct => ct.ConfirmerId == userId || user.UserRole.Role.Name == "Admin")
+            .Where(ct => ct.ConfirmerId == userId || userIsAdmin)
             .ToListAsync();
+
 
         var catTransferResultDTOs = new List<CatTransferResultDTO>();
 
         foreach (var transfer in catTransfers)
         {
+            var cat = await GetCatByIdAsync(transfer.CatId);
             var dto = new CatTransferResultDTO
             {
                 Id = transfer.Id,
                 CatId = transfer.CatId,
-                Cat = transfer.Cat,
+                Cat = cat.Data,
                 RequesterId = transfer.RequesterId,
                 ConfirmerId = transfer.ConfirmerId,
                 Confirmed = transfer.Confirmed,

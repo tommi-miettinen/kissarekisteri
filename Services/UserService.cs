@@ -60,31 +60,46 @@ public class UserService(
 
     public async Task<UserResponse> UploadUserPhotoAsync(string userId, IFormFile file)
     {
-
-        string extensionAppId = "a1caf0508ec746569ef7e0fe9a263127";
-        string avatarUrl = $"extension_{extensionAppId}_avatarUrl";
-
         var uploadedFile = await uploadService.UploadFile(file);
-        var update = new Microsoft.Graph.Models.User
+
+
+        var userInfo = await dbContext.UserInfos.FirstOrDefaultAsync(u => u.UserId == userId);
+        if (userInfo != null)
         {
-            AdditionalData = new Dictionary<string, object>
+            userInfo.AvatarUrl = uploadedFile.Uri.AbsoluteUri;
+        }
+        else
+        {
+            var userInfoPayload = new UserInfo
             {
-                [avatarUrl] = uploadedFile.Uri.AbsoluteUri
-            }
-        };
+                AvatarUrl = uploadedFile.Uri.AbsoluteUri,
+                UserId = userId
+            };
 
-        var user = await graphClient.Users[userId].PatchAsync(update);
+            dbContext.UserInfos.Add(userInfoPayload);
+        }
 
-        var response = new UserResponse
+        await dbContext.SaveChangesAsync();
+
+        var user = await GetUserById(userId);
+
+        return user;
+    }
+
+
+    public async Task<Result<UserResponse>> UpdateUser(string userId, UserUpdateRequestDTO updatePayload)
+    {
+        var result = new Result<UserResponse>();
+        var userInfo = await dbContext.UserInfos.FirstOrDefaultAsync(u => u.UserId == userId);
+
+        if (userInfo != null)
         {
-            GivenName = user.GivenName,
-            Id = user.Id,
-            DisplayName = user.DisplayName,
-            Surname = user.Surname,
-            AvatarUrl = user.AdditionalData.TryGetValue(avatarUrl, out object value) ? value.ToString() : null
-        };
+            userInfo.IsBreeder = updatePayload.IsBreeder;
+            await dbContext.SaveChangesAsync();
+        }
 
-        return response;
+        var user = await GetUserById(userId);
+        return result.Success(user);
     }
 
     public async Task<Result<User>> CreateUser(UserCreatePayloadDTO userPayload)
@@ -149,6 +164,7 @@ public class UserService(
     {
         try
         {
+            var userInfo = await dbContext.UserInfos.FirstOrDefaultAsync(u => u.UserId == userId);
             var user = await graphClient.Users[userId].GetAsync(requestConfiguration =>
             {
                 requestConfiguration.QueryParameters.Select =
@@ -162,6 +178,8 @@ public class UserService(
                 DisplayName = user.DisplayName,
                 Surname = user.Surname,
                 Email = user.Identities.FirstOrDefault().IssuerAssignedId,
+                AvatarUrl = userInfo?.AvatarUrl ?? null,
+                IsBreeder = userInfo?.IsBreeder ?? false,
                 UserRole = await permissionService.GetUserRole(user.Id) ?? null
             };
 

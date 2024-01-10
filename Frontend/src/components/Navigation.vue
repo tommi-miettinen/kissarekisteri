@@ -128,7 +128,7 @@ const requestsRef = ref<HTMLDivElement>();
         <router-link style="color: black" class="nav-link rounded-3" to="/users">{{ t("Navigation.members") }}</router-link>
       </li>
 
-      <div ref="requestsRef" tabindex="0" role="button" class="cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative">
+      <div ref="requestsRef" tabindex="0" role="button" class="hover-bg cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative">
         <NotificationIcon />
 
         <span
@@ -166,7 +166,6 @@ const requestsRef = ref<HTMLDivElement>();
         </template>
       </Dropdown>
       <a
-        v-if="!isMobile"
         @keyup.enter="handleLocaleClick"
         @click="handleLocaleClick"
         tabindex="0"
@@ -183,3 +182,9 @@ const requestsRef = ref<HTMLDivElement>();
     </div>
   </Drawer>
 </template>
+
+<style>
+.nav-item-active {
+  background-color: #f3f4f6;
+}
+</style>

@@ -53,7 +53,7 @@ watch(
     <div class="offcanvas-header">
       <button type="button" class="btn-close ms-auto" @click="sideOffCanvas?.hide()" aria-label="Close"></button>
     </div>
-    <div class="d-flex flex-column">
+    <div class="d-flex flex-column overflow-auto">
       <slot></slot>
     </div>
   </div>

@@ -14,6 +14,8 @@ namespace Kissarekisteri.DTOs
 
         public string Email { get; set; }
 
+        public bool IsBreeder { get; set; }
+
         public UserRole UserRole { get; set; }
 
         public List<ObjectIdentity> Identities { get; set; }

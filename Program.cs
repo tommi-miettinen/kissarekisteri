@@ -131,10 +131,15 @@ if (app.Environment.IsDevelopment())
     var seedService = scope.ServiceProvider.GetRequiredService<SeedService>();
 
     dbContext.Database.EnsureCreated();
+
+    /*
     await seedService.SeedCatBreeds();
     await seedService.SeedPermissions();
     await seedService.SeedRoles();
     await seedService.SeedRolePermissions();
+    await seedService.UpdateUserRoles();
+    */
+
 }
 
 app.UseSwagger();

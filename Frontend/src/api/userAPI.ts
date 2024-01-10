@@ -78,6 +78,22 @@ const getRoles = async () => {
   }
 };
 
+const uploadAvatar = async (image: File) => {
+  if (!image) return;
+
+  console.log("sending", image);
+
+  try {
+    const formData = new FormData();
+    formData.append("file", image);
+
+    const result = await apiClient.post<ApiResponse<Cat>>(`/users/avatar`, formData);
+    return result.data;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export default {
   getUserById,
   getUsers,
@@ -88,4 +104,5 @@ export default {
   deleteUserById,
   createUser,
   getRoles,
+  uploadAvatar,
 };

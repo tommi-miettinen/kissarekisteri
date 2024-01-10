@@ -57,6 +57,7 @@ interface User {
   isBreeder: boolean;
   cats?: Cat[];
   permissions: Permission[];
+  userRole: any;
 }
 
 interface CatPayload {
