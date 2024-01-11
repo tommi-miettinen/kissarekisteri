@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch } from "vue";
 import { Dropdown } from "bootstrap";
 import { Placement } from "@popperjs/core/lib/enums";
+import { onClickOutside } from "@vueuse/core";
 
 const props = defineProps({
   autoClose: {
@@ -24,14 +25,6 @@ const emit = defineEmits(["onCancel"]);
 const dropdown = ref<Dropdown>();
 const dropdownContentRef = ref<HTMLDivElement>();
 
-const closeDropdownIfClickedOutside = (event: MouseEvent) => {
-  const target = event.target as HTMLElement;
-
-  if (!dropdownContentRef.value?.contains(target) && !props.triggerRef?.contains(target)) {
-    dropdown.value?.hide();
-  }
-};
-
 watch(
   () => props.triggerRef,
   () => {
@@ -51,13 +44,12 @@ watch(
   }
 );
 
-onMounted(() => document.addEventListener("click", closeDropdownIfClickedOutside));
-onBeforeUnmount(() => document.removeEventListener("click", closeDropdownIfClickedOutside));
+onClickOutside(dropdownContentRef, () => dropdown.value?.hide());
 </script>
 
 <template>
   <div
-    @click.stop="props.autoClose && triggerRef?.click()"
+    @click.stop="props.autoClose && dropdown?.hide()"
     :class="{ invisible: !props.visible }"
     ref="dropdownContentRef"
     tabIndex="0"

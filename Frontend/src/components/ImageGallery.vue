@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-//@ts-ignore doesnt have types
-import FsLightbox from "fslightbox-vue/v3";
 import { ref, nextTick } from "vue";
 import { isCurrentAction, pushAction, removeAction } from "../store/actionStore";
 import { useMutationObserver } from "@vueuse/core";
+//@ts-ignore does not have types
+import FsLightbox from "fslightbox-vue/v3";
 
 enum ActionType {
   FULLSCREEN_IMAGE = "FULLSCREEN_IMAGE",
