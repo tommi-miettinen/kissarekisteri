@@ -27,34 +27,41 @@ public class UserService(
         {
             requestConfiguration.QueryParameters.Select = new string[]
             {
-                "givenName",
-                "surname",
-                "id",
-                "displayName",
-                "identities",
+            "givenName", "surname", "id", "displayName", "identities",
             };
         });
+
+        var userIds = users.Value.Select(u => u.Id).ToList();
+        var userInfos = await dbContext.UserInfos
+                                       .Where(ui => userIds.Contains(ui.UserId))
+                                       .ToListAsync();
 
         var responses = new List<UserResponse>();
 
         foreach (var u in users.Value)
         {
-            var isMicrosoftAccount = u.Identities.FirstOrDefault().Issuer == "MicrosoftAccount";
+            var isMicrosoftAccount = u.Identities.FirstOrDefault()?.Issuer == "MicrosoftAccount";
 
             if (!isMicrosoftAccount)
             {
+                var userInfo = userInfos.FirstOrDefault(ui => ui.UserId == u.Id);
+
                 var userResponse = new UserResponse
                 {
                     GivenName = u.GivenName,
                     Id = u.Id,
                     DisplayName = u.DisplayName,
                     Surname = u.Surname,
-                    Email = u.Identities.FirstOrDefault().IssuerAssignedId,
-                    UserRole = await permissionService.GetUserRole(u.Id) ?? null,
+                    Email = u.Identities.FirstOrDefault()?.IssuerAssignedId,
+                    AvatarUrl = userInfo?.AvatarUrl,
+                    IsBreeder = userInfo?.IsBreeder ?? false,
+                    UserRole = await permissionService.GetUserRole(u.Id) ?? null
                 };
+
                 responses.Add(userResponse);
             }
         }
+
         return responses;
     }
 

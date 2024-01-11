@@ -77,7 +77,7 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
           v-if="userHasPermission('CreateEvent')"
           @click="addingEvent = true"
           type="button"
-          class="btn btn-primary ms-auto px-5 mt-2 rounded-3 w-sm-100"
+          class="btn bg-black text-white rounded-3 px-5 ms-auto w-sm-100"
         >
           {{ t("CatShowList.addCatShow") }} +
         </button>

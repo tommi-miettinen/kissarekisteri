@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, computed, watch } from "vue";
-import { user as loggedInUser } from "../store/userStore";
+import { userIsLoggedInUser } from "../store/userStore";
 import { toast } from "vue-sonner";
 import userAPI from "../api/userAPI";
 import Modal from "../components/Modal.vue";
@@ -12,13 +12,12 @@ import { useRoute } from "vue-router";
 import CatForm from "../components/CatForm.vue";
 import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
-import { useWindowSize } from "@vueuse/core";
 import Dropdown from "../components/Dropdown.vue";
 import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { QueryKeys } from "../api/queryKeys";
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
-import Avatar from "../components/Avatar.vue";
-import Cropper from "../components/Cropper.vue";
+import { isMobile } from "../store/actionStore";
+import UserInfoCard from "../components/UserInfoCard.vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -30,7 +29,6 @@ enum ActionType {
   DELETING_CAT = "DELETING_CAT",
   ADDING_CAT = "ADDING_CAT",
   ADDING_CAT_MOBILE = "ADDING_CAT_MOBILE",
-  EDITING_AVATAR = "EDITING_AVATAR",
   SELECTING_CAT_ACTION = "SELECTING_CAT_ACTION",
   SELECTING_CAT_ACTION_MOBILE = "SELECTING_CAT_ACTION_MOBILE",
 }
@@ -44,13 +42,8 @@ const {
   isError: isUserError,
   refetch: refetchUser,
 } = useQuery({
-  queryKey: [QueryKeys.USER_BY_ID(route.params.userId as string)],
+  queryKey: QueryKeys.USER_BY_ID(route.params.userId as string),
   queryFn: () => userAPI.getUserById(route.params.userId as string),
-});
-
-const userIsLoggedInUser = computed(() => {
-  if (user.value && loggedInUser.value) return user.value.id === loggedInUser.value.id;
-  return false;
 });
 
 const { data: catsData, refetch: refetchCats } = useQuery({
@@ -82,22 +75,10 @@ const deleteMutation = useMutation({
   onError: () => toast.error("Jokin meni vikaan."),
 });
 
-const uploadAvatarMutation = useMutation({
-  mutationFn: (image: File) => userAPI.uploadAvatar(image),
-  onSuccess: () => {
-    toast.success("Profiilikuva päivitetty");
-    refetchUser();
-    removeAction(ActionType.EDITING_AVATAR);
-  },
-});
-
 watch([route, user], () => {
   refetchCats();
   refetchUser();
 });
-
-const width = useWindowSize().width;
-const isMobile = computed(() => width.value < 768);
 
 const editCat = async (updatedCat: EditCatPayload) => {
   await catAPI.editCat(updatedCat);
@@ -128,31 +109,7 @@ const startAddingCat = () => {
 <template>
   <h3 v-if="isUserError" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
   <div style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
-    <div v-if="user" class="d-flex gap-2 flex-column border-bottom py-3">
-      <div class="d-flex gap-2 align-items-center">
-        <Avatar
-          @click="userIsLoggedInUser && pushAction(ActionType.EDITING_AVATAR)"
-          @keyup.enter="userIsLoggedInUser && pushAction(ActionType.EDITING_AVATAR)"
-          :avatarUrl="user.avatarUrl"
-          :displayText="user.givenName[0] + user.surname[0]"
-        />
-
-        <h3 class="m-0">{{ `${user.givenName}  ${user.surname}` }}</h3>
-      </div>
-      <div v-if="user.userRole && user.userRole.role.name !== 'User'">
-        {{ t(`Roles.${user.userRole.roleName}`) }}
-      </div>
-      <div v-if="user.isBreeder">{{ "Kasvattaja" }}</div>
-      <button
-        tabIndex="0"
-        @click="console.log('test')"
-        v-if="!user.isBreeder && userIsLoggedInUser"
-        class="btn bg-black text-white focus-ring focus-ring-dark px-4 rounded-3 me-auto w-sm-100"
-      >
-        Rekisteröidy kasvattajaksi
-      </button>
-    </div>
-
+    <UserInfoCard v-if="user" :user="user" />
     <div class="d-flex flex-column rounded h-100 flex-grow-1">
       <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
       <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats && cats.length > 0" :items="cats" :itemsPerPage="cats.length">
@@ -162,7 +119,7 @@ const startAddingCat = () => {
               <div
                 :ref="(el) => (catListItemRefs[cat.id] = el as HTMLDivElement)"
                 @keyup.enter.stop
-                v-if="userIsLoggedInUser"
+                v-if="userIsLoggedInUser(user)"
                 data-testid="cat-options"
                 @click.stop="startSelectingCatAction(cat)"
                 class="d-flex"
@@ -200,7 +157,7 @@ const startAddingCat = () => {
         </template>
         <template #action>
           <button
-            v-if="userIsLoggedInUser"
+            v-if="userIsLoggedInUser(user)"
             @click.stop="startAddingCat"
             @keyup.enter.stop="startAddingCat"
             data-testid="add-new-cat-btn"
@@ -245,14 +202,6 @@ const startAddingCat = () => {
   >
     <CatForm @onSave="addCatMutation.mutate" />
   </Drawer>
-  <Modal :visible="isCurrentAction(ActionType.EDITING_AVATAR)" @onCancel="removeAction(ActionType.EDITING_AVATAR)">
-    <div style="width: 500px; height: 500px">
-      <Cropper
-        @onCrop="uploadAvatarMutation.mutate"
-        :imageSrc="'https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg'"
-      />
-    </div>
-  </Modal>
   <Modal :visible="isCurrentAction(ActionType.ADDING_CAT) && !isMobile" @onCancel="removeAction(ActionType.ADDING_CAT)">
     <div style="width: 550px">
       <CatForm @onSave="addCatMutation.mutate" />

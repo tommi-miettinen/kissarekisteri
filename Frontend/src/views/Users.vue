@@ -145,7 +145,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
       <template #action>
         <button
           @click="toggleAction(isMobile ? ActionType.ADDING_USER_MOBILE : ActionType.ADDING_USER)"
-          class="btn btn-primary rounded-3 px-5 ms-auto w-sm-100"
+          class="btn bg-black text-white rounded-3 px-5 ms-auto w-sm-100"
         >
           Lisää käyttäjä +
         </button>
@@ -156,17 +156,25 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
     :visible="isCurrentAction(ActionType.SELECTING_USER_ACTION_MOBILE) && isMobile"
     @onCancel="removeAction(ActionType.SELECTING_USER_ACTION_MOBILE)"
   >
-    <div v-if="userForActionToBeSelected" @click="startEditingUser(userForActionToBeSelected)">
-      {{ userForActionToBeSelected.givenName }}
-    </div>
-    <div
-      v-if="userForActionToBeSelected"
-      @click="startDeletingUser(userForActionToBeSelected)"
-      tabIndex="0"
-      class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
-      data-testid="start-cat-delete"
-    >
-      Poista
+    <div class="p-2">
+      <div
+        tabindex="0"
+        class="hover-bg-1 rounded-3 p-2 focus-ring"
+        v-if="userForActionToBeSelected"
+        @click="startEditingUser(userForActionToBeSelected)"
+      >
+        {{ userForActionToBeSelected.givenName }}
+      </div>
+
+      <div
+        tabIndex="0"
+        v-if="userForActionToBeSelected"
+        @click="startDeletingUser(userForActionToBeSelected)"
+        class="hover-bg-1 rounded-3 p-2 focus-ring"
+        data-testid="start-cat-delete"
+      >
+        Poista
+      </div>
     </div>
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.ADDING_USER) && !isMobile" @onCancel="removeAction(ActionType.ADDING_USER)">

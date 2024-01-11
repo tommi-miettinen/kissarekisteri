@@ -44,7 +44,7 @@ watch(
 
 <template>
   <div
-    style="height: auto"
+    style="height: auto; max-width: 100vw"
     :class="['offcanvas', `offcanvas-${props.placement}`, { 'h-100': props.fullsize, 'w-100': props.fullsize }]"
     ref="sideOffcanvasRef"
     tabindex="-1"

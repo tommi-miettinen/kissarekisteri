@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const props = defineProps({
+defineProps({
   backgroundColor: {
     type: String,
     default: "#818cf8",

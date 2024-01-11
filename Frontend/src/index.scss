@@ -6,6 +6,11 @@
 @import "bootstrap/scss/utilities";
 @import "bootstrap/scss/utilities/api";
 
+html,
+body {
+  overflow-x: hidden !important;
+}
+
 * {
   box-sizing: border-box;
   margin: 0px;
@@ -54,6 +59,10 @@
 .cat-thumbnail:hover {
   cursor: pointer;
   opacity: 0.8;
+}
+
+.fs-7 {
+  font-size: 0.875rem;
 }
 
 .image-gallery {

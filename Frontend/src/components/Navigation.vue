@@ -1,5 +1,5 @@
 <script async lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import { msalInstance } from "../auth";
 import { user } from "../store/userStore";
 import { useRouter, useRoute } from "vue-router";
@@ -7,44 +7,27 @@ import { useI18n } from "vue-i18n";
 import { login, logout } from "../auth";
 import { useWindowSize } from "@vueuse/core";
 import Drawer from "./Drawer.vue";
-import { pushAction, isCurrentAction, popAction } from "../store/actionStore";
-import { useMutation, useQuery } from "@tanstack/vue-query";
+import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { useQuery } from "@tanstack/vue-query";
 import catAPI from "../api/catAPI";
 import Dropdown from "./Dropdown.vue";
-import { toast } from "vue-sonner";
-import { useQueryClient } from "@tanstack/vue-query";
-import { QueryKeys } from "../api/queryKeys";
 import Avatar from "./Avatar.vue";
 import NotificationIcon from "../icons/NotificationIcon.vue";
+import moment from "moment";
+import Notifications from "./Notifications.vue";
 
 enum ActionType {
   NONE = "NONE",
   BOTTOM_SHEET = "BOTTOM_SHEET",
   SIDE_SHEET = "SIDE_SHEET",
+  NOTIFICATIONS_MOBILE = "NOTIFICATIONS_MOBILE",
 }
-
-const toggleAction = (actionType: ActionType, item = null) => {
-  if (actionType === ActionType.NONE) {
-    popAction();
-  }
-  if (actionType !== ActionType.NONE) {
-    pushAction(actionType);
-  }
-  if (currentItem.value === item) {
-    currentItem.value = null;
-  } else {
-    currentItem.value = item;
-  }
-};
-
-const currentItem = ref<any>(null);
 
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
-const queryClient = useQueryClient();
 
-const { data: confirmationRequestsData, refetch } = useQuery({
+const { data: confirmationRequestsData } = useQuery({
   queryKey: ["confirmationRequests"],
   queryFn: () => catAPI.getConfirmationRequests(),
   refetchInterval: 5000,
@@ -52,16 +35,10 @@ const { data: confirmationRequestsData, refetch } = useQuery({
 
 const confirmationRequests = computed(() => confirmationRequestsData.value?.data);
 
-const confirmationRequestMutation = useMutation({
-  mutationFn: (requestId: number) => catAPI.confirmTransferRequest(requestId),
-  onSuccess: () => {
-    toast.success("Omistajuuspyyntö hyväksytty");
-
-    queryClient.invalidateQueries({ queryKey: [QueryKeys.CAT] });
-    refetch();
-  },
-});
-const handleLocaleClick = () => (locale.value === "fi" ? (locale.value = "en") : (locale.value = "fi"));
+const handleLocaleClick = () => {
+  locale.value === "fi" ? (locale.value = "en") : (locale.value = "fi");
+  moment.locale(locale.value);
+};
 const localeString = computed(() => (locale.value === "fi" ? "In English" : "Suomeksi"));
 
 const logoutFromApp = () => {
@@ -74,17 +51,22 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
 onMounted(async () => await msalInstance.handleRedirectPromise());
 
 const handleAvatarClick = async () => {
-  if (isMobile.value) toggleAction(ActionType.BOTTOM_SHEET);
+  if (isMobile.value) pushAction(ActionType.BOTTOM_SHEET);
 };
 
 const navigateToProfile = () => {
-  toggleAction(ActionType.NONE);
-  router.push(`/users/${user.value?.id}`);
+  removeAction(ActionType.BOTTOM_SHEET);
+  removeAction(ActionType.NOTIFICATIONS_MOBILE);
+  nextTick(() => router.push(`/users/${user.value?.id}`));
+};
+const navigateTo = (route: string) => {
+  removeAction(ActionType.NOTIFICATIONS_MOBILE);
+  removeAction(ActionType.BOTTOM_SHEET);
+  nextTick(() => router.push(route));
 };
 
-const navigateTo = (route: string) => {
-  toggleAction(ActionType.NONE);
-  router.push(route);
+const handleNotificationClick = () => {
+  if (isMobile.value) pushAction(ActionType.NOTIFICATIONS_MOBILE);
 };
 
 const dropdownTriggerRef = ref<HTMLDivElement>();
@@ -107,14 +89,18 @@ const requestsRef = ref<HTMLDivElement>();
       </div>
       <Dropdown :visible="!isMobile" :triggerRef="dropdownTriggerRef">
         <template v-if="user">
-          <router-link class="dropdown-item rounded-2 hover-bg px-3 py-2" :to="`/users/${user.id}`">{{
-            t("Navigation.profile")
-          }}</router-link>
-          <li tabIndex="0" @click="logoutFromApp" class="dropdown-item rounded-2 hover-bg px-3 py-2">{{ t("Navigation.logout") }}</li>
+          <li tabIndex="0" @click="navigateTo(`/users/${user.id}`)" class="cursor-pointer hover-bg-1 rounded-2 hover-bg px-3 py-2">
+            {{ t("Navigation.profile") }}
+          </li>
+          <li tabIndex="0" @click="logoutFromApp" class="cursor-pointer hover-bg-1 rounded-2 hover-bg px-3 py-2">
+            {{ t("Navigation.logout") }}
+          </li>
         </template>
       </Dropdown>
 
-      <button @click="login" data-testid="login-btn" v-if="!user" class="btn btn-primary">{{ t("Navigation.login") }}</button>
+      <button @click="login" data-testid="login-btn" v-if="!user" class="btn bg-black rounded-3 text-white">
+        {{ t("Navigation.login") }}
+      </button>
       <li class="nav-item rounded-3 hover-bg-1" :class="{ 'd-none': isMobile, 'bg-1': route.path.includes('catshows') }">
         <router-link style="color: black" class="nav-link rounded-3" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
       </li>
@@ -128,7 +114,13 @@ const requestsRef = ref<HTMLDivElement>();
         <router-link style="color: black" class="nav-link rounded-3" to="/users">{{ t("Navigation.members") }}</router-link>
       </li>
 
-      <div ref="requestsRef" tabindex="0" role="button" class="hover-bg cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative">
+      <div
+        @click="handleNotificationClick"
+        ref="requestsRef"
+        tabindex="0"
+        role="button"
+        class="hover-bg-1 focus-ring cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative"
+      >
         <NotificationIcon />
 
         <span
@@ -138,30 +130,10 @@ const requestsRef = ref<HTMLDivElement>();
           >{{ confirmationRequests.length }}</span
         >
       </div>
-      <Dropdown :autoClose="false" :placement="'bottom-end'" :triggerRef="requestsRef">
-        <template v-if="user">
-          <div class="d-flex flex-column z-100 bg-white" style="max-width: 450px">
-            <div v-if="confirmationRequests && confirmationRequests.length > 0">
-              <div style="max-height: 600px" class="text-break overflow-auto d-flex flex-column">
-                <div v-for="request in confirmationRequests">
-                  <div class="p-3 d-flex align-items-center gap-2">
-                    <span>
-                      <a class="cursor-pointer link-underline-primary" @click="navigateTo(`/users/${request.requester.id}`)">{{
-                        request.requester?.givenName
-                      }}</a>
-                      pyytää omistajuutta kissalle
-                      <a class="cursor-pointer link-underline-primary" @click="navigateTo(`/cats/${request.cat.id}`)">{{
-                        request.cat?.name
-                      }}</a></span
-                    >
-                    <button @click="confirmationRequestMutation.mutate(request.id)" class="btn btn-primary px-2 py-1 ms-auto">
-                      Hyväksy
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-else class="p-2">Ei ilmoituksia</div>
+      <Dropdown :visible="!isMobile" :autoClose="false" :placement="'bottom-end'" :triggerRef="requestsRef">
+        <template v-if="user && !isMobile">
+          <div style="width: 450px">
+            <Notifications :navigateTo="navigateTo" />
           </div>
         </template>
       </Dropdown>
@@ -170,12 +142,19 @@ const requestsRef = ref<HTMLDivElement>();
         @click="handleLocaleClick"
         tabindex="0"
         style="cursor: pointer"
-        class="focus-ring p-2 rounded-3 text-black"
+        class="hover-bg-1 focus-ring p-2 rounded-3 text-black"
         >{{ localeString }}</a
       >
     </ul>
   </nav>
-  <Drawer :visible="isCurrentAction(ActionType.BOTTOM_SHEET) && isMobile" @onCancel="toggleAction(ActionType.NONE)">
+  <Drawer
+    :fullsize="false"
+    :visible="isCurrentAction(ActionType.NOTIFICATIONS_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionType.NOTIFICATIONS_MOBILE)"
+  >
+    <Notifications :navigateTo="navigateTo" />
+  </Drawer>
+  <Drawer :visible="isCurrentAction(ActionType.BOTTOM_SHEET) && isMobile" @onCancel="removeAction(ActionType.BOTTOM_SHEET)">
     <div class="p-2">
       <div tabindex="0" @click="navigateToProfile" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.profile") }}</div>
       <div tabindex="0" @click="logoutFromApp" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.logout") }}</div>

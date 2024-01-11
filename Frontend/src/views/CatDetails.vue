@@ -3,8 +3,6 @@ import { ref, watch } from "vue";
 import catAPI from "../api/catAPI";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery, useMutation } from "@tanstack/vue-query";
-// @ts-ignore doesn't have types
-import FsLightbox from "fslightbox-vue/v3";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import CatListItem from "../components/CatListItem.vue";
@@ -14,6 +12,7 @@ import ImageGallery from "../components/ImageGallery.vue";
 import { toast } from "vue-sonner";
 import { user } from "../store/userStore";
 import moment from "moment";
+import { QueryKeys } from "../api/queryKeys";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -24,7 +23,7 @@ const {
   refetch,
   isError: isCatError,
 } = useQuery({
-  queryKey: ["cat", route.params.catId],
+  queryKey: QueryKeys.CAT_BY_ID(+route.params.catId),
   queryFn: () => catAPI.getCatById(+route.params.catId),
 });
 
@@ -44,7 +43,7 @@ const requestOwnershipTransfer = async () => {
   await catAPI.requestOwnershipTransfer(cat.value!.id);
 };
 
-const navigateToCatShow = (catShowId: number) => router.push(`/catshows/${catShowId}?focusedCatId=${cat.value!.id}`);
+const navigateToCatShow = (catShowId: number) => router.push(`/catshows/${catShowId}`);
 
 const handleFileChange = async (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -120,19 +119,19 @@ watch(route, () => refetch());
 
       <div v-if="cat.parents && cat.parents.length > 0">
         <h5>{{ t("CatDetails.parents") }}</h5>
-        <CatListItem v-if="cat.parents" v-for="parent in cat.parents" :cat="parent.parentCat" />
+        <CatListItem v-for="parent in cat.parents" :cat="parent.parentCat" />
       </div>
 
       <div v-if="cat.kittens && cat.kittens.length > 0">
         <h5>{{ t("CatDetails.kittens") }}</h5>
-        <CatListItem v-if="cat.kittens" v-for="kitten in cat.kittens" :cat="kitten.childCat" />
+        <CatListItem v-for="kitten in cat.kittens" :cat="kitten.childCat" />
       </div>
 
-      <div>
+      <div v-if="cat.owner">
         <h5>{{ t("CatDetails.owner") }}</h5>
         <UserListItem :user="cat.owner" />
       </div>
-      <div>
+      <div v-if="cat.breeder">
         <h5>{{ t("CatDetails.breeder") }}</h5>
         <UserListItem :user="cat.breeder" />
       </div>
@@ -153,10 +152,6 @@ watch(route, () => refetch());
 </template>
 
 <style>
-.hero-container {
-  min-height: 400px;
-}
-
 .cat-image {
   max-width: 100%;
 }

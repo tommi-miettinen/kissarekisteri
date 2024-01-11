@@ -1,0 +1,77 @@
+<script lang="ts" setup>
+import { userIsLoggedInUser } from "../store/userStore";
+import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { useMutation, useQueryClient } from "@tanstack/vue-query";
+import userAPI from "../api/userAPI";
+import { useI18n } from "vue-i18n";
+import { QueryKeys } from "../api/queryKeys";
+import { toast } from "vue-sonner";
+import Avatar from "./Avatar.vue";
+import Cropper from "./Cropper.vue";
+import Modal from "./Modal.vue";
+
+const { t } = useI18n();
+const queryClient = useQueryClient();
+
+enum ActionType {
+  EDITING_AVATAR = "EDITING_AVATAR",
+}
+
+const props = defineProps({
+  user: {
+    type: Object as () => User,
+    required: true,
+  },
+});
+
+const uploadAvatarMutation = useMutation({
+  mutationFn: (image: File) => userAPI.uploadAvatar(image),
+  onSuccess: () => {
+    toast.success("Profiilikuva päivitetty");
+    queryClient.invalidateQueries({ queryKey: [QueryKeys.USER_BY_ID(props.user.id)] });
+    removeAction(ActionType.EDITING_AVATAR);
+  },
+});
+
+const registerAsBreederMutation = useMutation({
+  mutationFn: () => userAPI.registerAsBreeder(),
+  onSuccess: () => {
+    toast.success("Kasvattajaksi rekisteröityminen onnistui");
+    queryClient.invalidateQueries({ queryKey: QueryKeys.USER_BY_ID(props.user.id) });
+  },
+});
+</script>
+
+<template>
+  <div class="d-flex gap-2 flex-column border-bottom py-3">
+    <div class="d-flex gap-2 align-items-center">
+      <Avatar
+        @click="userIsLoggedInUser(user) && pushAction(ActionType.EDITING_AVATAR)"
+        @keyup.enter="userIsLoggedInUser(user) && pushAction(ActionType.EDITING_AVATAR)"
+        :avatarUrl="user.avatarUrl"
+        :displayText="user.givenName[0] + user.surname[0]"
+      />
+      <h3 class="m-0">{{ `${user.givenName}  ${user.surname}` }}</h3>
+    </div>
+    <div v-if="user.userRole && user.userRole.role.name !== 'User'">
+      {{ t(`Roles.${user.userRole.roleName}`) }}
+    </div>
+    <div v-if="user.isBreeder">{{ "Kasvattaja" }}</div>
+    <button
+      tabIndex="0"
+      @click="registerAsBreederMutation.mutate"
+      v-if="!user.isBreeder && userIsLoggedInUser(user)"
+      class="btn bg-black text-white focus-ring focus-ring-dark px-4 rounded-3 me-auto w-sm-100"
+    >
+      Rekisteröidy kasvattajaksi
+    </button>
+  </div>
+  <Modal :visible="isCurrentAction(ActionType.EDITING_AVATAR)" @onCancel="removeAction(ActionType.EDITING_AVATAR)">
+    <div style="width: 500px; height: 500px">
+      <Cropper
+        @onCrop="uploadAvatarMutation.mutate"
+        :imageSrc="'https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg'"
+      />
+    </div>
+  </Modal>
+</template>

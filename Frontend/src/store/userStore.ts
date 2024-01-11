@@ -45,3 +45,8 @@ export const editUser = async (user: User) => {
 };
 
 export const user = computed(() => userStore.user);
+
+export const userIsLoggedInUser = (userToCompare?: User) => {
+  if (userToCompare && user.value) return userToCompare.id === user.value.id;
+  return false;
+};

@@ -58,6 +58,8 @@ watchEffect(() => {
   }
 });
 
+console.log(totalPages.value);
+
 onMounted(() => {
   pages.value = createPagination(currentPage.value, totalPages.value, 3);
 });
@@ -89,13 +91,13 @@ watch([() => props.itemsPerPage, () => currentPage.value], () => {
       <nav v-if="totalPages > 1" aria-label="Page navigation" class="me-auto mt-auto">
         <div class="d-flex flex-wrap gap-1">
           <li
-            tabindex="0"
+            :tabindex="typeof page === 'number' ? 0 : undefined"
             @keyup.enter="typeof page === 'number' && goToPage(page)"
             @click="typeof page === 'number' && goToPage(page)"
             class="btn border focus-ring focus-ring-dark hover-bg rounded-3"
             v-for="page in pages"
             :key="page"
-            :class="{ 'bg-dark': currentPage === page, 'text-white': currentPage === page }"
+            :class="{ 'bg-black': currentPage === page, 'text-white': currentPage === page }"
           >
             {{ page }}
           </li>

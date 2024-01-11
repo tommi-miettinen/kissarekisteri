@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import { useWindowSize } from "@vueuse/core";
-import moment from "moment";
 import { useI18n } from "vue-i18n";
 
 const props = defineProps({
@@ -19,7 +17,6 @@ const navigateToCat = (catId: number) => router.push(`/cats/${catId}`);
 
 const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainecoon_jb2.jpg/250px-Mainecoon_jb2.jpg";
 
-const isMobile = computed(() => useWindowSize().width.value < 768);
 const isMale = computed(() => props.cat.sex === "Male");
 </script>
 
@@ -30,7 +27,7 @@ const isMale = computed(() => props.cat.sex === "Male");
       tabindex="0"
       @keyup.enter="navigateToCat(cat.id)"
       @click="navigateToCat(cat.id)"
-      class="hover-bg-1 rounded-3 p-sm-2 focus-ring gap-3 d-flex justify-content-between align-items-center w-100 cursor-pointer"
+      class="hover-bg-1 rounded-3 p-2 p-sm-2 focus-ring gap-3 d-flex justify-content-between align-items-center w-100 cursor-pointer h-100"
     >
       <div class="d-flex gap-2 rounded-3 align-items-center pointer hover-bg w-100">
         <div style="position: relative" class="d-flex border-primary">
@@ -47,18 +44,11 @@ const isMale = computed(() => props.cat.sex === "Male");
             style="width: 100px"
             class="text-primary bg-primary badge rounded-pill bg-opacity-10"
           >
-            {{ cat.sex === "Male" ? t("CatDetails.male") : t("CatDetails.female") }}
+            {{ t(`CatDetails.${cat.sex.toLowerCase()}`) }}
           </div>
-
-          <div v-if="isMobile" style="font-size: 13px; font-weight: bold">
-            {{ `${moment(cat.birthDate).format("LLL")}` }}
-          </div>
-        </div>
-        <div v-if="!isMobile" class="ms-auto" style="font-size: 13px; font-weight: bold; margin-top: auto">
-          {{ `${moment(cat.birthDate).format("LLL")}` }}
         </div>
       </div>
-      <div class="gap-2 align-items-center d-flex">
+      <div class="gap-2 d-flex mb-auto">
         <slot name="actions"></slot>
       </div>
     </div>

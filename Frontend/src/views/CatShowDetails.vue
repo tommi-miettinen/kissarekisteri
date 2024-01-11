@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch, nextTick, watchEffect } from "vue";
+import { ref, computed, watch } from "vue";
 import userAPI from "../api/userAPI";
 import { userHasPermission, user } from "../store/userStore";
 import { useRoute } from "vue-router";
@@ -8,8 +8,6 @@ import { useMutation, useQuery } from "@tanstack/vue-query";
 import Modal from "../components/Modal.vue";
 import catShowAPI from "../api/catShowAPI";
 import { useI18n } from "vue-i18n";
-//@ts-ignore doesnt have types
-import FsLightbox from "fslightbox-vue/v3";
 import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
 import ImageGallery from "../components/ImageGallery.vue";
@@ -18,6 +16,7 @@ import { isCurrentAction, removeAction, pushAction } from "../store/actionStore"
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 import Drawer from "../components/Drawer.vue";
 import { isMobile } from "../store/actionStore";
+import moment from "moment";
 
 enum ActionType {
   JOINING_EVENT = "JOINING_EVENT",
@@ -121,10 +120,6 @@ const catsGroupedByBreed = computed(() => {
 const inputRef = ref();
 const triggerFileInput = () => inputRef.value?.click();
 
-const joinEvent = () => {
-  joinEventMutation.mutate();
-};
-
 const leaveEvent = () => {
   leaveEventMutation.mutate();
   leavingEvent.value = false;
@@ -142,22 +137,20 @@ const toggleCheckbox = (catId: number) => {
 
 const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
 
-watchEffect(() => {
-  if (!isLoading.value) {
-    nextTick(() => {
-      const catElement = document.getElementById(("cat-list-item" + route.query.focusedCatId) as string);
-      catElement?.scrollIntoView({ behavior: "smooth", block: "center" });
-      catElement?.focus();
-    });
-  }
-});
-
 const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionType.JOINING_EVENT_MOBILE) : pushAction(ActionType.JOINING_EVENT));
+
+const formatDate = (start: string, end: string) => {
+  const startDate = moment(start).format("ll");
+  const endDate = moment(end).format("ll");
+  const startTime = moment(start).format("LT");
+  const endTime = moment(end).format("LT");
+  return `${startDate} - ${endDate}, ${startTime} - ${endTime}`;
+};
 </script>
 
 <template>
   <h3 v-if="isError" class="m-5 fw-bold">{{ t("CatShowDetails.404") }}</h3>
-  <div v-if="isLoading" class="spinner-border text-primary m-auto" role="status">
+  <div v-if="isLoading" class="spinner-border text-black m-auto" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
   <div
@@ -165,21 +158,29 @@ const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionType.JOININ
     class="p-2 w-100 h-100 d-flex flex-column align-items-center p-xl-5 col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5"
   >
     <div class="col-12 col-xxl-8 flex-grow-1 p-sm-5 d-flex flex-column gap-2 p-2 gap-sm-5">
-      <div class="d-flex flex-column flex-md-row gap-sm-4 hero-container">
-        <div class="border image-container rounded-4 hero-image" style="position: relative; width: 100%; height: 100%; overflow: hidden">
+      <div class="d-flex flex-column flex-md-row gap-sm-4 gap-2 hero-container">
+        <div class="border rounded-4 hero-image" style="position: relative; overflow: hidden">
           <img
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
             src="https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg"
           />
         </div>
-        <div class="d-flex flex-column p-2" style="width: 100%">
-          <h3>{{ catShow.name }}</h3>
-          <p>
-            {{ catShow.description }}
-          </p>
-          <span>{{ catShow.location }}</span>
+        <div class="d-flex flex-column gap-2 w-100">
+          <div>
+            <div class="d-flex flex-column gap-2 p-2">
+              <h3>{{ catShow.name }}</h3>
+              <div>{{ catShow.description }}</div>
+              <div>{{ catShow.location }}</div>
+              <div class="fw-semibold">{{ formatDate(catShow.startDate, catShow.endDate) }}</div>
+            </div>
+          </div>
           <div v-if="user" class="mt-auto ms-auto w-sm-100">
-            <button v-if="!isUserAnAttendee" type="button" class="btn bg-black text-white py-2 px-5 w-sm-100" @click="startJoiningCatShow">
+            <button
+              v-if="!isUserAnAttendee"
+              type="button"
+              class="btn bg-black text-white rounded-3 py-2 px-5 w-sm-100"
+              @click="startJoiningCatShow"
+            >
               {{ t("CatShowDetails.joinEvent") }}
             </button>
             <button
@@ -193,7 +194,6 @@ const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionType.JOININ
           </div>
         </div>
       </div>
-
       <div class="attendees-list mt-3 d-flex flex-column gap-5">
         <div v-for="(cats, breed) in catsGroupedByBreed" :key="breed">
           <h4>{{ breed }}</h4>
@@ -250,11 +250,13 @@ const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionType.JOININ
           </div>
         </div>
       </div>
-      <button @click="triggerFileInput" class="btn border rounded-3 px-5 py-2 btn-border me-auto focus-ring w-sm-100">
-        <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
-        Lisää kuva +
-      </button>
-      <ImageGallery v-if="catShow" :photos="lightboxPhotos" />
+      <div class="d-flex flex-column gap-2">
+        <button @click="triggerFileInput" class="btn bg-black text-white rounded-3 px-5 py-2 me-auto focus-ring w-sm-100">
+          <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
+          Lisää kuva +
+        </button>
+        <ImageGallery v-if="catShow" :photos="lightboxPhotos" />
+      </div>
     </div>
     <Modal :visible="isCurrentAction(ActionType.JOINING_EVENT) && !isMobile" @onCancel="removeAction(ActionType.JOINING_EVENT)">
       <div style="width: 90vw; max-width: 500px" class="d-flex flex-column bg-white p-4 gap-4 rounded">
@@ -268,7 +270,7 @@ const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionType.JOININ
           </div>
         </div>
         <div v-else>No cats available.</div>
-        <button @click="joinEvent" type="button" class="btn btn-primary">Osallistu</button>
+        <button @click="joinEventMutation.mutate" type="button" class="btn btn-primary">Osallistu</button>
       </div>
     </Modal>
     <Drawer
@@ -286,15 +288,17 @@ const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionType.JOININ
           </div>
         </div>
         <div v-else>No cats available.</div>
-        <button @click="joinEvent" type="button" class="btn btn-primary w-100">Osallistu</button>
+        <button @click="joinEventMutation.mutate" type="button" class="btn btn-primary w-100">Osallistu</button>
       </div>
     </Drawer>
     <Modal :visible="isCurrentAction(ActionType.LEAVING_EVENT)" @onCancel="removeAction(ActionType.LEAVING_EVENT)">
       <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
         <p>Perutaanko osallistuminen?</p>
         <div class="d-flex gap-2 justify-content-end">
-          <button @click="removeAction(ActionType.LEAVING_EVENT)" type="button" class="btn btn-secondary">Peruuta</button>
-          <button data-testid="confirm-cat-delete" @click="leaveEvent" type="button" class="btn btn-danger">Peru osallistuminen</button>
+          <button @click="removeAction(ActionType.LEAVING_EVENT)" type="button" class="btn btn-light border">Peruuta</button>
+          <button data-testid="confirm-cat-delete" @click="leaveEvent" type="button" class="btn bg-black text-white">
+            Peru osallistuminen
+          </button>
         </div>
       </div>
     </Modal>
@@ -303,19 +307,23 @@ const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionType.JOININ
 
 <style>
 .hero-container {
-  min-height: 400px;
+  width: 100%;
+  height: 300px;
 }
 
 .hero-image {
-  max-width: 100%;
+  height: 100%;
+  width: 100%;
+  max-width: 400px;
 }
 
-@media (min-width: 768px) {
+@media (max-width: 768px) {
   .hero-container {
-    min-height: 300px;
+    height: 400px;
   }
   .hero-image {
-    max-width: 400px;
+    width: 100%;
+    max-width: none;
   }
 }
 </style>
