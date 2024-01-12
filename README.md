@@ -255,3 +255,15 @@ public IActionResult CreateSample(SampleModel model)
 ```
 
 Outcome: If CreateSample receives data that doesn't comply with SampleModel validations (e.g., missing Name), ModelValidationFilter intercepts and returns a BadRequest with details of the validation errors.
+
+![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/7c121dd3-a1be-41a0-87aa-a09aaa905302)
+
+![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/5cbae06f-942e-492a-9734-1e96c31896d7)
+
+![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/21b92de3-fc7f-4bb0-b69f-ed03f1794cae)
+
+
+
+
+
+
