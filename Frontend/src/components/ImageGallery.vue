@@ -57,8 +57,8 @@ const thumbnailRefs = reactive<Record<number, HTMLElement>>({});
 
 watch(thumbnailRefs, () => {
   Object.values(thumbnailRefs).forEach((thumbnailRef, index) => {
-    if (!thumbnailRef) return;
     onLongPress(thumbnailRef, () => {
+      if (!isMobile.value) return;
       selectedImageIndex.value = index;
       drawerOpen.value = true;
       thumbnailRef.focus();
@@ -105,7 +105,9 @@ watch(thumbnailRefs, () => {
   />
   <Drawer :visible="drawerOpen" @onCancel="drawerOpen = false">
     <div style="height: 150px">
-      <div @click="$emit('onThumbnailActionClick', photos[selectedImageIndex])" class="rounded-3 w-100 p-3">Aseta profiilikuvaksi</div>
+      <div @click="$emit('onThumbnailActionClick', photos[selectedImageIndex]), (drawerOpen = false)" class="rounded-3 w-100 p-3">
+        Aseta profiilikuvaksi
+      </div>
     </div>
   </Drawer>
 </template>

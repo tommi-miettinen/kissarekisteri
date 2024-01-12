@@ -60,6 +60,12 @@ const en = {
     EventOrganizer: "Event organizer",
     User: "User",
   },
+
+  Breeds: {
+    Siamese: "Siamese",
+    Persian: "Persian",
+    ["Maine Coon"]: "Maine Coon",
+  },
 };
 
 export default en;

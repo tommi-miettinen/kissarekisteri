@@ -59,6 +59,11 @@ const fi = {
     EventOrganizer: "Tapahtuman järjestäjä",
     User: "Käyttäjä",
   },
+  Breeds: {
+    Siamese: "Siamilainen",
+    Persian: "Persialainen",
+    ["Maine Coon"]: "Maine Coon",
+  },
 };
 
 export default fi;

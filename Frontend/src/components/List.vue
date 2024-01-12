@@ -27,7 +27,7 @@ const totalPages = computed(() => {
   return Math.ceil(filteredItems.value.length / props.itemsPerPage);
 });
 
-const filteredItems = ref<any[]>([]);
+const filteredItems = ref<any>([]);
 
 const displayedItems = computed(() => {
   const startIndex = (currentPage.value - 1) * props.itemsPerPage;
@@ -42,9 +42,9 @@ const goToPage = (pageNumber: number) => {
   }
 };
 
-const valueMatchesSearchQuery = (value: any) => {
-  if (value) {
-    return value.toString().toLowerCase().includes(searchQuery.value.toLowerCase());
+const valueMatchesSearchQuery = (value: unknown) => {
+  if (typeof value === "string") {
+    return value.toLowerCase().includes(searchQuery.value.toLowerCase());
   }
   return false;
 };

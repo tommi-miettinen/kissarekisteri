@@ -39,11 +39,12 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 builder.Services.AddSingleton(serviceProvider =>
 {
-    var graphConfig = config.GetSection("Graph");
-    var tenantId = graphConfig["TenantId"];
-    var appId = graphConfig["AppId"];
+    var graphConfig = config.GetSection("AzureAdB2C");
+    var tenantId = graphConfig["Domain"];
+    var appId = graphConfig["ClientId"];
     var clientSecret = graphConfig["ClientSecret"];
     var clientSecretCredential = new ClientSecretCredential(tenantId, appId, clientSecret);
     var scopes = new[] { "https://graph.microsoft.com/.default" };

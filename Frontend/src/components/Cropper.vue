@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import { ref, onBeforeUnmount, watch } from "vue";
+import { ref, watchEffect } from "vue";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
+import { onBeforeMount } from "vue";
+import { onBeforeUnmount } from "vue";
 
 const emits = defineEmits(["onCrop"]);
 
@@ -12,9 +14,9 @@ defineProps({
   },
 });
 
-const cropper = ref<Cropper | null>(null);
+const cropper = ref<Cropper>();
 const croppable = ref(false);
-const imageRef = ref<HTMLImageElement | null>(null);
+const imageRef = ref<HTMLImageElement>();
 
 const getRoundedCanvas = (sourceCanvas: HTMLCanvasElement) => {
   const canvas = document.createElement("canvas");
@@ -58,38 +60,49 @@ const cropImage = () => {
   emits("onCrop", file);
 };
 
-onBeforeUnmount(() => {
+watchEffect(() => {
+  if (imageRef.value) {
+    cropper.value = new Cropper(imageRef.value, {
+      aspectRatio: 1,
+      viewMode: 1,
+      minContainerHeight: 300,
+      minContainerWidth: imageRef.value.width,
+      minCanvasHeight: imageRef.value.height,
+      minCanvasWidth: imageRef.value.width,
+      minCropBoxHeight: 60,
+      minCropBoxWidth: 60,
+      ready: () => {
+        croppable.value = true;
+      },
+    });
+  }
+});
+
+onBeforeMount(() => {
   if (cropper.value) {
     cropper.value.destroy();
   }
 });
 
-watch(
-  () => imageRef.value,
-  () => {
-    if (!imageRef.value) return;
-
-    cropper.value = new Cropper(imageRef.value, {
-      aspectRatio: 1,
-      viewMode: 1,
-      minCanvasHeight: imageRef.value.height,
-      minCanvasWidth: imageRef.value.width,
-      ready: () => {
-        croppable.value = true;
-      },
-    });
-  },
-  { immediate: true }
-);
+onBeforeUnmount(() => {
+  if (cropper.value) {
+    cropper.value.destroy();
+  }
+});
 </script>
 
 <template>
-  <div class="d-flex flex-column gap-2 w-100 h-100 bg-white">
-    <div style="height: 80%" class="bg-danger">
-      <img style="width: 100%; height: 90%; visibility: hidden; object-fit: cover" ref="imageRef" :src="imageSrc" alt="Picture" />
+  <div id="test-test" class="d-flex flex-column w-100 h-100 bg-white">
+    <div :key="croppable.toString()" class="w-100" style="height: 300px">
+      <img
+        style="max-height: 300px; max-width: 100%; height: 100%; width: 100%; object-fit: contain"
+        ref="imageRef"
+        :src="imageSrc"
+        alt="Picture"
+      />
     </div>
-    <div>
-      <button class="ms-auto btn btn-primary" type="button" @click="cropImage">Tallenna</button>
+    <div class="d-flex flex-grow-1 p-2">
+      <button class="ms-auto w-sm-100 mt-auto btn bg-black px-5 py-2 text-white" type="button" @click="cropImage">Tallenna</button>
     </div>
   </div>
 </template>

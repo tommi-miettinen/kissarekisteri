@@ -9,7 +9,6 @@ import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
 import UserListItem from "../components/UserListItem.vue";
 import ImageGallery from "../components/ImageGallery.vue";
-import { toast } from "vue-sonner";
 import { user } from "../store/userStore";
 import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
@@ -70,14 +69,10 @@ watch(route, () => refetch());
   <div v-if="isLoading" class="spinner-border text-black m-auto" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
-  <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4">
-    <div class="p-1 p-sm-5 rounded overflow-auto col-12 col-lg-8 gap-5 d-flex flex-column">
+  <div v-if="cat" class="p-2 w-100 h-100 d-flex flex-column align-items-center col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5">
+    <div class="p-1 flex-grow-1 pb-5 col-12 col-lg-8 gap-2 gap-sm-5 d-flex flex-column">
       <div class="d-flex flex-column flex-sm-row gap-4" style="min-height: 300px">
-        <div
-          @click="toast.error('test')"
-          class="border rounded-4 hero-image"
-          style="position: relative; min-height: 300px; overflow: hidden; width: 100%"
-        >
+        <div class="border rounded-4 hero-image" style="position: relative; min-height: 300px; overflow: hidden; width: 100%">
           <img
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
             :src="cat.imageUrl || altUrl"
@@ -95,7 +90,7 @@ watch(route, () => refetch());
           <button
             v-if="!userIsCatOwner"
             @click="requestOwnershipTransfer"
-            class="btn border rounded-3 px-5 py-2 btn-border focus-ring mt-auto ms-auto w-sm-100"
+            class="btn rounded-3 px-5 py-2 bg-black text-white focus-ring mt-auto ms-auto w-sm-100"
           >
             {{ cat.owner ? "Pyydä omistajuutta" : "Ilmottaudu omistajaksi" }}
           </button>
@@ -140,7 +135,7 @@ watch(route, () => refetch());
         <UserListItem :user="cat.breeder" />
       </div>
       <div class="d-flex flex-column gap-2">
-        <button @click="triggerFileInput" class="border rounded-3 px-5 py-2 btn-border me-auto focus-ring w-sm-100">
+        <button @click="triggerFileInput" class="btn bg-black rounded-3 text-white px-5 py-2 me-auto focus-ring focus-ring-dark w-sm-100">
           <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
           {{ t("CatDetails.uploadImage") }} +
         </button>

@@ -1,5 +1,9 @@
 <script lang="ts" setup>
 defineProps({
+  focusable: {
+    type: Boolean,
+    default: true,
+  },
   backgroundColor: {
     type: String,
     default: "#818cf8",
@@ -16,7 +20,7 @@ defineProps({
 <template>
   <div
     v-if="displayText || avatarUrl"
-    tabindex="0"
+    :tabindex="focusable ? 0 : undefined"
     class="cursor-pointer rounded-circle focus-ring"
     @click="$emit('click')"
     @keyup.enter="$emit('keyup.enter')"

@@ -9,12 +9,14 @@ import { toast } from "vue-sonner";
 import Avatar from "./Avatar.vue";
 import Cropper from "./Cropper.vue";
 import Modal from "./Modal.vue";
+import { isMobile } from "../store/actionStore";
 
 const { t } = useI18n();
 const queryClient = useQueryClient();
 
 enum ActionType {
   EDITING_AVATAR = "EDITING_AVATAR",
+  EDITING_AVATAR_MOBILE = "EDITING_AVATAR_MOBILE",
 }
 
 const props = defineProps({
@@ -28,8 +30,9 @@ const uploadAvatarMutation = useMutation({
   mutationFn: (image: File) => userAPI.uploadAvatar(image),
   onSuccess: () => {
     toast.success("Profiilikuva päivitetty");
-    queryClient.invalidateQueries({ queryKey: [QueryKeys.USER_BY_ID(props.user.id)] });
+    queryClient.invalidateQueries({ queryKey: QueryKeys.USER_BY_ID(props.user.id) });
     removeAction(ActionType.EDITING_AVATAR);
+    removeAction(ActionType.EDITING_AVATAR_MOBILE);
   },
 });
 
@@ -46,8 +49,9 @@ const registerAsBreederMutation = useMutation({
   <div class="d-flex gap-2 flex-column border-bottom py-3">
     <div class="d-flex gap-2 align-items-center">
       <Avatar
-        @click="userIsLoggedInUser(user) && pushAction(ActionType.EDITING_AVATAR)"
-        @keyup.enter="userIsLoggedInUser(user) && pushAction(ActionType.EDITING_AVATAR)"
+        :focusable="userIsLoggedInUser(user)"
+        @click="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
+        @keyup.enter="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
         :avatarUrl="user.avatarUrl"
         :displayText="user.givenName[0] + user.surname[0]"
       />
@@ -66,8 +70,21 @@ const registerAsBreederMutation = useMutation({
       Rekisteröidy kasvattajaksi
     </button>
   </div>
-  <Modal :visible="isCurrentAction(ActionType.EDITING_AVATAR)" @onCancel="removeAction(ActionType.EDITING_AVATAR)">
-    <div style="width: 500px; height: 500px">
+
+  <Modal
+    :visible="isCurrentAction(ActionType.EDITING_AVATAR_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionType.EDITING_AVATAR_MOBILE)"
+  >
+    <div style="width: 90vw" class="rounded-3 overflow-hidden">
+      <Cropper
+        @onCrop="uploadAvatarMutation.mutate"
+        :imageSrc="'https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg'"
+      />
+    </div>
+  </Modal>
+
+  <Modal :visible="isCurrentAction(ActionType.EDITING_AVATAR) && !isMobile" @onCancel="removeAction(ActionType.EDITING_AVATAR)">
+    <div style="width: 500px" class="rounded-3 overflow-hidden">
       <Cropper
         @onCrop="uploadAvatarMutation.mutate"
         :imageSrc="'https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg'"

@@ -183,7 +183,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
     </div>
   </Modal>
   <Drawer
-    :fullsize="false"
+    :fullsize="true"
     :visible="isCurrentAction(ActionType.ADDING_USER_MOBILE) && isMobile"
     @onCancel="removeAction(ActionType.ADDING_USER_MOBILE)"
   >
