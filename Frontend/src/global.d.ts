@@ -5,7 +5,7 @@ interface CatShowEvent {
   location: string;
   startDate: string;
   endDate: string;
-  attendees?: Attendee[];
+  cats: { cat: Cat }[];
   photos?: { id: string; url: string }[];
 }
 

@@ -49,7 +49,7 @@ const en = {
   CatShowDetails: {
     "404": "404 Cat show not found",
     joinEvent: "Join event",
-    leaveEvent: "Leave event",
+    updateAttendance: "Update attendance",
   },
   List: {
     Search: "Search...",

@@ -25,6 +25,13 @@ const emit = defineEmits(["onCancel"]);
 const dropdown = ref<Dropdown>();
 const dropdownContentRef = ref<HTMLDivElement>();
 
+const closeDropdownIfClickedOutside = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (!dropdownContentRef.value?.contains(target) && !props.triggerRef?.contains(target)) {
+    dropdown.value?.hide();
+  }
+};
+
 watch(
   () => props.triggerRef,
   () => {
@@ -41,10 +48,9 @@ watch(
     props.triggerRef.onclick = () => dropdown.value?.toggle();
     props.triggerRef.onkeyup = (e) => e.key === "Escape" && dropdown.value?.toggle();
     props.triggerRef?.addEventListener("hide.bs.dropdown", () => emit("onCancel"));
+    onClickOutside(dropdownContentRef, closeDropdownIfClickedOutside);
   }
 );
-
-onClickOutside(dropdownContentRef, () => dropdown.value?.hide());
 </script>
 
 <template>

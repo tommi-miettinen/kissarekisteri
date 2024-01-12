@@ -126,7 +126,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
                 tabIndex="0"
                 @keydown.enter.stop="startEditingUser(user)"
                 @click="startEditingUser(user)"
-                class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
               >
                 Muokkaa
               </li>
@@ -134,7 +134,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
                 tabIndex="0"
                 @keydown.enter.stop="startDeletingUser(user)"
                 @click="startDeletingUser(user)"
-                class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
               >
                 Poista
               </li>
@@ -179,7 +179,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.ADDING_USER) && !isMobile" @onCancel="removeAction(ActionType.ADDING_USER)">
     <div style="width: 550px">
-      <UserForm @onSave="createUserMutation.mutate" />
+      <UserForm :formActionButtonText="'Lisää käyttäjä +'" @onSave="createUserMutation.mutate" />
     </div>
   </Modal>
   <Drawer
@@ -187,19 +187,19 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
     :visible="isCurrentAction(ActionType.ADDING_USER_MOBILE) && isMobile"
     @onCancel="removeAction(ActionType.ADDING_USER_MOBILE)"
   >
-    <UserForm @onSave="createUserMutation.mutate" />
+    <UserForm :formActionButtonText="'Lisää käyttäjä +'" @onSave="createUserMutation.mutate" />
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.EDITING_USER) && !isMobile" @onCancel="removeAction(ActionType.EDITING_USER)">
     <div style="width: 550px">
-      <UserForm :user="userToBeEdited" @onSave="removeAction(ActionType.EDITING_USER)" />
+      <UserForm :formActionButtonText="'Tallenna tiedot'" :user="userToBeEdited" @onSave="removeAction(ActionType.EDITING_USER)" />
     </div>
   </Modal>
   <Drawer
-    :fullsize="false"
+    :fullsize="true"
     :visible="isCurrentAction(ActionType.EDITING_USER_MOBILE) && isMobile"
     @onCancel="removeAction(ActionType.EDITING_USER_MOBILE)"
   >
-    <UserForm :user="userToBeEdited" @onSave="removeAction(ActionType.EDITING_USER_MOBILE)" />
+    <UserForm :formActionButtonText="'Tallenna tiedot'" :user="userToBeEdited" @onSave="removeAction(ActionType.EDITING_USER_MOBILE)" />
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.DELETING_USER)" @onCancel="removeAction(ActionType.DELETING_USER)">
     <div v-if="userToBeDeleted" style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">

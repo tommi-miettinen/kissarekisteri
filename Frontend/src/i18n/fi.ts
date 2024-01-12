@@ -49,7 +49,7 @@ const fi = {
   CatShowDetails: {
     "404": "404 Näyttelyä ei löytynyt",
     joinEvent: "Liity tapahtumaan",
-    leaveEvent: "Poistu tapahtumasta",
+    updateAttendance: "Muokkaa osallistumista",
   },
   List: {
     Search: "Hae...",

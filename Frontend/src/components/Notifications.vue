@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import catAPI from "../api/catAPI";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/vue-query";
 import { QueryKeys } from "../api/queryKeys";
 import { toast } from "vue-sonner";
+import { user } from "../store/userStore";
 
 defineProps({
   navigateTo: {
@@ -31,13 +32,45 @@ const confirmationRequestMutation = useMutation({
     refetch();
   },
 });
+
+const tab = ref<"personal" | "admin">("personal");
+
+const adminConfirmationRequests = computed(() => confirmationRequests.value?.filter((request) => request.confirmerId !== user.value?.id));
+const personalConfirmationRequests = computed(() =>
+  confirmationRequests.value?.filter((request) => request.confirmerId === user.value?.id)
+);
+
+const confirmationRequestsToDisplay = computed(() => {
+  if (tab.value === "admin") {
+    return adminConfirmationRequests.value;
+  } else {
+    return personalConfirmationRequests.value;
+  }
+});
 </script>
 
 <template>
   <div class="d-flex flex-column">
-    <div v-if="confirmationRequests && confirmationRequests.length > 0">
+    <div>
       <div class="p-3 text-break overflow-auto d-flex flex-column">
-        <div v-for="request in confirmationRequests">
+        <div class="d-flex gap-1">
+          <button
+            @click="tab = 'personal'"
+            :class="{ 'bg-black': tab === 'personal', 'text-white': tab === 'personal', 'border-black': tab === 'personal' }"
+            class="btn btn-sm border rounded-3"
+          >
+            Omat
+          </button>
+
+          <button
+            @click="tab = 'admin'"
+            :class="{ 'bg-black': tab === 'admin', 'text-white': tab === 'admin', 'border-black': tab === 'admin' }"
+            class="btn border btn-sm rounded-3"
+          >
+            Ylläpitäjä
+          </button>
+        </div>
+        <div v-for="request in confirmationRequestsToDisplay">
           <div class="py-3 d-flex gap-2">
             <span>
               <a class="cursor-pointer text-underline text-black" @click="navigateTo(`/users/${request.requester.id}`)">{{
@@ -57,8 +90,8 @@ const confirmationRequestMutation = useMutation({
             </button>
           </div>
         </div>
+        <div class="py-3" v-if="!confirmationRequestsToDisplay || confirmationRequestsToDisplay.length === 0">Ei ilmoituksia</div>
       </div>
     </div>
-    <div v-else class="p-2">Ei ilmoituksia</div>
   </div>
 </template>

@@ -9,10 +9,9 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
     public DbSet<Cat> Cats { get; set; }
     public DbSet<CatPhoto> CatPhotos { get; set; }
     public DbSet<CatShow> CatShows { get; set; }
+    public DbSet<CatShowCats> CatShowCats { get; set; }
     public DbSet<CatShowResult> CatShowResults { get; set; }
     public DbSet<CatShowPhoto> CatShowPhotos { get; set; }
-    public DbSet<Attendee> Attendees { get; set; }
-    public DbSet<CatAttendee> CatAttendees { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<RolePermission> RolePermissions { get; set; }
     public DbSet<Permission> Permissions { get; set; }
@@ -28,9 +27,9 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
 
         modelBuilder
             .Entity<CatShow>()
-            .HasMany(c => c.Attendees)
-            .WithOne(a => a.CatShow)
-            .HasForeignKey(a => a.EventId);
+            .HasMany(catShow => catShow.Cats)
+            .WithOne(cat => cat.CatShow)
+            .HasForeignKey(a => a.CatShowId);
 
         modelBuilder
             .Entity<Cat>()
@@ -76,11 +75,5 @@ public class KissarekisteriDbContext(DbContextOptions<KissarekisteriDbContext> o
             .HasMany(c => c.Results)
             .WithOne(r => r.CatShow)
             .HasForeignKey(r => r.CatShowId);
-
-        modelBuilder
-            .Entity<Attendee>()
-            .HasMany(Attendee => Attendee.CatAttendees)
-            .WithOne(CatAttendee => CatAttendee.Attendee)
-            .HasForeignKey(CatAttendee => CatAttendee.AttendeeId);
     }
 };

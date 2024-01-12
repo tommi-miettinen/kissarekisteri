@@ -86,6 +86,12 @@ body {
   opacity: 0.8;
 }
 
+$form-check-input-border: var(--#{$prefix}border-width) solid #000;
+$form-check-input-focus-border: #000;
+$form-check-input-checked-bg-color: #000;
+$form-check-input-checked-border-color: #000;
+$form-check-input-checked-bg-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/></svg>");
+
 $utilities: map-merge(
   $utilities,
   (
@@ -104,3 +110,5 @@ $utilities: map-merge(
     width: 100%;
   }
 }
+
+@import "node_modules/bootstrap/scss/bootstrap";

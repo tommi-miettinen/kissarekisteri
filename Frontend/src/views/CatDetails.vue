@@ -22,6 +22,8 @@ const {
   data: catData,
   refetch,
   isError: isCatError,
+  isLoading,
+  isFetched: catIsFetched,
 } = useQuery({
   queryKey: QueryKeys.CAT_BY_ID(+route.params.catId),
   queryFn: () => catAPI.getCatById(+route.params.catId),
@@ -64,8 +66,10 @@ watch(route, () => refetch());
 </script>
 
 <template>
-  <h3 v-if="isCatError" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
-
+  <h3 v-if="isCatError && !catIsFetched" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
+  <div v-if="isLoading" class="spinner-border text-black m-auto" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
   <div v-if="cat" class="w-100 h-100 d-flex flex-column align-items-center gap-4">
     <div class="p-1 p-sm-5 rounded overflow-auto col-12 col-lg-8 gap-5 d-flex flex-column">
       <div class="d-flex flex-column flex-sm-row gap-4" style="min-height: 300px">

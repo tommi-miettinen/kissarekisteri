@@ -17,7 +17,7 @@ namespace Kissarekisteri.Models
 
         public DateTime EndDate { get; set; }
 
-        public List<Attendee> Attendees { get; set; }
+        public List<CatShowCats> Cats { get; set; }
         public List<CatShowPhoto> Photos { get; set; }
 
         public List<CatShowResult> Results { get; set; }

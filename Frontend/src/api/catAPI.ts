@@ -37,13 +37,9 @@ const getCatsByUserId = async (userId: string) => {
 };
 
 const getCatById = async (catId: number) => {
-  try {
-    const result = await apiClient.get<ApiResponse<Cat>>(`/cats/${catId}`);
-    result.data.errors = ["test", "test2"];
-    return result.data;
-  } catch (err) {
-    console.log(err);
-  }
+  const result = await apiClient.get<ApiResponse<Cat>>(`/cats/${catId}`);
+  result.data.errors = ["test", "test2"];
+  return result.data;
 };
 
 const editCat = async (updatedCat: EditCatPayload) => {

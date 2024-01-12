@@ -81,7 +81,7 @@ watch(user, () => refetchUserCats());
 
 const leavingEvent = ref(false);
 
-const isUserAnAttendee = computed(() => catShow.value && catShow.value.attendees?.some((attendee) => attendee.userId === user.value?.id));
+const isUserAnAttendee = computed(() => catShow.value && catShow.value.cats.some((cat) => cat.cat.ownerId === user.value?.id));
 
 const handleFileChange = async (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -101,8 +101,8 @@ const lightboxPhotos = computed(() => {
 });
 
 const catsGroupedByBreed = computed(() => {
-  if (catShow.value?.attendees) {
-    const groupedCats = catShow.value.attendees.flatMap((attendee) => attendee.catAttendees.map((catAttendee) => catAttendee.cat));
+  if (catShow.value?.cats) {
+    const groupedCats = catShow.value?.cats.map((c) => c.cat);
 
     const groupedCatsByBreed = groupedCats.reduce((acc: CatsGroupedByBreed, cat) => {
       if (!acc[cat.breed]) {
@@ -146,6 +146,13 @@ const formatDate = (start: string, end: string) => {
   const endTime = moment(end).format("LT");
   return `${startDate} - ${endDate}, ${startTime} - ${endTime}`;
 };
+
+const removeSingleCat = (catId: number) => {
+  const userCats = catShow.value?.cats.filter((c) => c.cat.ownerId === user.value?.id && c.cat.id !== catId);
+
+  selectedCatIds.value = userCats?.map((c) => c.cat.id) || [];
+  joinEventMutation.mutate();
+};
 </script>
 
 <template>
@@ -183,13 +190,8 @@ const formatDate = (start: string, end: string) => {
             >
               {{ t("CatShowDetails.joinEvent") }}
             </button>
-            <button
-              v-else
-              @click="pushAction(ActionType.LEAVING_EVENT)"
-              type="button"
-              class="w-sm-100 btn bg-black text-white rounded-3 py-2 px-5"
-            >
-              {{ t("CatShowDetails.leaveEvent") }}
+            <button v-else @click="startJoiningCatShow" type="button" class="w-sm-100 btn bg-black text-white rounded-3 py-2 px-5">
+              {{ t("CatShowDetails.updateAttendance") }}
             </button>
           </div>
         </div>
@@ -209,8 +211,9 @@ const formatDate = (start: string, end: string) => {
                   #{{ cat.results.find((result) => result.catShowId === eventId)?.place }}
                 </div>
               </template>
-              <template v-if="userHasPermission('CreateCatShowResult')" #actions>
+              <template #actions>
                 <div
+                  v-if="userHasPermission('CreateCatShowResult') || cat.ownerId === user?.id"
                   :ref="el => (dropdownRefs[cat.id] = el as HTMLDivElement)"
                   :id="cat.id.toString()"
                   tabindex="0"
@@ -221,28 +224,34 @@ const formatDate = (start: string, end: string) => {
                 </div>
                 <Dropdown :placement="'left-start'" :triggerRef="dropdownRefs[cat.id]">
                   <li
+                    v-if="userHasPermission('CreateCatShowResult')"
                     tabindex="0"
                     @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
                     @click="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
-                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                    class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
                   >
                     Ensimmäinen
                   </li>
                   <li
+                    v-if="userHasPermission('CreateCatShowResult')"
                     tabindex="0"
                     @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
                     @click="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
-                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                    class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
                   >
                     Toinen
                   </li>
                   <li
+                    v-if="userHasPermission('CreateCatShowResult')"
                     tabindex="0"
                     @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
                     @click="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
-                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                    class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
                   >
                     Kolmas
+                  </li>
+                  <li @click="removeSingleCat(cat.id)" tabindex="0" class="hover-bg-1 focus-ring px-3 py-2 rounded-2">
+                    Peru osallistuminen
                   </li>
                 </Dropdown>
               </template>
@@ -264,13 +273,24 @@ const formatDate = (start: string, end: string) => {
           <h5>Osallistuvat kissat:</h5>
           <div v-for="(cat, index) in userCats" :key="index">
             <label>
-              <input @keyup.enter="toggleCheckbox(cat.id)" type="checkbox" v-model="selectedCatIds" :value="cat.id" />
+              <input
+                class="form-check-input focus-ring focus-ring-dark"
+                @keyup.enter="toggleCheckbox(cat.id)"
+                type="checkbox"
+                v-model="selectedCatIds"
+                :value="cat.id"
+              />
               {{ cat.name }}
             </label>
           </div>
         </div>
         <div v-else>No cats available.</div>
-        <button @click="joinEventMutation.mutate" type="button" class="btn btn-primary">Osallistu</button>
+        <div class="d-flex gap-2">
+          <button data-testid="confirm-cat-delete" @click="leaveEvent" type="button" class="btn btn-light border w-100 rounded-3">
+            Peru osallistuminen
+          </button>
+          <button @click="joinEventMutation.mutate" type="button" class="btn bg-black text-white w-100 rounded-3">Osallistu</button>
+        </div>
       </div>
     </Modal>
     <Drawer
@@ -282,26 +302,27 @@ const formatDate = (start: string, end: string) => {
           <h5>Osallistuvat kissat:</h5>
           <div v-for="(cat, index) in userCats" :key="index">
             <label>
-              <input @keyup.enter="toggleCheckbox(cat.id)" type="checkbox" v-model="selectedCatIds" :value="cat.id" />
+              <input
+                checked
+                class="bg-black"
+                @keyup.enter="toggleCheckbox(cat.id)"
+                type="checkbox"
+                v-model="selectedCatIds"
+                :value="cat.id"
+              />
               {{ cat.name }}
             </label>
           </div>
         </div>
         <div v-else>No cats available.</div>
-        <button @click="joinEventMutation.mutate" type="button" class="btn btn-primary w-100">Osallistu</button>
-      </div>
-    </Drawer>
-    <Modal :visible="isCurrentAction(ActionType.LEAVING_EVENT)" @onCancel="removeAction(ActionType.LEAVING_EVENT)">
-      <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
-        <p>Perutaanko osallistuminen?</p>
-        <div class="d-flex gap-2 justify-content-end">
-          <button @click="removeAction(ActionType.LEAVING_EVENT)" type="button" class="btn btn-light border">Peruuta</button>
+        <div class="d-flex">
+          <button @click="joinEventMutation.mutate" type="button" class="btn btn-primary w-100">Osallistu</button>
           <button data-testid="confirm-cat-delete" @click="leaveEvent" type="button" class="btn bg-black text-white">
             Peru osallistuminen
           </button>
         </div>
       </div>
-    </Modal>
+    </Drawer>
   </div>
 </template>
 

@@ -40,6 +40,8 @@ const catForActionToBeSelected = ref<Cat>();
 const {
   data: user,
   isError: isUserError,
+  isFetched: isUserFetched,
+  isLoading: isUserLoading,
   refetch: refetchUser,
 } = useQuery({
   queryKey: QueryKeys.USER_BY_ID(route.params.userId as string),
@@ -107,8 +109,12 @@ const startAddingCat = () => {
 </script>
 
 <template>
-  <h3 v-if="isUserError" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
-  <div style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
+  <h3 v-if="isUserError && !isUserFetched" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
+  <div v-if="isUserLoading" class="spinner-border text-black m-auto" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+
+  <div v-if="!isUserLoading" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
     <UserInfoCard v-if="user" :user="user" />
     <div class="d-flex flex-column rounded h-100 flex-grow-1">
       <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
@@ -137,13 +143,13 @@ const startAddingCat = () => {
                     @keyup.enter.stop="startEditingCat(cat)"
                     @click="startEditingCat(cat)"
                     tabIndex="0"
-                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                    class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
                   >
                     Muokkaa
                   </li>
                   <li
                     tabIndex="0"
-                    class="dropdown-item focus-ring px-3 py-2 rounded-2 hover-bg"
+                    class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
                     data-testid="start-cat-delete"
                     @keyup.enter="startDeletingCat(cat)"
                     @click="startDeletingCat(cat)"

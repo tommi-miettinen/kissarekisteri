@@ -52,6 +52,7 @@ onMounted(async () => await msalInstance.handleRedirectPromise());
 
 const handleAvatarClick = async () => {
   if (isMobile.value) pushAction(ActionType.BOTTOM_SHEET);
+  dropdownTriggerRef.value?.click();
 };
 
 const navigateToProfile = () => {
@@ -74,18 +75,16 @@ const requestsRef = ref<HTMLDivElement>();
 </script>
 
 <template>
-  <nav class="border w-100 p-2 bg-white">
+  <nav style="min-height: 40px; height: auto" class="border-bottom w-100 p-2 bg-white">
     <ul class="nav align-items-center px-2 gap-1" style="color: black">
-      <div
-        tabindex="0"
-        role="button"
-        @click.stop="handleAvatarClick"
-        @keyup.enter="handleAvatarClick"
-        v-if="user"
-        class="focus-ring rounded-circle"
-        ref="dropdownTriggerRef"
-      >
-        <Avatar :avatarUrl="user.avatarUrl" :displayText="user.givenName[0] + user.surname[0]" />
+      <div ref="dropdownTriggerRef">
+        <Avatar
+          v-if="user"
+          @click="handleAvatarClick"
+          @keyup.enter="handleAvatarClick"
+          :avatarUrl="user.avatarUrl"
+          :displayText="user.givenName[0] + user.surname[0]"
+        />
       </div>
       <Dropdown :visible="!isMobile" :triggerRef="dropdownTriggerRef">
         <template v-if="user">
@@ -122,7 +121,6 @@ const requestsRef = ref<HTMLDivElement>();
         class="hover-bg-1 focus-ring cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative"
       >
         <NotificationIcon />
-
         <span
           style="margin-left: -8px"
           v-if="confirmationRequests && confirmationRequests.length > 0"
@@ -148,7 +146,7 @@ const requestsRef = ref<HTMLDivElement>();
     </ul>
   </nav>
   <Drawer
-    :fullsize="false"
+    :fullsize="true"
     :visible="isCurrentAction(ActionType.NOTIFICATIONS_MOBILE) && isMobile"
     @onCancel="removeAction(ActionType.NOTIFICATIONS_MOBILE)"
   >

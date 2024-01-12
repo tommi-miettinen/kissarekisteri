@@ -7,6 +7,10 @@ const props = defineProps({
   user: {
     type: Object as () => User,
   },
+  formActionButtonText: {
+    type: String,
+    required: true,
+  },
 });
 
 const { data: roles } = useQuery({
@@ -45,21 +49,21 @@ const createUserPayload = computed(() => {
 <template>
   <div style="w-100" class="p-4 gap-3 d-flex flex-column">
     <div>
-      <label for="catName" class="form-label w-100">Nimi</label>
-      <input data-testid="new-cat-name-input" type="text" class="form-control" id="name" v-model="newUser.name" />
+      <label for="username" class="form-label w-100">Nimi</label>
+      <input id="username" data-testid="new-cat-name-input" type="text" class="form-control" v-model="newUser.name" />
     </div>
     <div>
-      <label for="catBirthDate" class="form-label w-100">Salasana</label>
-      <input data-testid="new-cat-birthdate-input" type="text" class="form-control" id="catBirthDate" v-model="newUser.password" />
+      <label for="password" class="form-label w-100">Salasana</label>
+      <input id="password" data-testid="new-cat-birthdate-input" type="text" class="form-control" v-model="newUser.password" />
     </div>
     <div>
       <label for="role" class="form-label w-100">Role</label>
-      <select v-if="roles && roles.length > 0" v-model="newUser.role" class="form-select" id="role" aria-label="role">
+      <select id="role" v-if="roles && roles.length > 0" v-model="newUser.role" class="form-select" aria-label="role">
         <option v-for="role in roles" :key="role.name" :value="role.name">
           {{ role.name }}
         </option>
       </select>
     </div>
-    <button @click="$emit('onSave', createUserPayload)" class="btn btn-primary">Lisää käyttäjä</button>
+    <button @click="$emit('onSave', createUserPayload)" class="btn bg-black text-white rounded-3 py-2">{{ formActionButtonText }}</button>
   </div>
 </template>
