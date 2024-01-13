@@ -30,7 +30,12 @@ const selectedColor = computed(() => {
       class="hover-bg-1 p-3 d-flex rounded-3 p-2 flex align-items-center focus-ring cursor-pointer"
     >
       <div class="col d-flex align-items-center gap-2 col-8">
-        <Avatar :avatarUrl="user.avatarUrl" :displayText="user.givenName[0] + user.surname[0]" :backgroundColor="selectedColor" />
+        <Avatar
+          :focusable="false"
+          :avatarUrl="user.avatarUrl"
+          :displayText="user.givenName[0] + user.surname[0]"
+          :backgroundColor="selectedColor"
+        />
         <div>{{ `${user.givenName}  ${user.surname}` }}</div>
       </div>
       <div class="col justify-content-end d-flex gap-2 align-items-center">

@@ -17,6 +17,7 @@ import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 import Drawer from "../components/Drawer.vue";
 import { isMobile } from "../store/actionStore";
 import moment from "moment";
+import { QueryKeys } from "../api/queryKeys";
 
 enum ActionType {
   JOINING_EVENT = "JOINING_EVENT",
@@ -32,7 +33,22 @@ const { t } = useI18n();
 const selectedCatIds = ref<number[]>([]);
 const eventId = +route.params.eventId;
 
-const { data: catShow, refetch, isLoading, isError } = useQuery({ queryKey: ["catshow"], queryFn: () => catShowAPI.getEventById(eventId) });
+const {
+  data: catShow,
+  refetch,
+  isLoading,
+  isError,
+} = useQuery({ queryKey: QueryKeys.CAT_SHOW_BY_ID(eventId), queryFn: () => catShowAPI.getEventById(eventId) });
+
+watch(
+  [() => catShow.value, () => user.value],
+  () => {
+    if (catShow.value?.cats) {
+      selectedCatIds.value = catShow.value.cats.filter((c) => c.cat.ownerId === user.value?.id).map((c) => c.cat.id);
+    }
+  },
+  { immediate: true }
+);
 
 const joinEventMutation = useMutation({
   mutationFn: () => catShowAPI.joinEvent(eventId, selectedCatIds.value),
@@ -185,12 +201,17 @@ const removeSingleCat = (catId: number) => {
             <button
               v-if="!isUserAnAttendee"
               type="button"
-              class="btn bg-black text-white rounded-3 py-2 px-5 w-sm-100"
+              class="btn bg-black text-white rounded-3 py-2 px-5 w-sm-100 focus-ring"
               @click="startJoiningCatShow"
             >
               {{ t("CatShowDetails.joinEvent") }}
             </button>
-            <button v-else @click="startJoiningCatShow" type="button" class="w-sm-100 btn bg-black text-white rounded-3 py-2 px-5">
+            <button
+              v-else
+              @click="startJoiningCatShow"
+              type="button"
+              class="w-sm-100 btn bg-black text-white rounded-3 py-2 px-5 focus-ring"
+            >
               {{ t("CatShowDetails.updateAttendance") }}
             </button>
           </div>
@@ -212,16 +233,17 @@ const removeSingleCat = (catId: number) => {
                 </div>
               </template>
               <template #actions>
-                <div
+                <button
                   v-if="userHasPermission('CreateCatShowResult') || cat.ownerId === user?.id"
                   :ref="el => (dropdownRefs[cat.id] = el as HTMLDivElement)"
                   :id="cat.id.toString()"
-                  tabindex="0"
+                  tabndex="0"
                   @click.stop
-                  class="btn py-1 px-2 accordion d-flex focus-ring rounded-1 border-0"
+                  @keyup.enter.stop
+                  class="btn py-2 focus-ring d-flex rounded-1 border-0"
                 >
                   <ThreeDotsIcon />
-                </div>
+                </button>
                 <Dropdown :placement="'left-start'" :triggerRef="dropdownRefs[cat.id]">
                   <li
                     v-if="userHasPermission('CreateCatShowResult')"

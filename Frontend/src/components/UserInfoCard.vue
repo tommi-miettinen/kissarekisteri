@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { onMounted } from "vue";
 import { userIsLoggedInUser } from "../store/userStore";
 import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
@@ -10,6 +11,7 @@ import Avatar from "./Avatar.vue";
 import Cropper from "./Cropper.vue";
 import Modal from "./Modal.vue";
 import { isMobile } from "../store/actionStore";
+import { Tooltip } from "bootstrap";
 
 const { t } = useI18n();
 const queryClient = useQueryClient();
@@ -43,18 +45,26 @@ const registerAsBreederMutation = useMutation({
     queryClient.invalidateQueries({ queryKey: QueryKeys.USER_BY_ID(props.user.id) });
   },
 });
+
+onMounted(() => {
+  if (!userIsLoggedInUser(props.user)) return;
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  [...tooltipTriggerList].forEach((tooltipTriggerEl) => new Tooltip(tooltipTriggerEl));
+});
 </script>
 
 <template>
   <div class="d-flex gap-2 flex-column border-bottom py-3">
     <div class="d-flex gap-2 align-items-center">
-      <Avatar
-        :focusable="userIsLoggedInUser(user)"
-        @click="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
-        @keyup.enter="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
-        :avatarUrl="user.avatarUrl"
-        :displayText="user.givenName[0] + user.surname[0]"
-      />
+      <div data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="Edit avatar">
+        <Avatar
+          :focusable="userIsLoggedInUser(user)"
+          @click="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
+          @keyup.enter="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
+          :avatarUrl="user.avatarUrl"
+          :displayText="user.givenName[0] + user.surname[0]"
+        />
+      </div>
       <h3 class="m-0">{{ `${user.givenName}  ${user.surname}` }}</h3>
     </div>
     <div v-if="user.userRole && user.userRole.role.name !== 'User'">
@@ -65,7 +75,7 @@ const registerAsBreederMutation = useMutation({
       tabIndex="0"
       @click="registerAsBreederMutation.mutate"
       v-if="!user.isBreeder && userIsLoggedInUser(user)"
-      class="btn bg-black text-white focus-ring focus-ring-dark px-4 rounded-3 me-auto w-sm-100"
+      class="btn bg-black text-white focus-ring px-4 rounded-3 me-auto w-sm-100"
     >
       Rekisteröidy kasvattajaksi
     </button>

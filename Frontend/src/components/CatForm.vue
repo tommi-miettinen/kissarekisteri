@@ -167,7 +167,7 @@ const isFormValid = computed(() => {
       :disabled="!isFormValid"
       data-testid="add-new-cat-btn-save"
       @click="$emit('onSave', newCat)"
-      class="btn bg-black text-white ms-auto py-2 px-5 rounded-3 w-sm-100"
+      class="btn bg-black text-white col-sm-6 ms-auto py-2 rounded-3 w-sm-100"
     >
       Lisää kissa +
     </button>

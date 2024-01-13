@@ -36,6 +36,8 @@ const newEvent = ref({
       <input id="end-date" type="date" class="form-control" v-model="newEvent.endDate" />
     </div>
 
-    <button @click="$emit('onSave', newEvent)" type="button" class="btn btn-primary ms-auto px-5">Luo tapahtuma +</button>
+    <button @click="$emit('onSave', newEvent)" type="button" class="focus-ring btn bg-black text-white ms-auto px-5 py-2 rounded-3">
+      Lisää tapahtuma +
+    </button>
   </div>
 </template>

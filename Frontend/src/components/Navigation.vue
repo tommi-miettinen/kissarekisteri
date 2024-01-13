@@ -15,9 +15,9 @@ import Avatar from "./Avatar.vue";
 import NotificationIcon from "../icons/NotificationIcon.vue";
 import moment from "moment";
 import Notifications from "./Notifications.vue";
+import { QueryKeys } from "../api/queryKeys";
 
 enum ActionType {
-  NONE = "NONE",
   BOTTOM_SHEET = "BOTTOM_SHEET",
   SIDE_SHEET = "SIDE_SHEET",
   NOTIFICATIONS_MOBILE = "NOTIFICATIONS_MOBILE",
@@ -28,7 +28,7 @@ const router = useRouter();
 const { t, locale } = useI18n();
 
 const { data: confirmationRequestsData } = useQuery({
-  queryKey: ["confirmationRequests"],
+  queryKey: QueryKeys.CONFIRMATION_REQUESTS,
   queryFn: () => catAPI.getConfirmationRequests(),
   refetchInterval: 5000,
 });
@@ -66,8 +66,12 @@ const navigateTo = (route: string) => {
   nextTick(() => router.push(route));
 };
 
-const handleNotificationClick = () => {
+const handleNotificationClick = (e: MouseEvent | KeyboardEvent) => {
   if (isMobile.value) pushAction(ActionType.NOTIFICATIONS_MOBILE);
+
+  if (e instanceof KeyboardEvent && e.key === "Enter") {
+    requestsRef.value?.click();
+  }
 };
 
 const dropdownTriggerRef = ref<HTMLDivElement>();
@@ -75,7 +79,7 @@ const requestsRef = ref<HTMLDivElement>();
 </script>
 
 <template>
-  <nav style="min-height: 40px; height: auto" class="border-bottom w-100 p-2 bg-white">
+  <nav class="border-bottom w-100 p-2 bg-white">
     <ul class="nav align-items-center px-2 gap-1" style="color: black">
       <div ref="dropdownTriggerRef">
         <Avatar
@@ -88,10 +92,20 @@ const requestsRef = ref<HTMLDivElement>();
       </div>
       <Dropdown :visible="!isMobile" :triggerRef="dropdownTriggerRef">
         <template v-if="user">
-          <li tabIndex="0" @click="navigateTo(`/users/${user.id}`)" class="cursor-pointer hover-bg-1 rounded-2 hover-bg px-3 py-2">
+          <li
+            tabIndex="0"
+            @click="navigateTo(`/users/${user.id}`)"
+            @keyup.enter="navigateTo(`/users/${user.id}`)"
+            class="focus-ring cursor-pointer hover-bg-1 rounded-2 hover-bg px-3 py-2"
+          >
             {{ t("Navigation.profile") }}
           </li>
-          <li tabIndex="0" @click="logoutFromApp" class="cursor-pointer hover-bg-1 rounded-2 hover-bg px-3 py-2">
+          <li
+            tabIndex="0"
+            @click="logoutFromApp"
+            @keyup.enter="logoutFromApp"
+            class="focus-ring cursor-pointer hover-bg-1 rounded-2 hover-bg px-3 py-2"
+          >
             {{ t("Navigation.logout") }}
           </li>
         </template>
@@ -115,9 +129,9 @@ const requestsRef = ref<HTMLDivElement>();
 
       <div
         @click="handleNotificationClick"
+        @keyup.enter="handleNotificationClick"
         ref="requestsRef"
         tabindex="0"
-        role="button"
         class="hover-bg-1 focus-ring cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative"
       >
         <NotificationIcon />

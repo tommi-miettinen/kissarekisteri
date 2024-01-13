@@ -48,6 +48,16 @@ body {
   visibility: hidden;
 }
 
+.focus-ring:focus {
+  --focus-ring-width: 0.25rem;
+  --focus-ring-opacity: 0.25;
+  --focus-ring-color: rgba(0, 123, 255, var(--focus-ring-opacity));
+  --focus-ring-blur: 0;
+
+  outline: none !important;
+  box-shadow: 0 0 var(--focus-ring-blur) var(--focus-ring-width) var(--focus-ring-color) !important;
+}
+
 .image-container:focus-within .btn-border,
 .image-container .btn-border:focus {
   visibility: visible;

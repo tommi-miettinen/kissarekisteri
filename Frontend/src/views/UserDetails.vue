@@ -23,7 +23,6 @@ const { t } = useI18n();
 const route = useRoute();
 
 enum ActionType {
-  NONE = "NONE",
   EDITING_CAT = "EDITING_CAT",
   EDITING_CAT_MOBILE = "EDITING_CAT_MOBILE",
   DELETING_CAT = "DELETING_CAT",
@@ -49,7 +48,7 @@ const {
 });
 
 const { data: catsData, refetch: refetchCats } = useQuery({
-  queryKey: ["userCats"],
+  queryKey: QueryKeys.USERS_CATS,
   queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
   enabled: Boolean(user.value?.id),
 });
@@ -114,7 +113,7 @@ const startAddingCat = () => {
     <span class="visually-hidden">Loading...</span>
   </div>
 
-  <div v-if="!isUserLoading" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
+  <div v-if="!isUserLoading" style="min-height: 100%" class="d-flex flex-column px-3 py-2 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
     <UserInfoCard v-if="user" :user="user" />
     <div class="d-flex flex-column rounded h-100 flex-grow-1">
       <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
@@ -130,7 +129,7 @@ const startAddingCat = () => {
                 @click.stop="startSelectingCatAction(cat)"
                 class="d-flex"
               >
-                <button tabindex="0" class="btn p-2 accordion d-flex focus-ring rounded-1 border-0" type="button">
+                <button tabIndex="0" class="btn p-2 accordion d-flex focus-ring rounded-1 border-0">
                   <ThreeDotsIcon />
                 </button>
                 <Dropdown
@@ -168,7 +167,7 @@ const startAddingCat = () => {
             @keyup.enter.stop="startAddingCat"
             data-testid="add-new-cat-btn"
             type="button"
-            class="btn bg-black text-white focus-ring focus-ring-dark ms-auto py-2 px-5 rounded-3 w-sm-100"
+            class="btn bg-black text-white focus-ring ms-auto py-2 px-5 rounded-3 w-sm-100"
           >
             {{ t("Profile.addCat") }} +
           </button>

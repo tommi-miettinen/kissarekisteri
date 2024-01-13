@@ -2,6 +2,7 @@
 import { ref, watchEffect, computed } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 import userAPI from "../api/userAPI";
+import { QueryKeys } from "../api/queryKeys";
 
 const props = defineProps({
   user: {
@@ -14,7 +15,7 @@ const props = defineProps({
 });
 
 const { data: roles } = useQuery({
-  queryKey: ["roles"],
+  queryKey: QueryKeys.ROLES,
   queryFn: () => userAPI.getRoles(),
 });
 
@@ -27,7 +28,7 @@ const newUser = ref({
 watchEffect(() => {
   if (props.user) {
     newUser.value.name = props.user.givenName + " " + props.user.surname;
-    //@ts-ignore
+    newUser.value.role = props.user.userRole?.role.name || "User";
   }
 });
 
@@ -48,11 +49,11 @@ const createUserPayload = computed(() => {
 
 <template>
   <div style="w-100" class="p-4 gap-3 d-flex flex-column">
-    <div>
+    <div v-if="!user">
       <label for="username" class="form-label w-100">Nimi</label>
       <input id="username" data-testid="new-cat-name-input" type="text" class="form-control" v-model="newUser.name" />
     </div>
-    <div>
+    <div v-if="!user">
       <label for="password" class="form-label w-100">Salasana</label>
       <input id="password" data-testid="new-cat-birthdate-input" type="text" class="form-control" v-model="newUser.password" />
     </div>

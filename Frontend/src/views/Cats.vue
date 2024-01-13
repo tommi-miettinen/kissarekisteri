@@ -6,19 +6,20 @@ import { useI18n } from "vue-i18n";
 import CatListItem from "../components/CatListItem.vue";
 import List from "../components/List.vue";
 import { QueryKeys } from "../api/queryKeys";
+import Spinner from "../components/Spinner.vue";
 
 const { t } = useI18n();
 
-const { data } = useQuery({
-  queryKey: [QueryKeys.CATS],
+const catsQuery = useQuery({
+  queryKey: QueryKeys.CATS,
   queryFn: () => catAPI.getCats(),
 });
 
 const translatedValues = ref<Cat[]>();
 
 watchEffect(() => {
-  if (!data.value) return;
-  translatedValues.value = data.value?.map((cat) => {
+  if (!catsQuery.data.value) return;
+  translatedValues.value = catsQuery.data.value?.map((cat) => {
     return {
       ...cat,
       breed: t(`Breeds.${cat.breed}`),
@@ -28,7 +29,8 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto">
+  <Spinner v-if="catsQuery.isLoading.value" />
+  <div v-if="!catsQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto">
     <h3 class="m-0">{{ t("Cats.cats") }}</h3>
     <List
       :searchQueryPlaceholder="t('Cats.searchInput')"

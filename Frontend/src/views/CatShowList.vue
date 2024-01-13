@@ -12,6 +12,9 @@ import Drawer from "../components/Drawer.vue";
 import { useWindowSize } from "@vueuse/core";
 import CatShowForm from "../components/CatShowForm.vue";
 import moment from "moment";
+import { QueryKeys } from "../api/queryKeys";
+import Spinner from "../components/Spinner.vue";
+
 moment.locale("fi");
 
 const router = useRouter();
@@ -19,15 +22,16 @@ const { t } = useI18n();
 
 const addingEvent = ref(false);
 
-const { data: catShows, refetch: refetchCatShows } = useQuery({
-  queryKey: ["catshows"],
+const catShowsQuery = useQuery({
+  queryKey: QueryKeys.CAT_SHOWS,
   queryFn: () => catShowAPI.getEvents(),
 });
 
 const createCatShowMutation = useMutation({
   mutationFn: (newEvent: CatShowEvent) => catShowAPI.createCatShowEvent(newEvent),
   onSuccess: () => {
-    toast.info("Tapahtuma luotu"), refetchCatShows();
+    toast.info("Tapahtuma luotu");
+    catShowsQuery.refetch();
   },
 });
 
@@ -44,9 +48,15 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
 const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`);
 </script>
 <template>
-  <div style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto">
+  <Spinner v-if="catShowsQuery.isLoading.value" />
+  <div v-if="!catShowsQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto">
     <h3 class="m-0">{{ t("CatShowList.catShows") }}</h3>
-    <List :searchQueryPlaceholder="t('CatShowList.searchInput')" v-if="catShows" :items="catShows" :itemsPerPage="20">
+    <List
+      :searchQueryPlaceholder="t('CatShowList.searchInput')"
+      v-if="catShowsQuery.data.value"
+      :items="catShowsQuery.data.value"
+      :itemsPerPage="20"
+    >
       <template v-slot="{ item: catShow }">
         <div class="py-1 border-bottom">
           <div
@@ -85,11 +95,11 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
     </List>
   </div>
   <Drawer :fullsize="true" :visible="addingEvent && isMobile">
-    <CatShowForm @onSave="createCatShowMutation.mutate" />
+    <CatShowForm v-if="isMobile" @onSave="createCatShowMutation.mutate" />
   </Drawer>
   <Modal @onCancel="addingEvent = false" :visible="addingEvent && !isMobile">
     <div style="width: 550px">
-      <CatShowForm @onSave="createCatShowMutation.mutate" />
+      <CatShowForm v-if="!isMobile" @onSave="createCatShowMutation.mutate" />
     </div>
   </Modal>
 </template>

@@ -3,12 +3,10 @@ import { useWindowSize } from "@vueuse/core";
 
 interface ActionStore {
   actionStack: any[];
-  openDropdowns: string[];
 }
 
 const actionStore = reactive<ActionStore>({
   actionStack: [],
-  openDropdowns: [],
 });
 
 export const pushAction = (action: any) => actionStore.actionStack.push(action);
@@ -23,7 +21,5 @@ export const resetActionStack = () => (actionStore.actionStack = []);
 
 export const removeAction = (actionType: any) =>
   (actionStore.actionStack = actionStore.actionStack.filter((action) => action !== actionType));
-
-export const addOpenDropdown = (dropdownId: string) => actionStore.openDropdowns.push(dropdownId);
 
 export const isMobile = computed(() => useWindowSize().width.value < 768);

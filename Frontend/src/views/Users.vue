@@ -10,34 +10,26 @@ import Modal from "../components/Modal.vue";
 import { useWindowSize } from "@vueuse/core";
 import UserForm from "../components/UserForm.vue";
 import Dropdown from "../components/Dropdown.vue";
-import { popAction, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { toast } from "vue-sonner";
 import { useMutation } from "@tanstack/vue-query";
+import { QueryKeys } from "../api/queryKeys";
+import Spinner from "../components/Spinner.vue";
+import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 
 const { t } = useI18n();
 
 enum ActionType {
-  NONE = "NONE",
   EDITING_USER = "EDITING_USER",
   EDITING_USER_MOBILE = "EDITING_USER_MOBILE",
   ADDING_USER_MOBILE = "ADDING_USER_MOBILE",
   ADDING_USER = "ADDING_USER",
   DELETING_USER = "DELETING_USER",
-  SELECTING_USER_ACTION = "SELECTING_USER_ACTION",
   SELECTING_USER_ACTION_MOBILE = "SELECTING_USER_ACTION_MOBILE",
 }
 
-const toggleAction = (actionType: ActionType) => {
-  if (actionType === ActionType.NONE) {
-    popAction();
-  }
-  if (actionType !== ActionType.NONE && !isCurrentAction(actionType)) {
-    pushAction(actionType);
-  }
-};
-
 const userQuery = useQuery({
-  queryKey: ["users"],
+  queryKey: QueryKeys.USERS,
   queryFn: userAPI.getUsers,
 });
 
@@ -48,30 +40,28 @@ const userToBeEdited = ref<User>();
 const userForActionToBeSelected = ref<User>();
 
 const deleteUserMutation = useMutation({
-  mutationFn: () => userAPI.deleteUserById(userToBeDeleted.value!.id),
+  mutationFn: () => {
+    removeAction(ActionType.DELETING_USER);
+    return userAPI.deleteUserById(userToBeDeleted.value!.id);
+  },
   onSuccess: () => {
     toast.info("Käyttäjä poistettu");
     userQuery.refetch();
-    removeAction(ActionType.DELETING_USER);
   },
-  onError: (error) => {
-    console.log(error);
+  onError: () => {
     toast.error("Käyttäjän poistaminen epäonnistui");
-    removeAction(ActionType.DELETING_USER);
   },
 });
 
 const createUserMutation = useMutation({
-  mutationFn: (user: UserPayload) => userAPI.createUser(user),
+  mutationFn: (user: UserPayload) => {
+    removeAction(ActionType.ADDING_USER_MOBILE);
+    removeAction(ActionType.ADDING_USER);
+    return userAPI.createUser(user);
+  },
   onSuccess: () => {
     toast.info("Käyttäjä lisätty");
     userQuery.refetch();
-    removeAction(ActionType.ADDING_USER_MOBILE);
-    removeAction(ActionType.ADDING_USER);
-  },
-  onError: () => {
-    removeAction(ActionType.ADDING_USER_MOBILE);
-    removeAction(ActionType.ADDING_USER);
   },
 });
 
@@ -79,49 +69,42 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
 
 const startDeletingUser = (user: User) => {
   userToBeDeleted.value = user;
-  toggleAction(ActionType.DELETING_USER);
+  pushAction(ActionType.DELETING_USER);
 };
 
 const startEditingUser = (user: User) => {
   userToBeEdited.value = user;
-  toggleAction(isMobile.value ? ActionType.EDITING_USER_MOBILE : ActionType.EDITING_USER);
+  pushAction(isMobile.value ? ActionType.EDITING_USER_MOBILE : ActionType.EDITING_USER);
 };
 
 const startSelectingUserAction = (user: User) => {
   userForActionToBeSelected.value = user;
-  toggleAction(isMobile.value ? ActionType.SELECTING_USER_ACTION_MOBILE : ActionType.SELECTING_USER_ACTION);
+  if (isMobile.value) return pushAction(ActionType.SELECTING_USER_ACTION_MOBILE);
 };
 
 const userListItemRefs = reactive<Record<string, HTMLElement>>({});
 </script>
 
 <template>
-  <div style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto">
+  <h3 v-if="false" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
+  <Spinner v-if="userQuery.isLoading.value" />
+  <div v-if="!userQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto">
     <h3 class="m-0">{{ t("Users.members") }}</h3>
     <List :searchQueryPlaceholder="t('Users.searchInput')" v-if="users" :items="users" :itemsPerPage="20">
       <template v-slot="{ item: user }">
         <UserListItem :user="user">
           <template v-slot:actions>
             <button
+              :ref="el => userListItemRefs[user.id] = el as HTMLElement"
               @keyup.enter.stop="startSelectingUserAction(user)"
               @click.stop="startSelectingUserAction(user)"
-              :ref="el => userListItemRefs[user.id] = el as HTMLElement"
               tabindex="0"
               class="btn p-2 accordion d-flex focus-ring rounded-1 border-0"
               type="button"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 128 512">
-                <path
-                  d="M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"
-                />
-              </svg>
+              <ThreeDotsIcon />
             </button>
-            <Dropdown
-              @onCancel="removeAction(ActionType.SELECTING_USER_ACTION)"
-              :visible="!isMobile"
-              :triggerRef="userListItemRefs[user.id]"
-              :placement="'left-start'"
-            >
+            <Dropdown :visible="!isMobile" :triggerRef="userListItemRefs[user.id]" :placement="'left-start'">
               <li
                 tabIndex="0"
                 @keydown.enter.stop="startEditingUser(user)"
@@ -144,7 +127,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
       </template>
       <template #action>
         <button
-          @click="toggleAction(isMobile ? ActionType.ADDING_USER_MOBILE : ActionType.ADDING_USER)"
+          @click="pushAction(isMobile ? ActionType.ADDING_USER_MOBILE : ActionType.ADDING_USER)"
           class="btn bg-black text-white rounded-3 px-5 ms-auto w-sm-100"
         >
           Lisää käyttäjä +
@@ -156,7 +139,7 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
     :visible="isCurrentAction(ActionType.SELECTING_USER_ACTION_MOBILE) && isMobile"
     @onCancel="removeAction(ActionType.SELECTING_USER_ACTION_MOBILE)"
   >
-    <div class="p-2">
+    <div v-if="isMobile" class="p-2">
       <div
         tabindex="0"
         class="hover-bg-1 rounded-3 p-2 focus-ring"

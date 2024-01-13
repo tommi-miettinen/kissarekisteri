@@ -21,7 +21,8 @@ defineProps({
   <div
     v-if="displayText || avatarUrl"
     :tabindex="focusable ? 0 : undefined"
-    class="cursor-pointer rounded-circle focus-ring"
+    :class="{ 'cursor-pointer': focusable }"
+    class="rounded-circle focus-ring"
     @click="$emit('click')"
     @keyup.enter="$emit('keyup.enter')"
   >

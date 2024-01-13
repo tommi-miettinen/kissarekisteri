@@ -16,7 +16,7 @@ defineProps({
 const queryClient = useQueryClient();
 
 const { data: confirmationRequestsData, refetch } = useQuery({
-  queryKey: ["confirmationRequests"],
+  queryKey: QueryKeys.CONFIRMATION_REQUESTS,
   queryFn: () => catAPI.getConfirmationRequests(),
   refetchInterval: 5000,
 });
@@ -27,8 +27,8 @@ const confirmationRequestMutation = useMutation({
   mutationFn: (requestId: number) => catAPI.confirmTransferRequest(requestId),
   onSuccess: async () => {
     toast.success("Omistajuuspyyntö hyväksytty");
-    await queryClient.invalidateQueries({ queryKey: [QueryKeys.CAT] });
-    await queryClient.invalidateQueries({ queryKey: [QueryKeys.USER] });
+    await queryClient.invalidateQueries({ queryKey: QueryKeys.CAT });
+    await queryClient.invalidateQueries({ queryKey: QueryKeys.USER });
     refetch();
   },
 });
@@ -55,17 +55,18 @@ const confirmationRequestsToDisplay = computed(() => {
       <div class="p-3 text-break overflow-auto d-flex flex-column">
         <div class="d-flex gap-1">
           <button
+            tabindex="0"
             @click="tab = 'personal'"
             :class="{ 'bg-black': tab === 'personal', 'text-white': tab === 'personal', 'border-black': tab === 'personal' }"
-            class="btn btn-sm border rounded-3"
+            class="btn btn-sm border rounded-3 focus-ring"
           >
             Omat
           </button>
-
           <button
+            tabindex="0"
             @click="tab = 'admin'"
             :class="{ 'bg-black': tab === 'admin', 'text-white': tab === 'admin', 'border-black': tab === 'admin' }"
-            class="btn border btn-sm rounded-3"
+            class="btn border btn-sm rounded-3 focus-ring"
           >
             Ylläpitäjä
           </button>

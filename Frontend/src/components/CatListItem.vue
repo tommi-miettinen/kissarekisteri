@@ -40,9 +40,9 @@ const isMale = computed(() => props.cat.sex === "Male");
           <div>{{ cat.name }}</div>
           <div class="text-body-secondary">{{ cat.breed }}</div>
           <div
-            :class="{ 'text-danger': !isMale, 'bg-danger': !isMale }"
+            :style="{ backgroundColor: isMale ? '#93c5fd' : '#fda4af' }"
             style="width: 100px"
-            class="text-primary bg-primary badge rounded-pill bg-opacity-10"
+            class="text-black badge rounded-pill bg-opacity-75"
           >
             {{ t(`CatDetails.${cat.sex.toLowerCase()}`) }}
           </div>

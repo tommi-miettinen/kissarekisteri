@@ -46,8 +46,8 @@ watch(
     });
 
     props.triggerRef.onclick = () => dropdown.value?.toggle();
-    props.triggerRef.onkeyup = (e) => e.key === "Escape" && dropdown.value?.toggle();
     props.triggerRef?.addEventListener("hide.bs.dropdown", () => emit("onCancel"));
+    document.addEventListener("keyup", (e) => e.key === "Escape" && dropdown.value?.hide());
     onClickOutside(dropdownContentRef, closeDropdownIfClickedOutside);
   }
 );
@@ -58,8 +58,8 @@ watch(
     @click.stop="props.autoClose && dropdown?.hide()"
     :class="{ invisible: !props.visible }"
     ref="dropdownContentRef"
-    tabIndex="0"
     class="dropdown-menu border p-1 rounded-3"
+    tabindex="-1"
   >
     <slot></slot>
   </div>

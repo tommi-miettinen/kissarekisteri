@@ -1,13 +1,11 @@
 <script lang="ts" setup>
-import { ref, watchEffect } from "vue";
+import { ref, watchEffect, nextTick } from "vue";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
-import { onBeforeMount } from "vue";
-import { onBeforeUnmount } from "vue";
 
 const emits = defineEmits(["onCrop"]);
 
-defineProps({
+const props = defineProps({
   imageSrc: {
     type: String,
     required: true,
@@ -17,6 +15,8 @@ defineProps({
 const cropper = ref<Cropper>();
 const croppable = ref(false);
 const imageRef = ref<HTMLImageElement>();
+const imageSource = ref(props.imageSrc);
+const inputRef = ref();
 
 const getRoundedCanvas = (sourceCanvas: HTMLCanvasElement) => {
   const canvas = document.createElement("canvas");
@@ -42,9 +42,8 @@ const cropImage = () => {
   if (!croppedCanvas) return;
 
   const roundedCanvas = getRoundedCanvas(croppedCanvas);
-  const blobUrl = roundedCanvas.toDataURL("image/jpeg"); // Specify the MIME type
+  const blobUrl = roundedCanvas.toDataURL("image/jpeg");
 
-  // Convert the Data URL to binary data
   const base64WithoutPrefix = blobUrl.split(",")[1];
   const binaryData = atob(base64WithoutPrefix);
   const uint8Array = new Uint8Array(binaryData.length);
@@ -52,8 +51,7 @@ const cropImage = () => {
     uint8Array[i] = binaryData.charCodeAt(i);
   }
 
-  // Create a File object from the binary data
-  const file = new File([uint8Array], "fileName.jpg", {
+  const file = new File([uint8Array], "kuva.jpg", {
     type: "image/jpeg",
   });
 
@@ -62,6 +60,7 @@ const cropImage = () => {
 
 watchEffect(() => {
   if (imageRef.value) {
+    console.log("watcheffect ran");
     cropper.value = new Cropper(imageRef.value, {
       aspectRatio: 1,
       viewMode: 1,
@@ -78,17 +77,37 @@ watchEffect(() => {
   }
 });
 
-onBeforeMount(() => {
-  if (cropper.value) {
-    cropper.value.destroy();
-  }
-});
+const handleFileChange = async (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (!input || !input.files) return;
 
-onBeforeUnmount(() => {
+  imageSource.value = URL.createObjectURL(input.files[0]);
+
   if (cropper.value) {
     cropper.value.destroy();
+    croppable.value = false;
   }
-});
+
+  await nextTick();
+
+  if (imageRef.value) {
+    cropper.value = new Cropper(imageRef.value, {
+      aspectRatio: 1,
+      viewMode: 1,
+      minContainerHeight: 300,
+      minContainerWidth: imageRef.value.width,
+      minCanvasHeight: imageRef.value.height,
+      minCanvasWidth: imageRef.value.width,
+      minCropBoxHeight: 60,
+      minCropBoxWidth: 60,
+      ready: () => {
+        croppable.value = true;
+      },
+    });
+  }
+};
+
+const triggerFileInput = () => inputRef.value?.click();
 </script>
 
 <template>
@@ -97,12 +116,16 @@ onBeforeUnmount(() => {
       <img
         style="max-height: 300px; max-width: 100%; height: 100%; width: 100%; object-fit: contain"
         ref="imageRef"
-        :src="imageSrc"
+        :src="imageSource"
         alt="Picture"
       />
     </div>
-    <div class="d-flex flex-grow-1 p-2">
-      <button class="ms-auto w-sm-100 mt-auto btn bg-black px-5 py-2 text-white" type="button" @click="cropImage">Tallenna</button>
+    <div class="d-flex flex-grow-1 p-2 gap-2">
+      <button @click="triggerFileInput" class="btn bg-black rounded-3 text-white w-100 py-2 focus-ring">
+        <input accept="image/*" class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
+        Valitse tiedosto
+      </button>
+      <button class="btn focus-ring accordion bg-black w-100 rounded-3 py-2 text-white" type="button" @click="cropImage">Tallenna</button>
     </div>
   </div>
 </template>

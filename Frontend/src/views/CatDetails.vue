@@ -62,6 +62,7 @@ const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainec
 const userIsCatOwner = computed(() => user.value && cat.value && user.value.id === cat.value.ownerId);
 
 watch(route, () => refetch());
+const isMale = computed(() => cat.value?.sex === "Male");
 </script>
 
 <template>
@@ -84,6 +85,13 @@ watch(route, () => refetch());
           <p>
             {{ cat.breed }}
           </p>
+          <div
+            :style="{ backgroundColor: isMale ? '#93c5fd' : '#fda4af' }"
+            style="width: 100px"
+            class="text-black badge rounded-pill bg-opacity-75"
+          >
+            {{ t(`CatDetails.${cat.sex.toLowerCase()}`) }}
+          </div>
           <p>
             syntynyt <span>{{ moment(cat.birthDate).format("LLL") }}</span>
           </p>
