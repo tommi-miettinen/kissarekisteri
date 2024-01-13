@@ -89,7 +89,11 @@ watch(thumbnailRefs, () => {
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
         />
         <div v-if="showThumbnailActionButton && !isMobile" class="d-flex position-absolute w-100 bottom-0">
-          <button @click.stop="$emit('onThumbnailActionClick', photo)" class="w-100 rounded-3 border btn-border focus-ring py-2 m-2">
+          <button
+            @keyup.enter.stop="$emit('onThumbnailActionClick', photo)"
+            @click.stop="$emit('onThumbnailActionClick', photo)"
+            class="w-100 rounded-3 border btn-border focus-ring py-2 m-2"
+          >
             {{ thumbnailActionButtonText }}
           </button>
         </div>

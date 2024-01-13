@@ -60,7 +60,7 @@ onMounted(() => {
         <Avatar
           :focusable="userIsLoggedInUser(user)"
           @click="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
-          @keyup.enter="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
+          @keydown.enter="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
           :avatarUrl="user.avatarUrl"
           :displayText="user.givenName[0] + user.surname[0]"
         />

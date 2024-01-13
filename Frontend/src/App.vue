@@ -4,7 +4,8 @@ import { Toaster } from "vue-sonner";
 import { onMounted, computed, ref, watch } from "vue";
 import { fetchPermissions, fetchUser } from "./store/userStore";
 import BottomNavigation from "./components/BottomNavigation.vue";
-import { useWindowSize, useElementVisibility } from "@vueuse/core";
+import { useWindowSize, useActiveElement } from "@vueuse/core";
+import { focusFirstVisibleElement } from "./utils/focusFirstVisibleElement";
 
 const mainRef = ref<HTMLElement>();
 
@@ -13,36 +14,19 @@ onMounted(async () => {
   await fetchPermissions();
 });
 
-import { useActiveElement } from "@vueuse/core";
-
 const activeElement = useActiveElement();
 
 watch(activeElement, (el) => {
   console.log("focus changed to", el);
 });
 
-const focusMainContent = () => {
-  // Define the selectors for focusable elements
-  const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+const focusMainContent = () => focusFirstVisibleElement(mainRef.value!);
 
-  // Find all focusable elements within the mainRef
-  const focusableElements = mainRef.value?.querySelectorAll(focusableSelectors);
-
-  // Loop through the focusable elements
-  for (const elem of focusableElements || []) {
-    console.log(elem);
-    const targetIsVisible = useElementVisibility(elem as HTMLElement);
-    if (targetIsVisible) {
-      (elem as HTMLElement).focus();
-      break; // Break out of the loop once the first visible element is focused
-    }
-  }
-};
 const isMobile = computed(() => useWindowSize().width.value < 768);
 </script>
 
 <template>
-  <button @keyup.enter.stop="focusMainContent" @click="focusMainContent" class="skip-link rounded-3 focus-ring btn bg-white">
+  <button @keyup.enter.stop="focusMainContent" @click.stop="focusMainContent" class="skip-link rounded-3 focus-ring btn bg-white">
     Skip to Main Content
   </button>
   <div style="height: 100dvh" class="d-flex flex-column align-items-center flex-grow-1">

@@ -66,12 +66,8 @@ const navigateTo = (route: string) => {
   nextTick(() => router.push(route));
 };
 
-const handleNotificationClick = (e: MouseEvent | KeyboardEvent) => {
+const handleNotificationClick = () => {
   if (isMobile.value) pushAction(ActionType.NOTIFICATIONS_MOBILE);
-
-  if (e instanceof KeyboardEvent && e.key === "Enter") {
-    requestsRef.value?.click();
-  }
 };
 
 const dropdownTriggerRef = ref<HTMLDivElement>();

@@ -2,7 +2,7 @@
 import { ref, watch } from "vue";
 import { Dropdown } from "bootstrap";
 import { Placement } from "@popperjs/core/lib/enums";
-import { onClickOutside } from "@vueuse/core";
+import { onClickOutside, useFocusWithin, useEventListener } from "@vueuse/core";
 
 const props = defineProps({
   autoClose: {
@@ -24,11 +24,17 @@ const emit = defineEmits(["onCancel"]);
 
 const dropdown = ref<Dropdown>();
 const dropdownContentRef = ref<HTMLDivElement>();
+const { focused } = useFocusWithin(dropdownContentRef);
+const hasBeenFocused = ref(false);
 
-const closeDropdownIfClickedOutside = (event: MouseEvent) => {
+const handleDropdownClose = (event: MouseEvent | KeyboardEvent) => {
   const target = event.target as HTMLElement;
+  if (event instanceof KeyboardEvent && event.key === "Escape") {
+    return dropdown.value?.hide();
+  }
+
   if (!dropdownContentRef.value?.contains(target) && !props.triggerRef?.contains(target)) {
-    dropdown.value?.hide();
+    return dropdown.value?.hide();
   }
 };
 
@@ -47,15 +53,24 @@ watch(
 
     props.triggerRef.onclick = () => dropdown.value?.toggle();
     props.triggerRef?.addEventListener("hide.bs.dropdown", () => emit("onCancel"));
-    document.addEventListener("keyup", (e) => e.key === "Escape" && dropdown.value?.hide());
-    onClickOutside(dropdownContentRef, closeDropdownIfClickedOutside);
+
+    useEventListener(document, "keyup", handleDropdownClose);
+    onClickOutside(dropdownContentRef, handleDropdownClose);
   }
 );
+
+watch(focused, (isFocused) => {
+  if (isFocused) hasBeenFocused.value = true;
+  if (!isFocused && hasBeenFocused.value) {
+    dropdown.value?.hide();
+  }
+});
 </script>
 
 <template>
   <div
     @click.stop="props.autoClose && dropdown?.hide()"
+    @keyup.enter.stop="props.autoClose && dropdown?.hide()"
     :class="{ invisible: !props.visible }"
     ref="dropdownContentRef"
     class="dropdown-menu border p-1 rounded-3"

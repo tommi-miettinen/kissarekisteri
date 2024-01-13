@@ -25,8 +25,17 @@ defineProps({
     class="rounded-circle focus-ring"
     @click="$emit('click')"
     @keyup.enter="$emit('keyup.enter')"
+    @keydown.enter="$emit('keydown.enter')"
   >
-    <img v-if="avatarUrl" class="rounded-circle" height="32" width="32" style="object-fit: fill" :src="avatarUrl" alt="User avatar" />
+    <img
+      v-if="avatarUrl"
+      class="rounded-circle"
+      height="32"
+      width="32"
+      style="object-fit: fill; pointer-events: none"
+      :src="avatarUrl"
+      alt="User avatar"
+    />
     <div
       v-else
       style="width: 32px; height: 32px; font-size: 14px"

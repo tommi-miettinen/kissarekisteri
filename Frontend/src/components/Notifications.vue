@@ -58,7 +58,7 @@ const confirmationRequestsToDisplay = computed(() => {
             tabindex="0"
             @click="tab = 'personal'"
             :class="{ 'bg-black': tab === 'personal', 'text-white': tab === 'personal', 'border-black': tab === 'personal' }"
-            class="btn btn-sm border rounded-3 focus-ring"
+            class="btn btn-sm border rounded-3 focus-ring col-3"
           >
             Omat
           </button>
@@ -66,7 +66,7 @@ const confirmationRequestsToDisplay = computed(() => {
             tabindex="0"
             @click="tab = 'admin'"
             :class="{ 'bg-black': tab === 'admin', 'text-white': tab === 'admin', 'border-black': tab === 'admin' }"
-            class="btn border btn-sm rounded-3 focus-ring"
+            class="btn border btn-sm rounded-3 focus-ring col-3"
           >
             Ylläpitäjä
           </button>
