@@ -21,6 +21,9 @@
 		<NoWarn>$(NoWarn);1591</NoWarn>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<UserSecretsId>28a3d5f7-e8ca-4dee-98c7-06ee1f6e088a</UserSecretsId>
+	</PropertyGroup>
 
 
 	<ItemGroup>

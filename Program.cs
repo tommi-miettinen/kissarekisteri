@@ -26,29 +26,33 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
+var instance = config["AzureAdB2C:Instance"];
+var domain = config["AzureAdB2C:Domain"];
+var policyName = config["AzureAdB2C:SignUpSignInPolicyId"];
+var appId = config["AzureAdB2C:ClientId"];
+var clientSecret = config["AzureAdB2C:ClientSecret"];
+var tenantId = config["AzureAdB2C:TenantId"];
+var dbConnectionString = builder.Environment.IsDevelopment()
+          ? config.GetConnectionString("developmentSQL")
+          : config.GetConnectionString("AzureSQL");
+
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
         builder
-            .WithOrigins("https://localhost:5173", "kissarekisteri.b2clogin.com")
+            .WithOrigins("https://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
     });
 });
 
-
 builder.Services.AddSingleton(serviceProvider =>
 {
-    var graphConfig = config.GetSection("AzureAdB2C");
-    var tenantId = graphConfig["Domain"];
-    var appId = graphConfig["ClientId"];
-    var clientSecret = graphConfig["ClientSecret"];
-    var clientSecretCredential = new ClientSecretCredential(tenantId, appId, clientSecret);
+    var clientSecretCredential = new ClientSecretCredential(domain, appId, clientSecret);
     var scopes = new[] { "https://graph.microsoft.com/.default" };
-
     return new GraphServiceClient(clientSecretCredential, scopes);
 });
 
@@ -72,25 +76,23 @@ builder.Services.AddAuthorization(options =>
     }
 });
 
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority =
-            "https://kissarekisteri.b2clogin.com/kissarekisteri.onmicrosoft.com/B2C_1_SIGN_IN_SIGN_UP/v2.0/";
-        options.Audience = "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6";
+        options.Authority = $"{instance}/{domain}/{policyName}/v2.0/";
+        options.Audience = appId;
 
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidAudience = "8f374d27-54ee-40d1-bed8-ba2f8a4bd1f6",
-            ValidIssuer =
-                "https://kissarekisteri.b2clogin.com/d128e5ef-7125-45c2-8e8c-4fd41c0c862e/v2.0/"
+            ValidAudience = appId,
+            ValidIssuer = $"{instance}/{tenantId}/v2.0/"
         };
     });
 
-builder.Services.AddDbContext<KissarekisteriDbContext>(
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("developmentSQL"))
-);
+
+builder.Services.AddDbContext<KissarekisteriDbContext>(options => options.UseSqlServer(dbConnectionString));
 
 builder.Services
     .AddControllers(options => options.Filters.Add(new ModelValidationFilter()))
@@ -134,18 +136,13 @@ if (app.Environment.IsDevelopment())
     /*
     dbContext.Database.EnsureDeleted();
     dbContext.Database.EnsureCreated();
-   
-
 
     await seedService.SeedCatBreeds();
     await seedService.SeedPermissions();
     await seedService.SeedRoles();
     await seedService.SeedRolePermissions();
     await seedService.UpdateUserRoles();
-
-     */
-
-
+    */
 }
 
 app.UseSwagger();

@@ -7,12 +7,3 @@ services:
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
-
-  azurite:
-    image: mcr.microsoft.com/azure-storage/azurite
-    ports:
-      - "10000:10000"
-      - "10001:10001"
-      - "10002:10002"
-    volumes:
-      - ./azurite-data:/data

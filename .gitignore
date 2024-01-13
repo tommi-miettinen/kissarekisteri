@@ -55,4 +55,5 @@ azurite-data
 /blob-report/
 /playwright/.cache/
 
+secrets.json
 storageState.json
