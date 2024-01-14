@@ -2,12 +2,12 @@
 
 Prerequisites
 
-- Azure account
-- Docker
-- az cli
-- .NET
-- Node
-- Visual Studio
+- [Azure account](https://azure.microsoft.com/en-us/free)
+- [Docker](https://docs.docker.com/desktop/install/windows-install/)
+- [az cli](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli)
+- [Node](https://nodejs.org/en)
+- [Visual Studio](https://visualstudio.microsoft.com/downloads/)
+- [.NET](https://learn.microsoft.com/en-us/dotnet/core/install/windows?tabs=net80)
 
 
 ### Azure
@@ -39,11 +39,39 @@ Deploy the rest of the resources
 
 ### Backend
 
-Start the app
+Open the project in Visual studio
+
+#### Setup the secrets
+
+- Right click on the project
+- Select "Manage user secrets"
+
+  ![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/a27dffed-8c6c-49bd-beaf-4a92e2549006)
+
+- Set Storage connection string
+- Set AzureSQL connection string
+- Set AzureAdB2C:ClientSecret (Needed to query Users in AdB2C with admin access)
+
+The secret can be found here 
+![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/2d817b52-7036-46f7-a48b-3d3ad049088f)
 
 
 
-#### Frontend
+Start the app by clicking
+
+![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/1dc3a318-841d-494b-80c2-4f9b8c1e23fb)
+
+or
+
+    dotnet run watch
+
+You might need [dotnet cli tool](https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-install)
+
+
+
+
+
+### Frontend
 
     cd frontend
     npm install
@@ -255,6 +283,8 @@ public IActionResult CreateSample(SampleModel model)
 ```
 
 Outcome: If CreateSample receives data that doesn't comply with SampleModel validations (e.g., missing Name), ModelValidationFilter intercepts and returns a BadRequest with details of the validation errors.
+
+# Screenshots
 
 ![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/7c121dd3-a1be-41a0-87aa-a09aaa905302)
 
