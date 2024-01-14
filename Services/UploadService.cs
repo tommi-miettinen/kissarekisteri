@@ -1,15 +1,14 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
+
 namespace Kissarekisteri.Services;
 
-public class UploadService(BlobServiceClient blobServiceClient, IWebHostEnvironment env)
+public class UploadService(BlobServiceClient blobServiceClient)
 {
     private readonly BlobServiceClient _blobServiceClient = blobServiceClient;
 
@@ -19,7 +18,9 @@ public class UploadService(BlobServiceClient blobServiceClient, IWebHostEnvironm
         {
             return null;
         }
-        var containerName = env.IsDevelopment() ? "dev-images" : "images";
+
+        var envIsDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+        var containerName = envIsDevelopment ? "dev-images" : "images";
         var container = _blobServiceClient.GetBlobContainerClient(containerName);
         var publicAccessType = PublicAccessType.Blob;
         await container.CreateIfNotExistsAsync(publicAccessType: publicAccessType);

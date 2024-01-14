@@ -21,7 +21,11 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+
+
+[assembly: InternalsVisibleTo("ConsoleApplication")]
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +39,8 @@ var tenantId = config["AzureAdB2C:TenantId"];
 var dbConnectionString = builder.Environment.IsDevelopment()
           ? config.GetConnectionString("developmentSQL")
           : config.GetConnectionString("AzureSQL");
+
+Console.WriteLine(Assembly.GetExecutingAssembly().GetName());
 
 
 builder.Services.AddCors(options =>

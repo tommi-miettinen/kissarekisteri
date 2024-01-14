@@ -8,12 +8,20 @@
 
   <ItemGroup>
     <Compile Remove="AppCreationScripts\**" />
+    <Compile Remove="ConsoleApplication\**" />
+    <Compile Remove="ConsoleApp\**" />
     <Compile Remove="Frontend\**" />
     <Content Remove="AppCreationScripts\**" />
+    <Content Remove="ConsoleApplication\**" />
+    <Content Remove="ConsoleApp\**" />
     <Content Remove="Frontend\**" />
     <EmbeddedResource Remove="AppCreationScripts\**" />
+    <EmbeddedResource Remove="ConsoleApplication\**" />
+    <EmbeddedResource Remove="ConsoleApp\**" />
     <EmbeddedResource Remove="Frontend\**" />
     <None Remove="AppCreationScripts\**" />
+    <None Remove="ConsoleApplication\**" />
+    <None Remove="ConsoleApp\**" />
   </ItemGroup>
 
 	<PropertyGroup>
