@@ -143,7 +143,11 @@ const isMale = computed(() => cat.value?.sex === "Male");
         <UserListItem :user="cat.breeder" />
       </div>
       <div class="d-flex flex-column gap-2">
-        <button @click="triggerFileInput" class="btn bg-black rounded-3 text-white px-5 py-2 me-auto focus-ring focus-ring-dark w-sm-100">
+        <button
+          v-if="userIsCatOwner"
+          @click="triggerFileInput"
+          class="btn bg-black rounded-3 text-white px-5 py-2 me-auto focus-ring focus-ring-dark w-sm-100"
+        >
           <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
           {{ t("CatDetails.uploadImage") }} +
         </button>

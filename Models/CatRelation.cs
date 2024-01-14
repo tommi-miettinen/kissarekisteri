@@ -6,6 +6,7 @@ namespace Kissarekisteri.Models
     public class CatRelation : IValidatableObject
     {
         public int Id { get; set; }
+
         public int ParentId { get; set; }
         public int KittenId { get; set; }
         public string ParentType { get; set; }

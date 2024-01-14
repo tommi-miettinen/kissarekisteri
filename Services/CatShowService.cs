@@ -1,4 +1,5 @@
-﻿using Kissarekisteri.Database;
+﻿using Kissarekisteri.AccessControl;
+using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
 using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
@@ -12,8 +13,8 @@ namespace Kissarekisteri.Services
 {
     public class CatShowService(
         KissarekisteriDbContext dbContext,
-        UserService userService,
-        UploadService uploadService
+        UploadService uploadService,
+        PermissionService permissionService
     )
     {
         public async Task<Result<bool>> JoinCatShowAsync(
@@ -91,8 +92,15 @@ namespace Kissarekisteri.Services
             return catShows;
         }
 
-        public async Task<CatShow> UploadCatShowPhoto(int catShowId, IFormFile file)
+        public async Task<CatShow> UploadCatShowPhoto(string userId, int catShowId, IFormFile file)
         {
+            var hasPermission = await permissionService.HasPermission(userId, Permissions.CatShowWrite);
+
+            if (!hasPermission)
+            {
+                return null;
+            }
+
             var cat = await dbContext.CatShows.FirstOrDefaultAsync(
                 catShow => catShow.Id == catShowId
             );

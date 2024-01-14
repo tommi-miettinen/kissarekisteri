@@ -16,9 +16,15 @@ interface Attendee {
   catAttendees: { cat: Cat }[];
 }
 
+enum PermissionTypes {
+  CatShowWrite = "CatShow.Write",
+  RoleAdminWrite = "Role.Admin.Write",
+  RoleEventOrganizerWrite = "Role.EventOrganizer.Write",
+}
+
 interface Permission {
   id: number;
-  name: string;
+  name: PermissionTypes;
 }
 
 interface Cat {

@@ -1,6 +1,4 @@
 ﻿using Kissarekisteri.Models;
-using Microsoft.Graph.Models;
-using System.Collections.Generic;
 
 namespace Kissarekisteri.DTOs
 {
@@ -17,7 +15,5 @@ namespace Kissarekisteri.DTOs
         public bool IsBreeder { get; set; }
 
         public UserRole UserRole { get; set; }
-
-        public List<ObjectIdentity> Identities { get; set; }
     }
 }

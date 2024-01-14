@@ -9,20 +9,23 @@ namespace Kissarekisteri.Models
     public class Cat : IValidatableObject
     {
         public int Id { get; set; }
+        [Required]
         public required string Name { get; set; }
+        [Required]
         public required DateTime BirthDate { get; set; }
+        [Required]
         public required string Breed { get; set; }
+        [Required]
         public required string Sex { get; set; }
-
+        [Required]
         public required string OwnerId { get; set; }
         [NotMapped]
         public UserResponse Owner { get; set; }
+        [Required]
         public required string BreederId { get; set; }
-
         [NotMapped]
         public UserResponse Breeder { get; set; }
         public string ImageUrl { get; set; }
-
         public List<CatRelation> Parents { get; set; }
         public List<CatRelation> Kittens { get; set; }
         public List<CatShowResult> Results { get; set; }

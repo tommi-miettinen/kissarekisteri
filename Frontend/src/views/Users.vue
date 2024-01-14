@@ -22,8 +22,6 @@ const { t } = useI18n();
 enum ActionType {
   EDITING_USER = "EDITING_USER",
   EDITING_USER_MOBILE = "EDITING_USER_MOBILE",
-  ADDING_USER_MOBILE = "ADDING_USER_MOBILE",
-  ADDING_USER = "ADDING_USER",
   DELETING_USER = "DELETING_USER",
   SELECTING_USER_ACTION_MOBILE = "SELECTING_USER_ACTION_MOBILE",
 }
@@ -50,18 +48,6 @@ const deleteUserMutation = useMutation({
   },
   onError: () => {
     toast.error("Käyttäjän poistaminen epäonnistui");
-  },
-});
-
-const createUserMutation = useMutation({
-  mutationFn: (user: UserPayload) => {
-    removeAction(ActionType.ADDING_USER_MOBILE);
-    removeAction(ActionType.ADDING_USER);
-    return userAPI.createUser(user);
-  },
-  onSuccess: () => {
-    toast.info("Käyttäjä lisätty");
-    userQuery.refetch();
   },
 });
 
@@ -125,14 +111,6 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
           </template>
         </UserListItem>
       </template>
-      <template #action>
-        <button
-          @click="pushAction(isMobile ? ActionType.ADDING_USER_MOBILE : ActionType.ADDING_USER)"
-          class="btn bg-black text-white rounded-3 px-5 ms-auto w-sm-100"
-        >
-          Lisää käyttäjä +
-        </button>
-      </template>
     </List>
   </div>
   <Drawer
@@ -159,18 +137,6 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
         Poista
       </div>
     </div>
-  </Drawer>
-  <Modal :visible="isCurrentAction(ActionType.ADDING_USER) && !isMobile" @onCancel="removeAction(ActionType.ADDING_USER)">
-    <div style="width: 550px">
-      <UserForm :formActionButtonText="'Lisää käyttäjä +'" @onSave="createUserMutation.mutate" />
-    </div>
-  </Modal>
-  <Drawer
-    :fullsize="true"
-    :visible="isCurrentAction(ActionType.ADDING_USER_MOBILE) && isMobile"
-    @onCancel="removeAction(ActionType.ADDING_USER_MOBILE)"
-  >
-    <UserForm :formActionButtonText="'Lisää käyttäjä +'" @onSave="createUserMutation.mutate" />
   </Drawer>
   <Modal :visible="isCurrentAction(ActionType.EDITING_USER) && !isMobile" @onCancel="removeAction(ActionType.EDITING_USER)">
     <div style="width: 550px">

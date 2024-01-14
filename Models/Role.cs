@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kissarekisteri.Models;
 
@@ -7,6 +8,7 @@ namespace Kissarekisteri.Models;
 public class Role
 {
     public int Id { get; set; }
+    [Required]
     public string Name { get; set; }
     public ICollection<UserRole> UserRoles { get; set; }
 }

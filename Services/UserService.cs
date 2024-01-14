@@ -172,6 +172,13 @@ public class UserService(
         try
         {
             var userInfo = await dbContext.UserInfos.FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (userInfo != null)
+            {
+                userInfo.IsBreeder = userInfo.IsBreeder;
+            }
+
+
             var user = await graphClient.Users[userId].GetAsync(requestConfiguration =>
             {
                 requestConfiguration.QueryParameters.Select =
@@ -215,12 +222,6 @@ public class UserService(
         }
 
         return result.Success(true);
-    }
-
-    public async Task<List<Role>> GetRoles()
-    {
-        var roles = await dbContext.Roles.ToListAsync();
-        return roles;
     }
 
     public async Task<UserRole> CreateUserRole(UserRole userRole)

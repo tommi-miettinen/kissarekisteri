@@ -18,6 +18,7 @@ import Drawer from "../components/Drawer.vue";
 import { isMobile } from "../store/actionStore";
 import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
+import { PermissionTypes } from "../store/userStore";
 
 enum ActionType {
   JOINING_EVENT = "JOINING_EVENT",
@@ -234,7 +235,7 @@ const removeSingleCat = (catId: number) => {
               </template>
               <template #actions>
                 <button
-                  v-if="userHasPermission('CreateCatShowResult') || cat.ownerId === user?.id"
+                  v-if="userHasPermission(PermissionTypes.CatShowWrite) || cat.ownerId === user?.id"
                   :ref="el => (dropdownRefs[cat.id] = el as HTMLDivElement)"
                   :id="cat.id.toString()"
                   tabndex="0"
@@ -246,7 +247,7 @@ const removeSingleCat = (catId: number) => {
                 </button>
                 <Dropdown :placement="'left-start'" :triggerRef="dropdownRefs[cat.id]">
                   <li
-                    v-if="userHasPermission('CreateCatShowResult')"
+                    v-if="userHasPermission(PermissionTypes.CatShowWrite)"
                     tabindex="0"
                     @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
                     @click="updatePlacingMutation.mutate({ catId: cat.id, place: 1, breed: cat.breed })"
@@ -255,7 +256,7 @@ const removeSingleCat = (catId: number) => {
                     Ensimmäinen
                   </li>
                   <li
-                    v-if="userHasPermission('CreateCatShowResult')"
+                    v-if="userHasPermission(PermissionTypes.CatShowWrite)"
                     tabindex="0"
                     @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
                     @click="updatePlacingMutation.mutate({ catId: cat.id, place: 2, breed: cat.breed })"
@@ -264,7 +265,7 @@ const removeSingleCat = (catId: number) => {
                     Toinen
                   </li>
                   <li
-                    v-if="userHasPermission('CreateCatShowResult')"
+                    v-if="userHasPermission(PermissionTypes.CatShowWrite)"
                     tabindex="0"
                     @keyup.enter="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
                     @click="updatePlacingMutation.mutate({ catId: cat.id, place: 3, breed: cat.breed })"
@@ -282,7 +283,11 @@ const removeSingleCat = (catId: number) => {
         </div>
       </div>
       <div class="d-flex flex-column gap-2">
-        <button @click="triggerFileInput" class="btn bg-black text-white rounded-3 px-5 py-2 me-auto focus-ring w-sm-100">
+        <button
+          v-if="userHasPermission(PermissionTypes.CatShowWrite)"
+          @click="triggerFileInput"
+          class="btn bg-black text-white rounded-3 px-5 py-2 me-auto focus-ring w-sm-100"
+        >
           <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
           Lisää kuva +
         </button>

@@ -1,8 +1,8 @@
-﻿using Kissarekisteri.Database;
+﻿using Kissarekisteri.AccessControl;
+using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
 using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
-using Kissarekisteri.RBAC;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -117,7 +117,7 @@ public class CatService(
         var result = new Result<List<CatTransferResultDTO>>();
 
         var user = await userService.GetUserById(userId);
-        var userIsAdmin = user?.UserRole?.Role?.Name == RoleType.Admin.ToString();
+        var userIsAdmin = user?.UserRole?.Role?.Name == Roles.Admin;
 
         var catTransfers = await dbContext.CatTransfers
             .Where(ct => !ct.Confirmed)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kissarekisteri.Models;
 
@@ -6,5 +7,7 @@ namespace Kissarekisteri.Models;
 public class Permission
 {
     public int Id { get; set; }
+
+    [Required]
     public string Name { get; set; }
 }

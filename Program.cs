@@ -1,12 +1,9 @@
 ﻿using Azure.Identity;
 using Azure.Storage.Blobs;
-using Kissarekisteri.Authorization;
 using Kissarekisteri.Database;
 using Kissarekisteri.Filters;
-using Kissarekisteri.RBAC;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -24,9 +21,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
-
 [assembly: InternalsVisibleTo("ConsoleApplication")]
-
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -40,7 +35,7 @@ var dbConnectionString = builder.Environment.IsDevelopment()
           ? config.GetConnectionString("developmentSQL")
           : config.GetConnectionString("AzureSQL");
 
-Console.WriteLine(Assembly.GetExecutingAssembly().GetName());
+var devFrontendUrl = "https://localhost:5173";
 
 
 builder.Services.AddCors(options =>
@@ -48,10 +43,9 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(builder =>
     {
         builder
-            .WithOrigins("https://localhost:5173")
+            .WithOrigins(devFrontendUrl)
             .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+            .AllowAnyMethod();
     });
 });
 
@@ -68,19 +62,6 @@ builder.Services.AddScoped<UploadService>();
 builder.Services.AddScoped<CatService>();
 builder.Services.AddScoped<CatShowService>();
 builder.Services.AddScoped<PermissionService>();
-builder.Services.AddScoped<SeedService>();
-builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
-
-builder.Services.AddAuthorization(options =>
-{
-    foreach (PermissionType permission in Enum.GetValues(typeof(PermissionType)))
-    {
-        options.AddPolicy(
-            permission.ToString(),
-            policy => policy.Requirements.Add(new PermissionRequirement(permission))
-        );
-    }
-});
 
 
 builder.Services
@@ -132,24 +113,6 @@ app.UseExceptionHandler(appBuilder =>
         }
     });
 });
-
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<KissarekisteriDbContext>();
-    var seedService = scope.ServiceProvider.GetRequiredService<SeedService>();
-
-    /*
-    dbContext.Database.EnsureDeleted();
-    dbContext.Database.EnsureCreated();
-
-    await seedService.SeedCatBreeds();
-    await seedService.SeedPermissions();
-    await seedService.SeedRoles();
-    await seedService.SeedRolePermissions();
-    await seedService.UpdateUserRoles();
-    */
-}
 
 app.UseSwagger();
 app.UseSwaggerUI();

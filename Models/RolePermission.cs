@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kissarekisteri.Models
 {
@@ -7,9 +8,13 @@ namespace Kissarekisteri.Models
     {
         public int Id { get; set; }
 
+        [Required]
         public string RoleName { get; set; }
+        [Required]
         public int RoleId { get; set; }
+        [Required]
         public string PermissionName { get; set; }
+        [Required]
         public int PermissionId { get; set; }
 
         public Role Role { get; set; }

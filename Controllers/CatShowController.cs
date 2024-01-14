@@ -1,7 +1,5 @@
-﻿using Kissarekisteri.Authorization;
-using Kissarekisteri.DTOs;
+﻿using Kissarekisteri.DTOs;
 using Kissarekisteri.Models;
-using Kissarekisteri.RBAC;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +12,7 @@ namespace Kissarekisteribackend.Controllers;
 
 [ApiController]
 [Route("api/catshows")]
-public class CatShowController(CatShowService catShowService, SeedService seedService) : Controller
+public class CatShowController(CatShowService catShowService) : Controller
 {
     [Authorize]
     [HttpPost("{catShowId}/join")]
@@ -39,19 +37,6 @@ public class CatShowController(CatShowService catShowService, SeedService seedSe
         return Ok("Left cat show successfully");
     }
 
-    [HttpPost("seed")]
-    public async Task<ActionResult> Seed()
-    {
-        try
-        {
-            await seedService.SeedCatShows(true, 20);
-            return Ok();
-        }
-        catch (System.Exception e)
-        {
-            return Json(e.ToString());
-        }
-    }
 
     [HttpGet]
     public async Task<ActionResult<List<CatShow>>> GetEvents()
@@ -64,7 +49,8 @@ public class CatShowController(CatShowService catShowService, SeedService seedSe
     [HttpPost("{catShowId}/photos")]
     public async Task<ActionResult<CatShow>> UploadCatShowPhoto(int catShowId, IFormFile file)
     {
-        var catShow = await catShowService.UploadCatShowPhoto(catShowId, file);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var catShow = await catShowService.UploadCatShowPhoto(userId, catShowId, file);
         return Json(catShow);
     }
 
@@ -80,7 +66,6 @@ public class CatShowController(CatShowService catShowService, SeedService seedSe
     }
 
     [Authorize]
-    [PermissionAuthorize(PermissionType.CreateCatShowResult)]
     [HttpPost("{catShowId}/place")]
     public async Task<ActionResult<CatShowResult>> AssignCatPlacing(int catShowId, [FromBody] CatShowResultDTO resultPayload)
     {
@@ -89,7 +74,6 @@ public class CatShowController(CatShowService catShowService, SeedService seedSe
     }
 
     [Authorize]
-    [PermissionAuthorize(PermissionType.CreateEvent)]
     [HttpPost]
     public async Task<ActionResult<CatShow>> CreateEvent([FromBody] CatShow newCatShow)
     {

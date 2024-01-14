@@ -1,6 +1,12 @@
 import userAPI from "../api/userAPI";
 import { reactive, computed } from "vue";
 
+export enum PermissionTypes {
+  CatShowWrite = "CatShow.Write",
+  RoleAdminWrite = "Role.Admin.Write",
+  RoleEventOrganizerWrite = "Role.EventOrganizer.Write",
+}
+
 interface UserState {
   user: null | User;
   permissions: Permission[];
@@ -35,7 +41,7 @@ export const logout = () => {
   localStorage.removeItem("token");
 };
 
-export const userHasPermission = (permission: string) => userStore.permissions.some((p) => p.name === permission);
+export const userHasPermission = (permission: PermissionTypes) => userStore.permissions.some((p) => p.name === permission);
 
 export const editUser = async (user: User) => {
   const editedUser = await userAPI.editUser(user);
