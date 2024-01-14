@@ -18,10 +18,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
-
-[assembly: InternalsVisibleTo("ConsoleApplication")]
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;

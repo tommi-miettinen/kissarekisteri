@@ -48,20 +48,32 @@ public class PermissionService(KissarekisteriDbContext dbContext)
         }
     }
 
-    public async Task AssignRole(string userId, int roleId)
+    public async Task AssignRoleWithoutPermissionCheck(string userId, int roleId)
     {
         var userRole = await GetUserRole(userId);
         var role = await GetRoleById(roleId);
 
-        if (userRole != null && role != null)
+        if (role == null)
         {
-            dbContext.UserRoles.Remove(userRole);
-            dbContext.UserRoles.Add(new UserRole
+            return;
+        }
+
+        if (userRole != null)
+        {
+            userRole.UserId = userId;
+            userRole.RoleId = roleId;
+            userRole.RoleName = role.Name;
+        }
+        else
+        {
+            userRole = new UserRole
             {
                 UserId = userId,
-                RoleId = role.Id,
+                RoleId = roleId,
                 RoleName = role.Name
-            });
+            };
+
+            await dbContext.UserRoles.AddAsync(userRole);
         }
 
         await dbContext.SaveChangesAsync();

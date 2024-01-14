@@ -1,6 +1,7 @@
 ﻿
 using Azure.Identity;
 using Azure.Storage.Blobs;
+using ConsoleApplication;
 using Kissarekisteri.Database;
 using Kissarekisteri.Services;
 using KissarekisteriConsole.ConsoleApplication.Services;
@@ -15,8 +16,13 @@ namespace KissarekisteriConsole.ConsoleApplication;
 
 public class Program
 {
-    static async Task Main()
+    public static async Task Main()
     {
+        string[] envOptions = { "Development", "Production" };
+
+        int selectedOption = KeyboardNavigation.GetMenuChoice("Choose Environment", envOptions);
+        var env = envOptions[selectedOption];
+
         Assembly assembly = Assembly.Load("Kissarekisteri");
 
         var config = new ConfigurationBuilder()
@@ -25,7 +31,7 @@ public class Program
                 .AddUserSecrets(assembly)
                 .Build();
 
-        var env = "Development";
+
 
         var instance = config["AzureAdB2C:Instance"];
         var domain = config["AzureAdB2C:Domain"];
@@ -65,13 +71,8 @@ public class Program
 
         while (true)
         {
-            Console.WriteLine("Choose an action:");
-            Console.WriteLine("1. Create user");
-            Console.WriteLine("2. Assign Role to User");
-            Console.WriteLine("Press any key to exit...");
-
-
-            var userInput = Console.ReadLine();
+            var actionOptions = new string[] { "1. Assign Role to User", "2. Exit" };
+            var selectedAction = KeyboardNavigation.GetMenuChoice("Select action", actionOptions);
 
             var jsonSerializerOptions = new JsonSerializerOptions
             {
@@ -81,70 +82,42 @@ public class Program
 
             string Json(object obj) => JsonSerializer.Serialize(obj, jsonSerializerOptions);
 
-            switch (userInput)
+            switch (selectedAction)
             {
-                case "1":
-                    Console.WriteLine("Enter email:");
-                    var email = Console.ReadLine();
-                    var password = "";
-
-                    if (email != null)
-                    {
-                        Console.WriteLine("Password:");
-                        password = Console.ReadLine();
-
-                        if (password != null)
-                        {
-                            var user4 = new { email, password };
-                            Console.WriteLine("Create user (Y/N)?");
-
-                            var roles4 = await permissionService.GetRoles();
-                            Console.WriteLine(Json(roles4));
-                        }
-                    }
-                    break;
-
-                case "2":
+                case 0:
                     var userss = await userService.GetUsers();
                     var roles = await permissionService.GetRoles();
 
-                    Console.WriteLine("USERS");
-                    Console.WriteLine(Json(userss));
+                    var selectedUserIndex = KeyboardNavigation.GetMenuChoice("Select user", userss.Select(u => u.Email).ToArray());
+                    var selectedUser = userss[selectedUserIndex];
 
-                    Console.WriteLine("Enter user id:");
-                    var userId5 = Console.ReadLine();
-                    var user5 = await userService.GetUserById(userId5);
+                    var selectedRoleIndex = KeyboardNavigation.GetMenuChoice("Select role", roles.Select(r => r.Name).ToArray());
+                    var selectedRole = roles[selectedRoleIndex];
 
-                    Console.WriteLine("ROLES");
-                    Console.WriteLine(Json(roles));
-
-                    Console.WriteLine("Enter role id:");
-                    var roleId5 = Console.ReadLine();
-
-                    var role5 = await permissionService.GetRoleById(int.Parse(roleId5));
-
-                    if (userId5 == null || roleId5 == null)
+                    if (selectedUser == null || selectedRole == null)
                     {
                         Console.WriteLine("Invalid input. Please choose a valid action.");
                         break;
                     }
 
-                    Console.WriteLine("Assign " + Json(role5) + " to " + Json(user5) + "? (Y/N)");
+                    var confirmOptions = new string[] { "Yes", "No" };
+                    var selectedConfirmOption = KeyboardNavigation.GetMenuChoice($"Assign {selectedRole.Name} to {selectedUser.Email}?", confirmOptions);
+                    var confirmed = confirmOptions[selectedConfirmOption] == "Yes";
 
-                    var confirmation = Console.ReadLine();
-
-                    if (confirmation == "Y" || confirmation == "y")
+                    if (confirmed)
                     {
-                        await permissionService.AssignRole(userId5, int.Parse(roleId5));
+                        await permissionService.AssignRoleWithoutPermissionCheck(selectedUser.Id, selectedRole.Id);
+                        Console.Clear();
                         Console.WriteLine("Role assigned.");
+                        Thread.Sleep(2000);
                         break;
                     }
+
                     break;
 
 
                 default:
-                    Console.WriteLine("Invalid input. Please choose a valid action.");
-                    break;
+                    return;
             }
         }
     }
