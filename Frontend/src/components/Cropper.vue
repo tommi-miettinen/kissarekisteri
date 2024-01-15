@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { ref, watchEffect, nextTick } from "vue";
+import { ref, watch, nextTick } from "vue";
+import { useElementVisibility } from "@vueuse/core";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 
@@ -17,6 +18,9 @@ const croppable = ref(false);
 const imageRef = ref<HTMLImageElement>();
 const imageSource = ref(props.imageSrc);
 const inputRef = ref();
+const containerRef = ref();
+
+const targetIsVisible = useElementVisibility(containerRef);
 
 const getRoundedCanvas = (sourceCanvas: HTMLCanvasElement) => {
   const canvas = document.createElement("canvas");
@@ -36,8 +40,6 @@ const getRoundedCanvas = (sourceCanvas: HTMLCanvasElement) => {
 };
 
 const cropImage = () => {
-  if (!croppable.value) return;
-
   const croppedCanvas = cropper.value?.getCroppedCanvas();
   if (!croppedCanvas) return;
 
@@ -58,9 +60,13 @@ const cropImage = () => {
   emits("onCrop", file);
 };
 
-watchEffect(() => {
+watch([() => targetIsVisible.value, () => imageSource.value], async () => {
   if (imageRef.value) {
-    console.log("watcheffect ran");
+    cropper.value?.destroy();
+    croppable.value = false;
+
+    await nextTick();
+
     cropper.value = new Cropper(imageRef.value, {
       aspectRatio: 1,
       viewMode: 1,
@@ -82,40 +88,18 @@ const handleFileChange = async (event: Event) => {
   if (!input || !input.files) return;
 
   imageSource.value = URL.createObjectURL(input.files[0]);
-
-  if (cropper.value) {
-    cropper.value.destroy();
-    croppable.value = false;
-  }
-
-  await nextTick();
-
-  if (imageRef.value) {
-    cropper.value = new Cropper(imageRef.value, {
-      aspectRatio: 1,
-      viewMode: 1,
-      minContainerHeight: 300,
-      minContainerWidth: imageRef.value.width,
-      minCanvasHeight: imageRef.value.height,
-      minCanvasWidth: imageRef.value.width,
-      minCropBoxHeight: 60,
-      minCropBoxWidth: 60,
-      ready: () => {
-        croppable.value = true;
-      },
-    });
-  }
 };
 
 const triggerFileInput = () => inputRef.value?.click();
 </script>
 
 <template>
-  <div id="test-test" class="d-flex flex-column w-100 h-100 bg-white">
-    <div :key="croppable.toString()" class="w-100" style="height: 300px">
+  <div ref="containerRef" class="d-flex flex-column w-100 h-100 bg-white">
+    <div class="w-100 position-relative" style="height: 300px">
       <img
-        style="max-height: 300px; max-width: 100%; height: 100%; width: 100%; object-fit: contain"
+        style="max-height: 300px; visibility: hidden; max-width: 100%; height: 100%; width: 100%; object-fit: contain"
         ref="imageRef"
+        :key="croppable.toString()"
         :src="imageSource"
         alt="Picture"
       />
@@ -131,6 +115,11 @@ const triggerFileInput = () => inputRef.value?.click();
 </template>
 
 <style>
+.cropper-container {
+  top: 0;
+  position: absolute;
+}
+
 .cropper-view-box,
 .cropper-face {
   border-radius: 50%;

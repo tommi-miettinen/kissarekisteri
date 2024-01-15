@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { onMounted } from "vue";
-import { userIsLoggedInUser } from "../store/userStore";
+import { fetchUser, userIsLoggedInUser } from "../store/userStore";
 import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import userAPI from "../api/userAPI";
@@ -30,11 +30,12 @@ const props = defineProps({
 
 const uploadAvatarMutation = useMutation({
   mutationFn: (image: File) => userAPI.uploadAvatar(image),
-  onSuccess: () => {
+  onSuccess: async () => {
     toast.success("Profiilikuva päivitetty");
     queryClient.invalidateQueries({ queryKey: QueryKeys.USER_BY_ID(props.user.id) });
     removeAction(ActionType.EDITING_AVATAR);
     removeAction(ActionType.EDITING_AVATAR_MOBILE);
+    await fetchUser();
   },
 });
 
@@ -86,19 +87,13 @@ onMounted(() => {
     @onCancel="removeAction(ActionType.EDITING_AVATAR_MOBILE)"
   >
     <div style="width: 90vw" class="rounded-3 overflow-hidden">
-      <Cropper
-        @onCrop="uploadAvatarMutation.mutate"
-        :imageSrc="'https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg'"
-      />
+      <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>
   </Modal>
 
   <Modal :visible="isCurrentAction(ActionType.EDITING_AVATAR) && !isMobile" @onCancel="removeAction(ActionType.EDITING_AVATAR)">
     <div style="width: 500px" class="rounded-3 overflow-hidden">
-      <Cropper
-        @onCrop="uploadAvatarMutation.mutate"
-        :imageSrc="'https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg'"
-      />
+      <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>
   </Modal>
 </template>

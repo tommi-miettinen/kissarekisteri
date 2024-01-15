@@ -112,13 +112,13 @@ const isMale = computed(() => cat.value?.sex === "Male");
             tabindex="0"
             @keyup.enter="() => navigateToCatShow(result.catShowId)"
             @click="() => navigateToCatShow(result.catShowId)"
-            class="hover-bg-1 p-3 d-flex rounded-3 p-2 flex align-items-center focus-ring cursor-pointer"
+            class="hover-bg-1 p-3 d-flex rounded-3 flex align-items-center focus-ring cursor-pointer"
           >
             <div class="d-flex align-items-center gap-2">
               <span :style="{ backgroundColor: getMedalColor(result.place) }" class="badge rounded-pill text-black"
                 >#{{ result.place }}</span
               >
-              <span class="mb-1">{{ result.catShow.name }}</span>
+              <span>{{ result.catShow.name }}</span>
             </div>
           </div>
         </div>

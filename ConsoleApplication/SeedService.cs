@@ -121,61 +121,50 @@ public class SeedService(
 
     public async Task SeedPermissions()
     {
-        dbContext.Permissions.RemoveRange(dbContext.Permissions);
-        await dbContext.SaveChangesAsync();
-
-        var permissionsToAdd = Permissions.All.Select(p => new Permission { Name = p });
-
-        dbContext.Permissions.AddRange(permissionsToAdd);
+        await dbContext.Permissions.ExecuteDeleteAsync();
+        dbContext.Permissions.AddRange(Permissions.All.Select(p => new Permission { Name = p }));
         await dbContext.SaveChangesAsync();
     }
 
     public async Task SeedRoles()
     {
-        dbContext.Roles.RemoveRange(dbContext.Roles);
-        await dbContext.SaveChangesAsync();
-
-        var rolesToAdd = Roles.All.Select(r => new Role { Name = r });
-
-        dbContext.Roles.AddRange(rolesToAdd);
+        await dbContext.Roles.ExecuteDeleteAsync();
+        dbContext.Roles.AddRange(Roles.All.Select(r => new Role { Name = r }));
         await dbContext.SaveChangesAsync();
     }
 
     public async Task SeedRolePermissions()
     {
-        dbContext.RolePermissions.RemoveRange(dbContext.RolePermissions);
-        await dbContext.SaveChangesAsync();
+        await dbContext.RolePermissions.ExecuteDeleteAsync();
+        var permissionsToAdd = new List<RolePermission>();
 
         foreach (var rolePermissionPair in RolePermissions.RolesWithPermissions)
         {
-            var roleName = rolePermissionPair.Key;
-            var roleEntity = dbContext.Roles.FirstOrDefault(r => r.Name == roleName);
+            var roleEntity = dbContext.Roles.FirstOrDefault(r => r.Name == rolePermissionPair.Key);
 
-            if (roleEntity != null)
+            if (roleEntity == null) continue;
+
+            foreach (var permissionName in rolePermissionPair.Value)
             {
-                var permissionsToAdd = new List<RolePermission>();
-                foreach (var permissionName in rolePermissionPair.Value)
-                {
-                    var permissionEntity = dbContext.Permissions.FirstOrDefault(
-                        perm => perm.Name == permissionName
-                    );
-                    if (permissionEntity != null)
-                    {
-                        permissionsToAdd.Add(
-                            new RolePermission
-                            {
-                                RoleId = roleEntity.Id,
-                                RoleName = roleEntity.Name,
-                                PermissionName = permissionEntity.Name,
-                                PermissionId = permissionEntity.Id
-                            }
-                        );
-                    }
-                }
+                var permissionEntity = dbContext.Permissions.FirstOrDefault(
+                    perm => perm.Name == permissionName
+                );
 
-                dbContext.RolePermissions.AddRange(permissionsToAdd);
+                if (permissionEntity == null) continue;
+
+                permissionsToAdd.Add(
+                    new RolePermission
+                    {
+                        RoleId = roleEntity.Id,
+                        RoleName = roleEntity.Name,
+                        PermissionName = permissionEntity.Name,
+                        PermissionId = permissionEntity.Id
+                    }
+                );
             }
         }
+
+        dbContext.RolePermissions.AddRange(permissionsToAdd);
         await dbContext.SaveChangesAsync();
     }
 
@@ -274,13 +263,40 @@ public class SeedService(
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<Cat>> SeedCats(bool deleteExisting = false, int amount = 10)
+    public async Task SeedCatPhotos()
+    {
+        var cats = await dbContext.Cats.ToListAsync();
+        var catPhotos = new List<CatPhoto>();
+        var randomGenerator = new Random();
+
+        foreach (var cat in cats)
+        {
+            var count = randomGenerator.Next(1, 10);
+
+            for (int i = 0; i < count; i++)
+            {
+                var photo = new CatPhoto
+                {
+                    CatId = cat.Id,
+                    Url = CatImageUrls.ImageUrls[randomGenerator.Next(CatImageUrls.ImageUrls.Count)]
+                };
+
+                catPhotos.Add(photo);
+            }
+        }
+
+        dbContext.CatPhotos.AddRange(catPhotos);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task SeedCats(bool deleteExisting = false, int amount = 10)
     {
         if (deleteExisting)
         {
-            var allCats = await dbContext.Cats.ToListAsync();
-            dbContext.Cats.RemoveRange(allCats);
-            await dbContext.SaveChangesAsync();
+            await dbContext.CatRelations.ExecuteDeleteAsync();
+            await dbContext.CatTransfers.ExecuteDeleteAsync();
+            await dbContext.Cats.ExecuteDeleteAsync();
+            await dbContext.CatPhotos.ExecuteDeleteAsync();
         }
 
         var users = await userService.GetUsers();
@@ -306,27 +322,7 @@ public class SeedService(
 
         var catData = catFaker.Generate(amount);
 
-        var existingCats = await catService.GetCatsAsync();
-
-        var catsToCreate = catData
-            .Where(
-                newCat =>
-                    !existingCats.Data.Any(
-                        existingCat =>
-                            existingCat.Name.Equals(newCat.Name, StringComparison.OrdinalIgnoreCase)
-                            && existingCat.Breed.Equals(
-                                newCat.Breed,
-                                StringComparison.OrdinalIgnoreCase
-                            )
-                    )
-            )
-            .ToList();
-
-        var createdCats = new List<Cat>();
-
-        dbContext.Cats.AddRange(catsToCreate);
+        dbContext.Cats.AddRange(catData);
         await dbContext.SaveChangesAsync();
-
-        return createdCats;
     }
 }

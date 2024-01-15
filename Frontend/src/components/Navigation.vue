@@ -76,7 +76,7 @@ const requestsRef = ref<HTMLDivElement>();
 
 <template>
   <nav class="border-bottom w-100 p-2 bg-white">
-    <ul class="nav align-items-center px-2 gap-1" style="color: black">
+    <ul class="nav align-items-center px-1 gap-1" style="color: black">
       <div ref="dropdownTriggerRef">
         <Avatar
           v-if="user"

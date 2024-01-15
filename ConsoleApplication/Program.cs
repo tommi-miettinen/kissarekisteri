@@ -2,7 +2,6 @@
 using Azure.Storage.Blobs;
 using ConsoleApplication;
 using Kissarekisteri.Database;
-using Kissarekisteri.SeedData;
 using Kissarekisteri.Services;
 using KissarekisteriConsole.ConsoleApplication.Services;
 using Microsoft.EntityFrameworkCore;
@@ -70,12 +69,11 @@ public class Program
             var actionOptions = new string[]
             {
                 "1. Assign Role to User",
-                "2. Seed Cat Relationships",
-                "3. Update Cat Photos",
-                "4. Update Cat Show Photos",
+                "2. Seed Cats",
+                "3. Seed Cat Shows",
                 "5. Exit",
             };
-            var selectedAction = KeyboardNavigation.GetMenuChoice("Select action", actionOptions);
+            var selectedAction = KeyboardNavigation.GetMenuChoice("Select action", actionOptions) + 1;
 
             var jsonSerializerOptions = new JsonSerializerOptions
             {
@@ -87,7 +85,7 @@ public class Program
 
             switch (selectedAction)
             {
-                case 0:
+                case 1:
                     var userss = await userService.GetUsers();
                     var roles = await permissionService.GetRoles();
 
@@ -127,33 +125,22 @@ public class Program
                         Thread.Sleep(2000);
                         break;
                     }
-
-                    break;
-
-                case 1:
-                    await seedService.SeedCatRelations();
-                    Console.Clear();
-                    Console.WriteLine("Relationships added.");
-                    Thread.Sleep(2000);
                     break;
 
                 case 2:
-                    var cats = await dbContext.Cats.ToListAsync();
-
-                    foreach (var cat in cats)
-                    {
-                        cat.ImageUrl = CatImageUrls.ImageUrls[
-                            new Random().Next(0, CatImageUrls.ImageUrls.Count)
-                        ];
-                    }
-
-                    await dbContext.SaveChangesAsync();
-
+                    await seedService.SeedCats(true, 50);
+                    await seedService.SeedCatRelations();
+                    await seedService.SeedCatPhotos();
+                    Console.Clear();
+                    Console.WriteLine("Cats seeded.");
+                    Thread.Sleep(2000);
                     break;
 
                 case 3:
                     await seedService.SeedCatShows(true, 50);
-
+                    Console.Clear();
+                    Console.WriteLine("Cat shows seeded.");
+                    Thread.Sleep(2000);
                     break;
 
                 default:

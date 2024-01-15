@@ -6,6 +6,7 @@ import { fetchPermissions, fetchUser } from "./store/userStore";
 import BottomNavigation from "./components/BottomNavigation.vue";
 import { useWindowSize, useActiveElement } from "@vueuse/core";
 import { focusFirstVisibleElement } from "./utils/focusFirstVisibleElement";
+import { useSwipe } from "@vueuse/core";
 
 const mainRef = ref<HTMLElement>();
 
@@ -15,6 +16,13 @@ onMounted(async () => {
 });
 
 const activeElement = useActiveElement();
+const { direction } = useSwipe(mainRef);
+
+console.log(direction.value);
+
+watch(direction, (dir) => {
+  console.log(dir);
+});
 
 watch(activeElement, (el) => {
   console.log("focus changed to", el);

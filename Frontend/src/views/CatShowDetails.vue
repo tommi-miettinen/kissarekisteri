@@ -174,8 +174,8 @@ const removeSingleCat = (catId: number) => {
   <div v-if="isLoading" class="spinner-border text-black m-auto" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
-  <div v-if="catShow" class="p-2 w-100 h-100 d-flex flex-column align-items-center p-xl-5 col-12 col-xxl-8 d-flex flex-column gap-sm-5">
-    <div class="col-12 col-xxl-8 flex-grow-1 d-flex flex-column gap-2 p-2 pb-5 gap-sm-5">
+  <div v-if="catShow" class="w-100 d-flex flex-column align-items-center p-2 p-xl-5 col-12 col-xxl-8 d-flex flex-column">
+    <div class="col-12 col-xxl-8 flex-grow-1 d-flex flex-column gap-2 gap-sm-5">
       <div class="d-flex flex-column flex-md-row gap-sm-4 gap-2 hero-container">
         <div class="border rounded-4 hero-image" style="position: relative; overflow: hidden">
           <img style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover" :src="catShow.imageUrl" />
