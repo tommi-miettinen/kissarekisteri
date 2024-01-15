@@ -109,10 +109,7 @@ const handleFileChange = async (event: Event) => {
 
 const lightboxPhotos = computed(() => {
   if (catShow.value?.photos) {
-    return [
-      "https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg",
-      ...catShow.value.photos.map((photo) => photo.url),
-    ];
+    return catShow.value.photos.map((photo) => photo.url);
   }
   return [];
 });
@@ -177,17 +174,11 @@ const removeSingleCat = (catId: number) => {
   <div v-if="isLoading" class="spinner-border text-black m-auto" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
-  <div
-    v-if="catShow"
-    class="p-2 w-100 h-100 d-flex flex-column align-items-center p-xl-5 col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5"
-  >
-    <div class="col-12 col-xxl-8 flex-grow-1 p-sm-5 d-flex flex-column gap-2 p-2 gap-sm-5">
+  <div v-if="catShow" class="p-2 w-100 h-100 d-flex flex-column align-items-center p-xl-5 col-12 col-xxl-8 d-flex flex-column gap-sm-5">
+    <div class="col-12 col-xxl-8 flex-grow-1 d-flex flex-column gap-2 p-2 pb-5 gap-sm-5">
       <div class="d-flex flex-column flex-md-row gap-sm-4 gap-2 hero-container">
         <div class="border rounded-4 hero-image" style="position: relative; overflow: hidden">
-          <img
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
-            src="https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg"
-          />
+          <img style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover" :src="catShow.imageUrl" />
         </div>
         <div class="d-flex flex-column gap-2 w-100">
           <div>

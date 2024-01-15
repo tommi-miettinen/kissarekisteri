@@ -7,6 +7,7 @@ interface CatShowEvent {
   endDate: string;
   cats: { cat: Cat }[];
   photos?: { id: string; url: string }[];
+  imageUrl: string;
 }
 
 interface Attendee {
@@ -14,12 +15,6 @@ interface Attendee {
   userId: string;
   user: User;
   catAttendees: { cat: Cat }[];
-}
-
-enum PermissionTypes {
-  CatShowWrite = "CatShow.Write",
-  RoleAdminWrite = "Role.Admin.Write",
-  RoleEventOrganizerWrite = "Role.EventOrganizer.Write",
 }
 
 interface Permission {

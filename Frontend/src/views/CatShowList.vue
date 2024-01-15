@@ -14,6 +14,7 @@ import CatShowForm from "../components/CatShowForm.vue";
 import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
 import Spinner from "../components/Spinner.vue";
+import { PermissionTypes } from "../store/userStore";
 
 moment.locale("fi");
 
@@ -66,11 +67,7 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
             class="d-flex gap-4 rounded-3 p-2 align-items-center pointer hover-bg-1 cursor-pointer focus-ring"
           >
             <div class="d-flex">
-              <img
-                style="width: 80px; height: 80px; object-fit: cover"
-                class="rounded-2"
-                src="https://kissarekisteritf.blob.core.windows.net/images/a2174d16-0f1e-452f-b1a8-2c2d58600d05.jpg"
-              />
+              <img style="width: 80px; height: 80px; object-fit: cover" class="rounded-2 border" :src="catShow.imageUrl" />
             </div>
             <div class="d-flex flex-column gap-1">
               <div>{{ catShow.name }}</div>
@@ -84,7 +81,7 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
       </template>
       <template #action>
         <button
-          v-if="userHasPermission('CreateEvent')"
+          v-if="userHasPermission(PermissionTypes.CatShowWrite)"
           @click="addingEvent = true"
           type="button"
           class="btn bg-black text-white rounded-3 px-5 ms-auto w-sm-100"

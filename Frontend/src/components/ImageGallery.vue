@@ -85,7 +85,7 @@ watch(thumbnailRefs, () => {
         <img
           :src="photo"
           alt="Cat image"
-          class="image thumbnail"
+          class="image thumbnail scale-up-animation"
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
         />
         <div v-if="showThumbnailActionButton && !isMobile" class="d-flex position-absolute w-100 bottom-0">

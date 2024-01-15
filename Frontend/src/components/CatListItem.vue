@@ -30,8 +30,12 @@ const isMale = computed(() => props.cat.sex === "Male");
       class="hover-bg-1 rounded-3 p-2 p-sm-2 focus-ring gap-3 d-flex justify-content-between align-items-center w-100 cursor-pointer h-100"
     >
       <div class="d-flex gap-2 rounded-3 align-items-center pointer hover-bg w-100">
-        <div style="position: relative" class="d-flex border-primary">
-          <img style="width: 80px; height: 80px; object-fit: cover" class="rounded-2" :src="cat.imageUrl || altUrl" />
+        <div style="position: relative" class="d-flex">
+          <img
+            style="width: 80px; height: 80px; object-fit: cover"
+            class="ratio-1x1 scale-up-animation rounded-2 border"
+            :src="cat.imageUrl || altUrl"
+          />
           <div class="position-absolute top-0 start-0 translate-middle">
             <slot name="medal"></slot>
           </div>

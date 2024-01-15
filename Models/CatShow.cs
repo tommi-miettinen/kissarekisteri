@@ -18,6 +18,8 @@ namespace Kissarekisteri.Models
         [Required]
         public DateTime EndDate { get; set; }
 
+        public string ImageUrl { get; set; }
+
         public List<CatShowCats> Cats { get; set; }
         public List<CatShowPhoto> Photos { get; set; }
 

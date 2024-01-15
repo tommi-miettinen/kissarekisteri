@@ -48,6 +48,14 @@ body {
   visibility: hidden;
 }
 
+.scale-up-animation:hover {
+  transform: scale(1.1);
+}
+
+.scale-up-animation {
+  transition: 0.3s ease-in-out;
+}
+
 .focus-ring:focus {
   --focus-ring-width: 0.25rem;
   --focus-ring-opacity: 0.25;

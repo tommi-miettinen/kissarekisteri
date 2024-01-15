@@ -65,7 +65,7 @@ onMounted(() => {
           :displayText="user.givenName[0] + user.surname[0]"
         />
       </div>
-      <h3 class="m-0">{{ `${user.givenName}  ${user.surname}` }}</h3>
+      <h3 class="mb-1">{{ `${user.givenName}  ${user.surname}` }}</h3>
     </div>
     <div v-if="user.userRole && user.userRole.role.name !== 'User'">
       {{ t(`Roles.${user.userRole.roleName}`) }}
