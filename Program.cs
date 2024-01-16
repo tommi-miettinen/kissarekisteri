@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -31,9 +32,28 @@ var tenantId = config["AzureAdB2C:TenantId"];
 var dbConnectionString = builder.Environment.IsDevelopment()
           ? config.GetConnectionString("developmentSQL")
           : config.GetConnectionString("AzureSQL");
-
 var devFrontendUrl = "https://localhost:5173";
 
+
+var configMap = new Dictionary<string, string>
+{
+    [nameof(instance)] = instance,
+    [nameof(domain)] = domain,
+    [nameof(policyName)] = policyName,
+    [nameof(appId)] = appId,
+    [nameof(clientSecret)] = clientSecret,
+    [nameof(tenantId)] = tenantId,
+    [nameof(devFrontendUrl)] = devFrontendUrl
+};
+
+
+foreach (var value in configMap)
+{
+    if (string.IsNullOrEmpty(value.Value))
+    {
+        throw new Exception($"Missing value for {value.Key}");
+    }
+}
 
 builder.Services.AddCors(options =>
 {
@@ -49,7 +69,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton(serviceProvider =>
 {
     var clientSecretCredential = new ClientSecretCredential(domain, appId, clientSecret);
-    var scopes = new[] { "https://graph.microsoft.com/.default" };
+    List<string> scopes = ["https://graph.microsoft.com/.default"];
     return new GraphServiceClient(clientSecretCredential, scopes);
 });
 
@@ -110,6 +130,7 @@ app.UseExceptionHandler(appBuilder =>
         }
     });
 });
+
 
 app.UseSwagger();
 app.UseSwaggerUI();

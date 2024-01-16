@@ -7,7 +7,7 @@ namespace Kissarekisteri.Models
     {
         public int Id { get; set; }
         [Required]
-        public int CatId { get; set; }
+        public required int CatId { get; set; }
         public Cat Cat { get; set; }
         [Required]
         public string RequesterId { get; set; }

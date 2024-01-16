@@ -17,17 +17,17 @@ public class PermissionService(KissarekisteriDbContext dbContext)
             .Select(ur => ur.RoleId)
             .ToListAsync();
 
-        return await dbContext.RolePermissions
+        var rolePermissions = await dbContext.RolePermissions
             .Where(rp => userRoleIds.Contains(rp.RoleId))
             .Select(rp => rp.Permission)
-            .Distinct()
             .ToListAsync();
+
+        return rolePermissions;
     }
 
     public async Task<bool> HasPermission(string userId, string permissionName)
     {
         var permissions = await GetPermissions(userId);
-
         return permissions.Any(permission => permission.Name == permissionName);
     }
 

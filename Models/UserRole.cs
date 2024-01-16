@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kissarekisteri.Models
 {
+    [Index(nameof(UserId), IsUnique = true)]
     public class UserRole
     {
         public int Id { get; set; }
@@ -10,7 +12,7 @@ namespace Kissarekisteri.Models
         [Required]
         public required int RoleId { get; set; }
         [Required]
-        public string RoleName { get; set; }
+        public required string RoleName { get; set; }
         public Role Role { get; set; }
     }
 }

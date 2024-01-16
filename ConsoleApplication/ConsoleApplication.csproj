@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
+    <PackageReference Include="Microsoft.OpenApi" Version="1.6.11" />
   </ItemGroup>
 
   <ItemGroup>
