@@ -36,13 +36,13 @@ jobs:
           Move-Item -Path Frontend/dist/* -Destination ${{env.DOTNET_ROOT}}/myapp/wwwroot -Force
 
       - name: Clean project
-        run: dotnet clean 1-5-B2C.sln
+        run: dotnet clean Kissarekisteri.csproj
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release 1-5-B2C.sln
+        run: dotnet build --configuration Release Kissarekisteri.csproj
 
       - name: dotnet publish
-        run: dotnet publish 1-5-B2C.sln -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish Kissarekisteri.csproj -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3

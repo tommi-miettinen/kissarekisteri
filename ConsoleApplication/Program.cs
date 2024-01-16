@@ -17,7 +17,7 @@ public class Program
 {
     public static async Task Main()
     {
-        string[] envOptions = { "Development", "Production" };
+        string[] envOptions = ["Development", "Production"];
 
         int selectedOption = KeyboardNavigation.GetMenuChoice("Choose Environment", envOptions);
         var env = envOptions[selectedOption];
