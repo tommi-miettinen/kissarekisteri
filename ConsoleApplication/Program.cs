@@ -68,10 +68,12 @@ public class Program
         {
             var actionOptions = new string[]
             {
-                "1. Assign Role to User",
-                "2. Seed Cats",
-                "3. Seed Cat Shows",
-                "5. Exit",
+                "1. Create Roles",
+                "2. Assign Role to User",
+                "3. Seed Cats",
+                "4. Seed Cat Shows",
+                "5. Create Database",
+                "6. Exit",
             };
             var selectedAction = KeyboardNavigation.GetMenuChoice("Select action", actionOptions) + 1;
 
@@ -83,9 +85,19 @@ public class Program
 
             string Json(object obj) => JsonSerializer.Serialize(obj, jsonSerializerOptions);
 
+            bool confirmed;
+            string[] confirmOptions;
+            int selectedOptionIndex;
+
             switch (selectedAction)
             {
                 case 1:
+                    await seedService.SeedRoles();
+                    await seedService.SeedPermissions();
+                    await seedService.SeedRolePermissions();
+                    break;
+
+                case 2:
                     var userss = await userService.GetUsers();
                     var roles = await permissionService.GetRoles();
 
@@ -107,12 +119,13 @@ public class Program
                         break;
                     }
 
-                    var confirmOptions = new string[] { "Yes", "No" };
-                    var selectedConfirmOption = KeyboardNavigation.GetMenuChoice(
+                    confirmOptions = ["Yes", "No"];
+                    selectedOptionIndex = KeyboardNavigation.GetMenuChoice(
                         $"Assign {selectedRole.Name} to {selectedUser.Email}?",
                         confirmOptions
                     );
-                    var confirmed = confirmOptions[selectedConfirmOption] == "Yes";
+
+                    confirmed = confirmOptions[selectedOptionIndex] == "Yes";
 
                     if (confirmed)
                     {
@@ -127,7 +140,7 @@ public class Program
                     }
                     break;
 
-                case 2:
+                case 3:
                     await seedService.SeedCats(true, 50);
                     await seedService.SeedCatRelations();
                     await seedService.SeedCatPhotos();
@@ -136,10 +149,33 @@ public class Program
                     Thread.Sleep(2000);
                     break;
 
-                case 3:
+                case 4:
                     await seedService.SeedCatShows(true, 50);
                     Console.Clear();
                     Console.WriteLine("Cat shows seeded.");
+                    Thread.Sleep(2000);
+                    break;
+
+                case 5:
+                    if (env == "Production")
+                    {
+                        Console.WriteLine($"Are you sure you want to create the database in {env}?");
+                        confirmOptions = ["Yes", "No"];
+                        selectedOptionIndex = KeyboardNavigation.GetMenuChoice(
+                                                       $"Create database in {env}?",
+                                                       confirmOptions
+                                                                                                         );
+                        confirmed = confirmOptions[selectedOptionIndex] == "Yes";
+
+                        if (!confirmed)
+                        {
+                            break;
+                        }
+                    }
+
+                    await dbContext.Database.EnsureCreatedAsync();
+                    Console.Clear();
+                    Console.WriteLine("Database created.");
                     Thread.Sleep(2000);
                     break;
 

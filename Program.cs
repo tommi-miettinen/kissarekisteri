@@ -23,17 +23,19 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
+
 var instance = config["AzureAdB2C:Instance"];
 var domain = config["AzureAdB2C:Domain"];
 var policyName = config["AzureAdB2C:SignUpSignInPolicyId"];
 var appId = config["AzureAdB2C:ClientId"];
-var clientSecret = config["AzureAdB2C:ClientSecret"];
 var tenantId = config["AzureAdB2C:TenantId"];
-var dbConnectionString = builder.Environment.IsDevelopment()
-          ? config.GetConnectionString("developmentSQL")
-          : config.GetConnectionString("AzureSQL");
-var devFrontendUrl = "https://localhost:5173";
+var clientSecret = config["AzureAdB2C:ClientSecret"];
 
+var productionSql = config.GetConnectionString("AzureSQL");
+var developmentSql = config.GetConnectionString("developmentSQL");
+var dbConnectionString = builder.Environment.IsDevelopment() ? developmentSql : productionSql;
+
+var devFrontendUrl = "https://localhost:5173";
 
 var configMap = new Dictionary<string, string>
 {
@@ -43,9 +45,9 @@ var configMap = new Dictionary<string, string>
     [nameof(appId)] = appId,
     [nameof(clientSecret)] = clientSecret,
     [nameof(tenantId)] = tenantId,
-    [nameof(devFrontendUrl)] = devFrontendUrl
+    [nameof(devFrontendUrl)] = devFrontendUrl,
+    [nameof(dbConnectionString)] = dbConnectionString
 };
-
 
 foreach (var value in configMap)
 {
@@ -56,30 +58,22 @@ foreach (var value in configMap)
 }
 
 builder.Services.AddCors(options =>
-{
     options.AddDefaultPolicy(builder =>
     {
         builder
             .WithOrigins(devFrontendUrl)
             .AllowAnyHeader()
             .AllowAnyMethod();
-    });
-});
+    }));
 
-builder.Services.AddSingleton(serviceProvider =>
-{
-    var clientSecretCredential = new ClientSecretCredential(domain, appId, clientSecret);
-    List<string> scopes = ["https://graph.microsoft.com/.default"];
-    return new GraphServiceClient(clientSecretCredential, scopes);
-});
-
+var credential = new ClientSecretCredential(domain, appId, clientSecret);
+builder.Services.AddSingleton(new GraphServiceClient(credential, ["https://graph.microsoft.com/.default"]));
 builder.Services.AddSingleton(new BlobServiceClient(config.GetConnectionString("Storage")));
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UploadService>();
 builder.Services.AddScoped<CatService>();
 builder.Services.AddScoped<CatShowService>();
 builder.Services.AddScoped<PermissionService>();
-
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -95,14 +89,11 @@ builder.Services
         };
     });
 
-
-builder.Services.AddDbContext<KissarekisteriDbContext>(options => options.UseSqlServer(dbConnectionString));
+builder.Services.AddDbContext<KissarekisteriDbContext>(options => options.UseSqlServer(config.GetConnectionString("AzureSQL")));
 
 builder.Services
     .AddControllers(options => options.Filters.Add(new ModelValidationFilter()))
-    .AddJsonOptions(
-        options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
-    );
+    .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(options =>
@@ -115,7 +106,6 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 app.UseExceptionHandler(appBuilder =>
-{
     appBuilder.Run(async context =>
     {
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
@@ -128,9 +118,7 @@ app.UseExceptionHandler(appBuilder =>
 
             await context.Response.WriteAsync("Internal Server Error");
         }
-    });
-});
-
+    }));
 
 app.UseSwagger();
 app.UseSwaggerUI();
