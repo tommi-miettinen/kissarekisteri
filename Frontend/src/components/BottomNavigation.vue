@@ -1,20 +1,21 @@
 <script lang="ts" setup>
 import { computed } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import { user } from "../store/userStore";
 import UserIcon from "../icons/UserIcon.vue";
 import UsersIcon from "../icons/UsersIcon.vue";
 import AwardIcon from "../icons/AwardIcon.vue";
 import CatIcon from "../icons/CatIcon.vue";
 import NotificationIcon from "../icons/NotificationIcon.vue";
-import { pushAction, ActionTypes } from "../store/actionStore";
+import { isCurrentAction, removeAction, pushAction, ActionTypes } from "../store/actionStore";
+import { navigateTo } from "../store/routeStore";
+import { isMobile } from "../store/actionStore";
+import Drawer from "./Drawer.vue";
+import Notifications from "./Notifications.vue";
 
-const router = useRouter();
 const route = useRoute();
 
 const isCurrentUser = computed(() => user.value?.id === route.params.userId);
-
-const navigateTo = (route: string) => router.push(route);
 </script>
 
 <template>
@@ -54,7 +55,7 @@ const navigateTo = (route: string) => router.push(route);
       :class="{ 'opacity-100': isCurrentUser }"
       class="focus-ring position-relative col-2 d-flex flex-column justify-content-center align-items-center rounded-3 p-2"
       @click="pushAction(ActionTypes.NOTIFICATIONS_MOBILE)"
-      @keyup.enter="navigateTo(`/users/${user?.id}`)"
+      @keyup.enter="pushAction(ActionTypes.NOTIFICATIONS_MOBILE)"
     >
       <div class="position-relative d-flex flex-column align-items-center h-100">
         <NotificationIcon strokeWidth="1.5" />
@@ -76,4 +77,11 @@ const navigateTo = (route: string) => router.push(route);
       <span class="d-inline-block text-truncate" style="max-width: 100%"> {{ user?.givenName || "" + user?.surname }}</span>
     </div>
   </div>
+  <Drawer
+    :fullsize="true"
+    :visible="isCurrentAction(ActionTypes.NOTIFICATIONS_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionTypes.NOTIFICATIONS_MOBILE)"
+  >
+    <Notifications :navigateTo="navigateTo" />
+  </Drawer>
 </template>

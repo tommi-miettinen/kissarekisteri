@@ -18,6 +18,7 @@ import { QueryKeys } from "../api/queryKeys";
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 import { isMobile } from "../store/actionStore";
 import UserInfoCard from "../components/UserInfoCard.vue";
+import { setCurrentRouteLabel } from "../store/routeStore";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -66,10 +67,15 @@ const deleteMutation = useMutation({
   onError: () => toast.error("Jokin meni vikaan."),
 });
 
-watch([route, user], () => {
-  refetchCats();
-  refetchUser();
-});
+watch(
+  [route, user],
+  () => {
+    user.value && setCurrentRouteLabel(user.value.givenName);
+    refetchCats();
+    refetchUser();
+  },
+  { immediate: true }
+);
 
 const editCat = async (updatedCat: EditCatPayload) => {
   await catAPI.editCat(updatedCat);

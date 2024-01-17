@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import Navigation from "./components/Navigation.vue";
 import { Toaster } from "vue-sonner";
-import { onMounted, computed, ref } from "vue";
+import { onMounted, computed, ref, watch } from "vue";
 import { fetchPermissions, fetchUser } from "./store/userStore";
 import BottomNavigation from "./components/BottomNavigation.vue";
 import { useWindowSize } from "@vueuse/core";
 import { focusFirstVisibleElement } from "./utils/focusFirstVisibleElement";
+import { actionStack } from "./store/actionStore";
+import Appbar from "./components/Appbar.vue";
 
 const mainRef = ref<HTMLElement>();
 
@@ -17,6 +19,10 @@ onMounted(async () => {
 const focusMainContent = () => focusFirstVisibleElement(mainRef.value!);
 
 const isMobile = computed(() => useWindowSize().width.value < 768);
+
+watch(actionStack.value, () => {
+  console.log(actionStack.value);
+});
 </script>
 
 <template>
@@ -24,7 +30,8 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
     Skip to Main Content
   </button>
   <div style="height: 100dvh" class="d-flex flex-column align-items-center flex-grow-1">
-    <Navigation />
+    <Navigation v-if="!isMobile" />
+    <Appbar v-if="isMobile" />
     <Toaster closeButton :expand="true" :position="isMobile ? 'top-center' : 'bottom-right'" />
     <main ref="mainRef" tabIndex="-1" class="d-flex flex-column overflow-auto w-100 h-100 overflow-auto">
       <RouterView />

@@ -25,6 +25,7 @@ const { data: confirmationRequestsData } = useQuery({
   queryKey: QueryKeys.CONFIRMATION_REQUESTS,
   queryFn: () => catAPI.getConfirmationRequests(),
   refetchInterval: 5000,
+  enabled: Boolean(user.value?.id),
 });
 
 const confirmationRequests = computed(() => confirmationRequestsData.value?.data);
@@ -45,7 +46,7 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
 onMounted(async () => await msalInstance.handleRedirectPromise());
 
 const handleAvatarClick = async () => {
-  if (isMobile.value) pushAction(ActionTypes.BOTTOM_SHEET);
+  if (isMobile.value && !isCurrentAction(ActionTypes.BOTTOM_SHEET)) pushAction(ActionTypes.BOTTOM_SHEET);
   dropdownTriggerRef.value?.click();
 };
 
@@ -64,8 +65,8 @@ const requestsRef = ref<HTMLDivElement>();
 </script>
 
 <template>
-  <nav class="border-bottom w-100 p-2 bg-white">
-    <ul class="nav align-items-center px-1 gap-1" style="color: black">
+  <nav class="border-bottom w-100 p-2">
+    <ul class="nav align-items-center px-1 gap-1">
       <div ref="dropdownTriggerRef">
         <Avatar
           v-if="user"
@@ -136,12 +137,12 @@ const requestsRef = ref<HTMLDivElement>();
         </template>
       </Dropdown>
       <a
+        v-if="!isMobile"
         @keyup.enter="handleLocaleClick"
         @click="handleLocaleClick"
         tabindex="0"
-        style="cursor: pointer"
         :class="{ 'ms-auto': isMobile }"
-        class="hover-bg-1 focus-ring p-2 rounded-3 text-black"
+        class="cursor-pointer hover-bg-1 focus-ring p-2 rounded-3 text-black"
         >{{ localeString }}</a
       >
     </ul>

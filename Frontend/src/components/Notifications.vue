@@ -53,7 +53,7 @@ const confirmationRequestsToDisplay = computed(() => {
   <div class="d-flex flex-column">
     <div>
       <div class="p-3 text-break overflow-auto d-flex flex-column">
-        <div class="d-flex gap-1 justify-content-center">
+        <div class="d-flex gap-1">
           <button
             tabindex="0"
             @click="tab = 'personal'"

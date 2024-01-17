@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
 import Modal from "../components/Modal.vue";
 import { useI18n } from "vue-i18n";
 import catShowAPI from "../api/catShowAPI";
@@ -15,10 +14,11 @@ import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
 import Spinner from "../components/Spinner.vue";
 import { PermissionTypes } from "../store/userStore";
+import { navigateTo, setCurrentRouteLabel } from "../store/routeStore";
+import { onMounted } from "vue";
 
 moment.locale("fi");
 
-const router = useRouter();
 const { t } = useI18n();
 
 const addingEvent = ref(false);
@@ -44,13 +44,13 @@ const formatDate = (start: string, end: string) => {
   return `${startDate} - ${endDate}, ${startTime} - ${endTime}`;
 };
 
-const isMobile = computed(() => useWindowSize().width.value < 768);
+onMounted(() => setCurrentRouteLabel("Näyttelyt"));
 
-const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`);
+const isMobile = computed(() => useWindowSize().width.value < 768);
 </script>
 <template>
   <Spinner v-if="catShowsQuery.isLoading.value" />
-  <div v-if="!catShowsQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto">
+  <div v-if="!catShowsQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto">
     <h3 class="m-0">{{ t("CatShowList.catShows") }}</h3>
     <List
       :searchQueryPlaceholder="t('CatShowList.searchInput')"
@@ -62,8 +62,8 @@ const navigateToEvent = (eventId: number) => router.push(`/catshows/${eventId}`)
         <div class="py-1 border-bottom">
           <div
             tabindex="0"
-            @keyup.enter="() => navigateToEvent(catShow.id!)"
-            @click="() => navigateToEvent(catShow.id!)"
+            @keyup.enter="navigateTo(`catshows/${catShow.id}`)"
+            @click="navigateTo(`catshows/${catShow.id}`)"
             class="d-flex gap-4 rounded-3 p-2 align-items-center pointer hover-bg-1 cursor-pointer focus-ring"
           >
             <div class="d-flex">

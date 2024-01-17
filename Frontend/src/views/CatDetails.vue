@@ -12,6 +12,7 @@ import ImageGallery from "../components/ImageGallery.vue";
 import { user } from "../store/userStore";
 import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
+import { setCurrentRouteLabel } from "../store/routeStore";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -62,6 +63,8 @@ const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainec
 const userIsCatOwner = computed(() => user.value && cat.value && user.value.id === cat.value.ownerId);
 
 watch(route, () => refetch());
+watch(cat, () => cat.value && setCurrentRouteLabel(cat.value.name), { immediate: true });
+
 const isMale = computed(() => cat.value?.sex === "Male");
 </script>
 
@@ -75,8 +78,8 @@ const isMale = computed(() => cat.value?.sex === "Male");
     v-if="cat"
     class="p-2 w-100 h-100 d-flex flex-column align-items-center col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5"
   >
-    <div class="p-1 flex-grow-1 pb-5 col-12 col-lg-8 gap-2 gap-sm-5 d-flex flex-column">
-      <div class="d-flex flex-column flex-sm-row gap-4" style="min-height: 300px">
+    <div class="p-1 flex-grow-1 pb-5 col-12 col-lg-8 gap-4 gap-sm-5 d-flex flex-column">
+      <div class="d-flex flex-column flex-sm-row gap-2" style="min-height: 300px">
         <div class="border rounded-4 hero-image" style="position: relative; min-height: 300px; overflow: hidden; width: 100%">
           <img
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
@@ -84,20 +87,20 @@ const isMale = computed(() => cat.value?.sex === "Male");
             alt="Cat image"
           />
         </div>
-        <div class="d-flex flex-column p-2" style="width: 100%">
-          <h3>{{ cat.name }}</h3>
-          <p>
+        <div class="d-flex flex-column p-2 gap-2" style="width: 100%">
+          <h3 class="m-0">{{ cat.name }}</h3>
+          <p class="m-0">
             {{ cat.breed }}
           </p>
           <div
             :style="{ backgroundColor: isMale ? '#93c5fd' : '#fda4af' }"
             style="width: 100px"
-            class="text-black badge rounded-pill bg-opacity-75"
+            class="m-0 text-black badge rounded-pill bg-opacity-75"
           >
             {{ t(`CatDetails.${cat.sex.toLowerCase()}`) }}
           </div>
-          <p>
-            syntynyt <span>{{ moment(cat.birthDate).format("LLL") }}</span>
+          <p class="m-0 fw-semibold">
+            <span>Syntynyt {{ moment(cat.birthDate).format("LLL") }}</span>
           </p>
           <button
             v-if="!userIsCatOwner"
@@ -110,7 +113,7 @@ const isMale = computed(() => cat.value?.sex === "Male");
       </div>
 
       <div v-if="cat.results && cat.results.length > 0">
-        <h5>{{ t("CatDetails.placings") }}</h5>
+        <h5 class="m-2">{{ t("CatDetails.placings") }}</h5>
         <div v-for="result in cat.results" class="border-bottom py-1">
           <div
             tabindex="0"
@@ -129,21 +132,21 @@ const isMale = computed(() => cat.value?.sex === "Male");
       </div>
 
       <div v-if="cat.parents && cat.parents.length > 0">
-        <h5>{{ t("CatDetails.parents") }}</h5>
+        <h5 class="m-2">{{ t("CatDetails.parents") }}</h5>
         <CatListItem v-for="parent in cat.parents" :cat="parent.parentCat" />
       </div>
 
       <div v-if="cat.kittens && cat.kittens.length > 0">
-        <h5>{{ t("CatDetails.kittens") }}</h5>
+        <h5 class="m-2">{{ t("CatDetails.kittens") }}</h5>
         <CatListItem v-for="kitten in cat.kittens" :cat="kitten.childCat" />
       </div>
 
       <div v-if="cat.owner">
-        <h5>{{ t("CatDetails.owner") }}</h5>
+        <h5 class="m-2">{{ t("CatDetails.owner") }}</h5>
         <UserListItem :user="cat.owner" />
       </div>
       <div v-if="cat.breeder">
-        <h5>{{ t("CatDetails.breeder") }}</h5>
+        <h5 class="m-2">{{ t("CatDetails.breeder") }}</h5>
         <UserListItem :user="cat.breeder" />
       </div>
       <div class="d-flex flex-column gap-2">

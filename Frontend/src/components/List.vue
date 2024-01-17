@@ -97,7 +97,7 @@ watch([() => props.itemsPerPage, () => currentPage.value], () => {
             class="btn border focus-ring focus-ring-dark hover-bg rounded-3"
             v-for="page in pages"
             :key="page"
-            :class="{ 'bg-black': currentPage === page, 'text-white': currentPage === page }"
+            :class="{ 'bg-black': currentPage === page, 'text-white': currentPage === page, 'border-black': currentPage === page }"
           >
             {{ page }}
           </li>

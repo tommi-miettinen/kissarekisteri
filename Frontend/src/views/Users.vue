@@ -16,6 +16,8 @@ import { useMutation } from "@tanstack/vue-query";
 import { QueryKeys } from "../api/queryKeys";
 import Spinner from "../components/Spinner.vue";
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
+import { onMounted } from "vue";
+import { setCurrentRouteLabel } from "../store/routeStore";
 
 const { t } = useI18n();
 
@@ -62,12 +64,14 @@ const startSelectingUserAction = (user: User) => {
 };
 
 const userListItemRefs = reactive<Record<string, HTMLElement>>({});
+
+onMounted(() => setCurrentRouteLabel("Käyttäjät"));
 </script>
 
 <template>
   <h3 v-if="false" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
   <Spinner v-if="userQuery.isLoading.value" />
-  <div v-if="!userQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-2 p-sm-5 rounded col-12 col-lg-8 mx-auto">
+  <div v-if="!userQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto">
     <h3 class="m-0">{{ t("Users.members") }}</h3>
     <List :searchQueryPlaceholder="t('Users.searchInput')" v-if="users" :items="users" :itemsPerPage="20">
       <template v-slot="{ item: user }">
