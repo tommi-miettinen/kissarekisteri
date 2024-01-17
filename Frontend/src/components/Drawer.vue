@@ -25,7 +25,7 @@ const sideOffCanvas = ref<Offcanvas>();
 const sideOffcanvasRef = ref<HTMLDivElement>();
 
 const drawerStyle = reactive({
-  top: "0%",
+  top: "10%",
   transition: "all 0.3s ease-in-out",
 });
 
@@ -42,7 +42,7 @@ watch(
   () => props.visible,
   (newValue) => {
     if (newValue) {
-      drawerStyle.top = "0%";
+      drawerStyle.top = "10%";
       sideOffCanvas.value?.show();
     } else {
       sideOffCanvas.value?.hide();
@@ -50,15 +50,30 @@ watch(
   }
 );
 
+const disablePullToRefresh = () => {
+  document.body.style.overscrollBehavior = "none";
+  document.documentElement.style.overscrollBehavior = "none";
+};
+
+const enablePullToRefresh = () => {
+  document.body.style.overscrollBehavior = "auto";
+  document.documentElement.style.overscrollBehavior = "auto";
+};
+
 const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
   onSwipe() {
-    if (direction.value !== "down") return;
+    disablePullToRefresh();
+
     const swipeLength = Math.abs(lengthY.value);
-    drawerStyle.transition = "none";
-    drawerStyle.top = `${swipeLength}px`;
+    drawerStyle.transition = "none"; // Disable transition for smooth dragging
+
+    if (direction.value === "down") {
+      drawerStyle.top = `${swipeLength}px`;
+    }
   },
   onSwipeEnd() {
-    if (direction.value !== "down") return;
+    enablePullToRefresh();
+
     const swipeLength = Math.abs(lengthY.value);
     drawerStyle.transition = "all 0.3s ease-in-out";
 
@@ -70,16 +85,17 @@ const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
       return;
     }
 
-    drawerStyle.top = "0%";
+    drawerStyle.top = "10%";
   },
+  threshold: 0,
 });
 </script>
 
 <template>
   <div
     style="height: auto; max-width: 100vw"
-    :class="['offcanvas', `offcanvas-${props.placement}`, { 'h-100': props.fullsize, 'w-100': props.fullsize }]"
-    class="sheet"
+    :class="['offcanvas', `offcanvas-${props.placement}`, { 'h-90': props.fullsize, 'w-100': props.fullsize }]"
+    class="sheet rounded-4"
     ref="sideOffcanvasRef"
     tabindex="-1"
     :style="drawerStyle"
@@ -93,3 +109,9 @@ const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
     </div>
   </div>
 </template>
+
+<style>
+.h-90 {
+  height: 90%;
+}
+</style>

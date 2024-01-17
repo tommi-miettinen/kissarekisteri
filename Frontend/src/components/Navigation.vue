@@ -7,7 +7,7 @@ import { useI18n } from "vue-i18n";
 import { login, logout } from "../auth";
 import { useWindowSize } from "@vueuse/core";
 import Drawer from "./Drawer.vue";
-import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { ActionTypes, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { useQuery } from "@tanstack/vue-query";
 import catAPI from "../api/catAPI";
 import Dropdown from "./Dropdown.vue";
@@ -16,12 +16,6 @@ import NotificationIcon from "../icons/NotificationIcon.vue";
 import moment from "moment";
 import Notifications from "./Notifications.vue";
 import { QueryKeys } from "../api/queryKeys";
-
-enum ActionType {
-  BOTTOM_SHEET = "BOTTOM_SHEET",
-  SIDE_SHEET = "SIDE_SHEET",
-  NOTIFICATIONS_MOBILE = "NOTIFICATIONS_MOBILE",
-}
 
 const route = useRoute();
 const router = useRouter();
@@ -51,23 +45,18 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
 onMounted(async () => await msalInstance.handleRedirectPromise());
 
 const handleAvatarClick = async () => {
-  if (isMobile.value) pushAction(ActionType.BOTTOM_SHEET);
+  if (isMobile.value) pushAction(ActionTypes.BOTTOM_SHEET);
   dropdownTriggerRef.value?.click();
 };
 
-const navigateToProfile = () => {
-  removeAction(ActionType.BOTTOM_SHEET);
-  removeAction(ActionType.NOTIFICATIONS_MOBILE);
-  nextTick(() => router.push(`/users/${user.value?.id}`));
-};
 const navigateTo = (route: string) => {
-  removeAction(ActionType.NOTIFICATIONS_MOBILE);
-  removeAction(ActionType.BOTTOM_SHEET);
+  removeAction(ActionTypes.NOTIFICATIONS_MOBILE);
+  removeAction(ActionTypes.BOTTOM_SHEET);
   nextTick(() => router.push(route));
 };
 
 const handleNotificationClick = () => {
-  if (isMobile.value) pushAction(ActionType.NOTIFICATIONS_MOBILE);
+  if (isMobile.value) pushAction(ActionTypes.NOTIFICATIONS_MOBILE);
 };
 
 const dropdownTriggerRef = ref<HTMLDivElement>();
@@ -124,11 +113,12 @@ const requestsRef = ref<HTMLDivElement>();
       </li>
 
       <div
+        v-if="!isMobile"
         @click="handleNotificationClick"
         @keyup.enter="handleNotificationClick"
         ref="requestsRef"
         tabindex="0"
-        class="hover-bg-1 focus-ring cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative"
+        class="hover-bg-1 gap-2 focus-ring cursor-pointer nav-item rounded-3 rounded-3 p-2 ms-auto relative"
       >
         <NotificationIcon />
         <span
@@ -150,6 +140,7 @@ const requestsRef = ref<HTMLDivElement>();
         @click="handleLocaleClick"
         tabindex="0"
         style="cursor: pointer"
+        :class="{ 'ms-auto': isMobile }"
         class="hover-bg-1 focus-ring p-2 rounded-3 text-black"
         >{{ localeString }}</a
       >
@@ -157,15 +148,14 @@ const requestsRef = ref<HTMLDivElement>();
   </nav>
   <Drawer
     :fullsize="true"
-    :visible="isCurrentAction(ActionType.NOTIFICATIONS_MOBILE) && isMobile"
-    @onCancel="removeAction(ActionType.NOTIFICATIONS_MOBILE)"
+    :visible="isCurrentAction(ActionTypes.NOTIFICATIONS_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionTypes.NOTIFICATIONS_MOBILE)"
   >
     <Notifications :navigateTo="navigateTo" />
   </Drawer>
-  <Drawer :visible="isCurrentAction(ActionType.BOTTOM_SHEET) && isMobile" @onCancel="removeAction(ActionType.BOTTOM_SHEET)">
+  <Drawer :visible="isCurrentAction(ActionTypes.BOTTOM_SHEET) && isMobile" @onCancel="removeAction(ActionTypes.BOTTOM_SHEET)">
     <div class="p-2">
-      <div tabindex="0" @click="navigateToProfile" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.profile") }}</div>
-      <div tabindex="0" @click="logoutFromApp" class="hover-bg rounded-3 p-2 focus-ring">{{ t("Navigation.logout") }}</div>
+      <div tabindex="0" @click="logoutFromApp" class="hover-bg btn-border rounded-3 p-2 focus-ring">{{ t("Navigation.logout") }}</div>
     </div>
   </Drawer>
 </template>

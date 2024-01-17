@@ -12,21 +12,13 @@ import CatListItem from "../components/CatListItem.vue";
 import getMedalColor from "../utils/getMedalColor";
 import ImageGallery from "../components/ImageGallery.vue";
 import Dropdown from "../components/Dropdown.vue";
-import { isCurrentAction, removeAction, pushAction } from "../store/actionStore";
+import { ActionTypes, isCurrentAction, removeAction, pushAction } from "../store/actionStore";
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 import Drawer from "../components/Drawer.vue";
 import { isMobile } from "../store/actionStore";
 import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
 import { PermissionTypes } from "../store/userStore";
-
-enum ActionType {
-  JOINING_EVENT = "JOINING_EVENT",
-  JOINING_EVENT_MOBILE = "JOINING_EVENT_MOBILE",
-  LEAVING_EVENT = "LEAVING_EVENT",
-  SELECTING_CAT_ACTION = "SELECTING_CAT_ACTION",
-  SELECTING_CAT_ACTION_MOBILE = "SELECTING_CAT_ACTION_MOBILE",
-}
 
 const route = useRoute();
 const { t } = useI18n();
@@ -56,8 +48,8 @@ const joinEventMutation = useMutation({
   onSuccess: () => {
     toast.info("Osallistuminen rekisteröity");
     refetch();
-    removeAction(ActionType.JOINING_EVENT);
-    removeAction(ActionType.JOINING_EVENT_MOBILE);
+    removeAction(ActionTypes.JOINING_EVENT);
+    removeAction(ActionTypes.JOINING_EVENT_MOBILE);
   },
 });
 
@@ -82,7 +74,7 @@ const leaveEventMutation = useMutation({
   onSuccess: () => {
     toast.info("Osallistuminen peruttu");
     refetch();
-    removeAction(ActionType.LEAVING_EVENT);
+    removeAction(ActionTypes.LEAVING_EVENT);
   },
 });
 
@@ -151,7 +143,7 @@ const toggleCheckbox = (catId: number) => {
 
 const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
 
-const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionType.JOINING_EVENT_MOBILE) : pushAction(ActionType.JOINING_EVENT));
+const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionTypes.JOINING_EVENT_MOBILE) : pushAction(ActionTypes.JOINING_EVENT));
 
 const formatDate = (start: string, end: string) => {
   const startDate = moment(start).format("ll");
@@ -285,7 +277,7 @@ const removeSingleCat = (catId: number) => {
         <ImageGallery v-if="catShow" :photos="lightboxPhotos" />
       </div>
     </div>
-    <Modal :visible="isCurrentAction(ActionType.JOINING_EVENT) && !isMobile" @onCancel="removeAction(ActionType.JOINING_EVENT)">
+    <Modal :visible="isCurrentAction(ActionTypes.JOINING_EVENT) && !isMobile" @onCancel="removeAction(ActionTypes.JOINING_EVENT)">
       <div style="width: 90vw; max-width: 500px" class="d-flex flex-column bg-white p-4 gap-4 rounded">
         <div v-if="userCats && userCats.length > 0">
           <h5>Osallistuvat kissat:</h5>
@@ -312,8 +304,8 @@ const removeSingleCat = (catId: number) => {
       </div>
     </Modal>
     <Drawer
-      :visible="isCurrentAction(ActionType.JOINING_EVENT_MOBILE) && isMobile"
-      @onCancel="removeAction(ActionType.JOINING_EVENT_MOBILE)"
+      :visible="isCurrentAction(ActionTypes.JOINING_EVENT_MOBILE) && isMobile"
+      @onCancel="removeAction(ActionTypes.JOINING_EVENT_MOBILE)"
     >
       <div class="d-flex flex-column bg-white p-4 gap-4 rounded">
         <div v-if="userCats && userCats.length > 0">
@@ -321,8 +313,7 @@ const removeSingleCat = (catId: number) => {
           <div v-for="(cat, index) in userCats" :key="index">
             <label>
               <input
-                checked
-                class="bg-black"
+                class="form-check-input focus-ring focus-ring-dark"
                 @keyup.enter="toggleCheckbox(cat.id)"
                 type="checkbox"
                 v-model="selectedCatIds"
@@ -334,10 +325,7 @@ const removeSingleCat = (catId: number) => {
         </div>
         <div v-else>No cats available.</div>
         <div class="d-flex">
-          <button @click="joinEventMutation.mutate" type="button" class="btn btn-primary w-100">Osallistu</button>
-          <button data-testid="confirm-cat-delete" @click="leaveEvent" type="button" class="btn bg-black text-white">
-            Peru osallistuminen
-          </button>
+          <button @click="joinEventMutation.mutate" type="button" class="btn bg-black text-white w-100 rounded-3">Osallistu</button>
         </div>
       </div>
     </Drawer>
@@ -358,7 +346,7 @@ const removeSingleCat = (catId: number) => {
 
 @media (max-width: 768px) {
   .hero-container {
-    height: 400px;
+    height: 500px;
   }
   .hero-image {
     width: 100%;

@@ -13,7 +13,7 @@ import CatForm from "../components/CatForm.vue";
 import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
 import Dropdown from "../components/Dropdown.vue";
-import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { ActionTypes, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { QueryKeys } from "../api/queryKeys";
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 import { isMobile } from "../store/actionStore";
@@ -21,16 +21,6 @@ import UserInfoCard from "../components/UserInfoCard.vue";
 
 const { t } = useI18n();
 const route = useRoute();
-
-enum ActionType {
-  EDITING_CAT = "EDITING_CAT",
-  EDITING_CAT_MOBILE = "EDITING_CAT_MOBILE",
-  DELETING_CAT = "DELETING_CAT",
-  ADDING_CAT = "ADDING_CAT",
-  ADDING_CAT_MOBILE = "ADDING_CAT_MOBILE",
-  SELECTING_CAT_ACTION = "SELECTING_CAT_ACTION",
-  SELECTING_CAT_ACTION_MOBILE = "SELECTING_CAT_ACTION_MOBILE",
-}
 
 const catToBeDeleted = ref<Cat>();
 const catToBeEdited = ref<Cat>();
@@ -60,8 +50,8 @@ const addCatMutation = useMutation({
   onSuccess: () => {
     toast.success("Kissan tiedot lisätty");
     refetchCats();
-    removeAction(ActionType.ADDING_CAT);
-    removeAction(ActionType.ADDING_CAT_MOBILE);
+    removeAction(ActionTypes.ADDING_CAT);
+    removeAction(ActionTypes.ADDING_CAT_MOBILE);
   },
   onError: () => toast.error("Jokin meni vikaan."),
 });
@@ -71,7 +61,7 @@ const deleteMutation = useMutation({
   onSuccess: () => {
     toast.success("Kissan tiedot poistettu");
     refetchCats();
-    removeAction(ActionType.DELETING_CAT);
+    removeAction(ActionTypes.DELETING_CAT);
   },
   onError: () => toast.error("Jokin meni vikaan."),
 });
@@ -89,21 +79,21 @@ const catListItemRefs = ref<Record<number, HTMLElement>>({});
 
 const startDeletingCat = (cat: Cat) => {
   catToBeDeleted.value = cat;
-  pushAction(ActionType.DELETING_CAT);
+  pushAction(ActionTypes.DELETING_CAT);
 };
 
 const startSelectingCatAction = (cat: Cat) => {
   catForActionToBeSelected.value = cat;
-  pushAction(isMobile.value ? ActionType.SELECTING_CAT_ACTION_MOBILE : ActionType.SELECTING_CAT_ACTION);
+  pushAction(isMobile.value ? ActionTypes.SELECTING_CAT_ACTION_MOBILE : ActionTypes.SELECTING_CAT_ACTION);
 };
 
 const startEditingCat = (cat: Cat) => {
   catToBeEdited.value = cat;
-  pushAction(isMobile.value ? ActionType.EDITING_CAT_MOBILE : ActionType.EDITING_CAT);
+  pushAction(isMobile.value ? ActionTypes.EDITING_CAT_MOBILE : ActionTypes.EDITING_CAT);
 };
 
 const startAddingCat = () => {
-  pushAction(isMobile.value ? ActionType.ADDING_CAT_MOBILE : ActionType.ADDING_CAT);
+  pushAction(isMobile.value ? ActionTypes.ADDING_CAT_MOBILE : ActionTypes.ADDING_CAT);
 };
 </script>
 
@@ -133,7 +123,7 @@ const startAddingCat = () => {
                   <ThreeDotsIcon />
                 </button>
                 <Dropdown
-                  @onCancel="removeAction(ActionType.SELECTING_CAT_ACTION)"
+                  @onCancel="removeAction(ActionTypes.SELECTING_CAT_ACTION)"
                   :visible="!isMobile"
                   :placement="'left-start'"
                   :triggerRef="catListItemRefs[cat.id]"
@@ -177,8 +167,8 @@ const startAddingCat = () => {
   </div>
 
   <Drawer
-    :visible="isMobile && isCurrentAction(ActionType.SELECTING_CAT_ACTION_MOBILE)"
-    @onCancel="removeAction(ActionType.SELECTING_CAT_ACTION_MOBILE)"
+    :visible="isMobile && isCurrentAction(ActionTypes.SELECTING_CAT_ACTION_MOBILE)"
+    @onCancel="removeAction(ActionTypes.SELECTING_CAT_ACTION_MOBILE)"
   >
     <div class="gap-2 p-2 d-flex flex-column list-unstyled">
       <li
@@ -202,33 +192,33 @@ const startAddingCat = () => {
   </Drawer>
   <Drawer
     :fullsize="true"
-    :visible="isCurrentAction(ActionType.ADDING_CAT_MOBILE) && isMobile"
-    @onCancel="removeAction(ActionType.ADDING_CAT_MOBILE)"
+    :visible="isCurrentAction(ActionTypes.ADDING_CAT_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionTypes.ADDING_CAT_MOBILE)"
   >
     <CatForm @onSave="addCatMutation.mutate" />
   </Drawer>
-  <Modal :visible="isCurrentAction(ActionType.ADDING_CAT) && !isMobile" @onCancel="removeAction(ActionType.ADDING_CAT)">
+  <Modal :visible="isCurrentAction(ActionTypes.ADDING_CAT) && !isMobile" @onCancel="removeAction(ActionTypes.ADDING_CAT)">
     <div style="width: 550px">
       <CatForm @onSave="addCatMutation.mutate" />
     </div>
   </Modal>
-  <Modal :visible="isCurrentAction(ActionType.EDITING_CAT) && !isMobile" @onCancel="removeAction(ActionType.EDITING_CAT)">
+  <Modal :visible="isCurrentAction(ActionTypes.EDITING_CAT) && !isMobile" @onCancel="removeAction(ActionTypes.EDITING_CAT)">
     <div style="width: 550px">
       <CatForm :cat="catToBeEdited" @onSave="editCat" />
     </div>
   </Modal>
   <Drawer
     :fullsize="true"
-    :visible="isCurrentAction(ActionType.EDITING_CAT_MOBILE) && isMobile"
-    @onCancel="removeAction(ActionType.EDITING_CAT_MOBILE)"
+    :visible="isCurrentAction(ActionTypes.EDITING_CAT_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionTypes.EDITING_CAT_MOBILE)"
   >
     <CatForm :cat="catToBeEdited" @onSave="editCat" />
   </Drawer>
-  <Modal @onCancel="removeAction(ActionType.DELETING_CAT)" :visible="isCurrentAction(ActionType.DELETING_CAT)">
+  <Modal @onCancel="removeAction(ActionTypes.DELETING_CAT)" :visible="isCurrentAction(ActionTypes.DELETING_CAT)">
     <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
       <p>Poistetaanko kissan tiedot?</p>
       <div class="d-flex gap-2 justify-content-end">
-        <button type="button" class="btn btn-secondary" @click="removeAction(ActionType.DELETING_CAT)">Peruuta</button>
+        <button type="button" class="btn btn-secondary" @click="removeAction(ActionTypes.DELETING_CAT)">Peruuta</button>
         <button data-testid="confirm-cat-delete" @click="deleteMutation.mutate" type="button" class="btn btn-danger">Poista</button>
       </div>
     </div>

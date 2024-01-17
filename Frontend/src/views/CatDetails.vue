@@ -70,7 +70,11 @@ const isMale = computed(() => cat.value?.sex === "Male");
   <div v-if="isLoading" class="spinner-border text-black m-auto" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
-  <div v-if="cat" class="p-2 w-100 h-100 d-flex flex-column align-items-center col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5">
+  <div
+    :key="cat.id"
+    v-if="cat"
+    class="p-2 w-100 h-100 d-flex flex-column align-items-center col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5"
+  >
     <div class="p-1 flex-grow-1 pb-5 col-12 col-lg-8 gap-2 gap-sm-5 d-flex flex-column">
       <div class="d-flex flex-column flex-sm-row gap-4" style="min-height: 300px">
         <div class="border rounded-4 hero-image" style="position: relative; min-height: 300px; overflow: hidden; width: 100%">
@@ -152,6 +156,7 @@ const isMale = computed(() => cat.value?.sex === "Male");
           {{ t("CatDetails.uploadImage") }} +
         </button>
         <ImageGallery
+          :key="cat.id"
           :thumbnailActionButtonText="t('CatDetails.setAsProfilePicture')"
           showThumbnailActionButton
           :photos="catPhotos"

@@ -141,9 +141,13 @@ public class Program
                     break;
 
                 case 3:
+                    await seedService.SeedCatBreeds();
+
+                    /*
                     await seedService.SeedCats(true, 50);
                     await seedService.SeedCatRelations();
                     await seedService.SeedCatPhotos();
+                   */
                     Console.Clear();
                     Console.WriteLine("Cats seeded.");
                     Thread.Sleep(2000);

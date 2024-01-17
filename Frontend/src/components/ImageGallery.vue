@@ -1,16 +1,10 @@
 <script lang="ts" setup>
-import { ref, nextTick, reactive, watch } from "vue";
-import { isCurrentAction, pushAction, removeAction } from "../store/actionStore";
-import { useMutationObserver } from "@vueuse/core";
-//@ts-ignore does not have types
-import FsLightbox from "fslightbox-vue/v3";
+import { ref, reactive, nextTick } from "vue";
+import { ActionTypes, isCurrentAction, pushAction, removeAction } from "../store/actionStore";
+import { useEventListener } from "@vueuse/core";
 import { onLongPress } from "@vueuse/core";
 import Drawer from "./Drawer.vue";
 import { isMobile } from "../store/actionStore";
-
-enum ActionType {
-  FULLSCREEN_IMAGE = "FULLSCREEN_IMAGE",
-}
 
 defineProps({
   thumbnailActionButtonText: {
@@ -28,43 +22,58 @@ defineProps({
   },
 });
 
-const toggler = ref(false);
-
-useMutationObserver(
-  document.documentElement,
-  () => {
-    const isOpen = document.documentElement.classList.contains("fslightbox-open");
-    if (!isOpen) removeAction(ActionType.FULLSCREEN_IMAGE);
-  },
-  {
-    attributes: true,
-    attributeFilter: ["class"],
-  }
-);
-
-const selectedImageIndex = ref(0);
 const drawerOpen = ref(false);
+const currentImage = ref<HTMLElement>();
+const currentIndex = ref(0);
 
-const handleImageClick = (index: number) => {
-  pushAction(ActionType.FULLSCREEN_IMAGE);
-  selectedImageIndex.value = index;
+const handleImageClick = async (index: number) => {
+  pushAction(ActionTypes.FULLSCREEN_IMAGE);
+  currentImage.value = images[index];
+  currentIndex.value = index;
 
-  //toggler needs to be toggled after the lightbox has attached to the DOM
-  nextTick(() => (toggler.value = !toggler.value));
+  await nextTick();
+
+  if (scrollContainer.value && images[index]) {
+    const imageOffset = images[index].offsetLeft;
+    scrollContainer.value.scrollLeft = imageOffset;
+  }
 };
 
 const thumbnailRefs = reactive<Record<number, HTMLElement>>({});
 
-watch(thumbnailRefs, () => {
-  Object.values(thumbnailRefs).forEach((thumbnailRef, index) => {
-    onLongPress(thumbnailRef, () => {
-      if (!isMobile.value) return;
-      selectedImageIndex.value = index;
-      drawerOpen.value = true;
-      thumbnailRef.focus();
-    });
+Object.values(thumbnailRefs).forEach((thumbnailRef, index) => {
+  onLongPress(thumbnailRef, () => {
+    if (!isMobile.value) return;
+    currentImage.value = images[index];
+    drawerOpen.value = true;
+    thumbnailRef.focus();
   });
 });
+
+const scrollContainer = ref<HTMLElement>();
+const images = reactive<Record<number, HTMLElement>>({});
+
+const getClosestImage = () => {
+  const viewportMidpoint = window.innerWidth / 2;
+  let closestImage = null;
+  let smallestDistance = Infinity;
+
+  Object.values(images).forEach((image, index) => {
+    if (!scrollContainer.value) return;
+
+    const imageMidpoint = image.offsetLeft - scrollContainer.value.scrollLeft + image.offsetWidth / 2;
+    const distance = Math.abs(viewportMidpoint - imageMidpoint);
+
+    if (distance < smallestDistance) {
+      smallestDistance = distance;
+      closestImage = image;
+      currentImage.value = closestImage;
+      currentIndex.value = index;
+    }
+  });
+};
+
+useEventListener(scrollContainer, "scroll", getClosestImage);
 </script>
 
 <template>
@@ -100,18 +109,69 @@ watch(thumbnailRefs, () => {
       </div>
     </div>
   </div>
-  <FsLightbox
-    v-if="isCurrentAction(ActionType.FULLSCREEN_IMAGE)"
-    :key="photos.length"
-    :toggler="toggler"
-    :sources="photos"
-    :slide="selectedImageIndex + 1"
-  />
   <Drawer :visible="drawerOpen" @onCancel="drawerOpen = false">
     <div style="height: 150px">
-      <div @click="$emit('onThumbnailActionClick', photos[selectedImageIndex]), (drawerOpen = false)" class="rounded-3 w-100 p-3">
+      <div @click="$emit('onThumbnailActionClick', currentImage), (drawerOpen = false)" class="rounded-3 w-100 p-3">
         Aseta profiilikuvaksi
       </div>
     </div>
   </Drawer>
+  <div
+    ref="scrollContainer"
+    @click="removeAction(ActionTypes.FULLSCREEN_IMAGE)"
+    v-if="isCurrentAction(ActionTypes.FULLSCREEN_IMAGE)"
+    class="d-flex overflow-x-auto overflow-y-hidden scroller lightbox-container"
+  >
+    <div
+      :key="index"
+      @click="removeAction(ActionTypes.FULLSCREEN_IMAGE)"
+      class="d-flex align-items-center justify-content-center"
+      style="min-width: 100vw; width: 100vw; height: 100vh; scroll-snap-align: center; scroll-snap-stop: always"
+      v-for="(_, index) in photos"
+    >
+      <div style="z-index: 1001; left: 12px; top: 12px" class="fixed-top text-white">{{ currentIndex + 1 }} / {{ photos.length }}</div>
+
+      <img
+        :ref="el => images[index] = el as HTMLImageElement"
+        @click.stop
+        :src="photos[index]"
+        alt="Cat image"
+        class="lightbox-image"
+        style="object-fit: contain; height: min-content; scroll-snap-align: center"
+      />
+    </div>
+  </div>
 </template>
+
+<style>
+.lightbox-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  min-height: 100vh;
+  min-width: 100vw;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .lightbox-container {
+    background-color: black;
+  }
+}
+
+.lightbox-image {
+  max-width: 100vw;
+}
+
+.scroller {
+  scroll-snap-type: x mandatory;
+  scroll-snap-stop: always;
+}
+</style>

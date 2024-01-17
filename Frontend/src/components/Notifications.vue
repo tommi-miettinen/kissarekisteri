@@ -53,7 +53,7 @@ const confirmationRequestsToDisplay = computed(() => {
   <div class="d-flex flex-column">
     <div>
       <div class="p-3 text-break overflow-auto d-flex flex-column">
-        <div class="d-flex gap-1">
+        <div class="d-flex gap-1 justify-content-center">
           <button
             tabindex="0"
             @click="tab = 'personal'"
@@ -72,7 +72,7 @@ const confirmationRequestsToDisplay = computed(() => {
           </button>
         </div>
         <div v-for="request in confirmationRequestsToDisplay">
-          <div class="py-3 d-flex gap-2">
+          <div class="py-3 d-flex gap-2 d-flex flex-column">
             <span>
               <a class="cursor-pointer text-underline text-black" @click="navigateTo(`/users/${request.requester.id}`)">{{
                 request.requester?.givenName

@@ -6,6 +6,8 @@ import UserIcon from "../icons/UserIcon.vue";
 import UsersIcon from "../icons/UsersIcon.vue";
 import AwardIcon from "../icons/AwardIcon.vue";
 import CatIcon from "../icons/CatIcon.vue";
+import NotificationIcon from "../icons/NotificationIcon.vue";
+import { pushAction, ActionTypes } from "../store/actionStore";
 
 const router = useRouter();
 const route = useRoute();
@@ -16,7 +18,7 @@ const navigateTo = (route: string) => router.push(route);
 </script>
 
 <template>
-  <div style="font-size: 12px" class="d-flex py-2 justify-content-around w-100 border-top fw-semibold">
+  <div style="font-size: 12px" class="d-flex p-1 py-2 justify-content-between w-100 border-top fw-semibold">
     <div
       tabIndex="0"
       :class="{ 'opacity-100': route.path === '/cats' || route.path.startsWith('/cats/') }"
@@ -46,7 +48,22 @@ const navigateTo = (route: string) => router.push(route);
       <UsersIcon />
       Jäsenet
     </div>
-
+    <div
+      tabIndex="0"
+      v-if="user"
+      :class="{ 'opacity-100': isCurrentUser }"
+      class="focus-ring position-relative col-2 d-flex flex-column justify-content-center align-items-center rounded-3 p-2"
+      @click="pushAction(ActionTypes.NOTIFICATIONS_MOBILE)"
+      @keyup.enter="navigateTo(`/users/${user?.id}`)"
+    >
+      <div class="position-relative d-flex flex-column align-items-center h-100">
+        <NotificationIcon strokeWidth="1.5" />
+        <span :class="{ 'opacity-100': isCurrentUser }" class="d-inline-block mt-auto opacity-75">Ilmoitukset</span>
+        <div style="right: 12px" class="position-absolute">
+          <span class="badge rounded-circle bg-danger">{{ 1 }}</span>
+        </div>
+      </div>
+    </div>
     <div
       tabIndex="0"
       v-if="user"

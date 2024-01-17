@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { onMounted } from "vue";
 import { fetchUser, userIsLoggedInUser } from "../store/userStore";
-import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { ActionTypes, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { useMutation, useQueryClient } from "@tanstack/vue-query";
 import userAPI from "../api/userAPI";
 import { useI18n } from "vue-i18n";
@@ -16,11 +16,6 @@ import { Tooltip } from "bootstrap";
 const { t } = useI18n();
 const queryClient = useQueryClient();
 
-enum ActionType {
-  EDITING_AVATAR = "EDITING_AVATAR",
-  EDITING_AVATAR_MOBILE = "EDITING_AVATAR_MOBILE",
-}
-
 const props = defineProps({
   user: {
     type: Object as () => User,
@@ -33,8 +28,8 @@ const uploadAvatarMutation = useMutation({
   onSuccess: async () => {
     toast.success("Profiilikuva päivitetty");
     queryClient.invalidateQueries({ queryKey: QueryKeys.USER_BY_ID(props.user.id) });
-    removeAction(ActionType.EDITING_AVATAR);
-    removeAction(ActionType.EDITING_AVATAR_MOBILE);
+    removeAction(ActionTypes.EDITING_AVATAR);
+    removeAction(ActionTypes.EDITING_AVATAR_MOBILE);
     await fetchUser();
   },
 });
@@ -60,8 +55,8 @@ onMounted(() => {
       <div data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="Edit avatar">
         <Avatar
           :focusable="userIsLoggedInUser(user)"
-          @click="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
-          @keydown.enter="userIsLoggedInUser(user) && pushAction(isMobile ? ActionType.EDITING_AVATAR_MOBILE : ActionType.EDITING_AVATAR)"
+          @click="userIsLoggedInUser(user) && pushAction(isMobile ? ActionTypes.EDITING_AVATAR_MOBILE : ActionTypes.EDITING_AVATAR)"
+          @keydown.enter="userIsLoggedInUser(user) && pushAction(isMobile ? ActionTypes.EDITING_AVATAR_MOBILE : ActionTypes.EDITING_AVATAR)"
           :avatarUrl="user.avatarUrl"
           :displayText="user.givenName[0] + user.surname[0]"
         />
@@ -78,20 +73,20 @@ onMounted(() => {
       v-if="!user.isBreeder && userIsLoggedInUser(user)"
       class="btn bg-black text-white focus-ring px-4 rounded-3 me-auto w-sm-100"
     >
-      Rekisteröidy kasvattajaksi
+      Muokkaa tietoja
     </button>
   </div>
 
   <Modal
-    :visible="isCurrentAction(ActionType.EDITING_AVATAR_MOBILE) && isMobile"
-    @onCancel="removeAction(ActionType.EDITING_AVATAR_MOBILE)"
+    :visible="isCurrentAction(ActionTypes.EDITING_AVATAR_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionTypes.EDITING_AVATAR_MOBILE)"
   >
     <div style="width: 90vw" class="rounded-3 overflow-hidden">
       <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>
   </Modal>
 
-  <Modal :visible="isCurrentAction(ActionType.EDITING_AVATAR) && !isMobile" @onCancel="removeAction(ActionType.EDITING_AVATAR)">
+  <Modal :visible="isCurrentAction(ActionTypes.EDITING_AVATAR) && !isMobile" @onCancel="removeAction(ActionTypes.EDITING_AVATAR)">
     <div style="width: 500px" class="rounded-3 overflow-hidden">
       <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>

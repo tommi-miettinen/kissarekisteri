@@ -10,7 +10,7 @@ import Modal from "../components/Modal.vue";
 import { useWindowSize } from "@vueuse/core";
 import UserForm from "../components/UserForm.vue";
 import Dropdown from "../components/Dropdown.vue";
-import { pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { ActionTypes, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { toast } from "vue-sonner";
 import { useMutation } from "@tanstack/vue-query";
 import { QueryKeys } from "../api/queryKeys";
@@ -18,13 +18,6 @@ import Spinner from "../components/Spinner.vue";
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 
 const { t } = useI18n();
-
-enum ActionType {
-  EDITING_USER = "EDITING_USER",
-  EDITING_USER_MOBILE = "EDITING_USER_MOBILE",
-  DELETING_USER = "DELETING_USER",
-  SELECTING_USER_ACTION_MOBILE = "SELECTING_USER_ACTION_MOBILE",
-}
 
 const userQuery = useQuery({
   queryKey: QueryKeys.USERS,
@@ -39,7 +32,7 @@ const userForActionToBeSelected = ref<User>();
 
 const deleteUserMutation = useMutation({
   mutationFn: () => {
-    removeAction(ActionType.DELETING_USER);
+    removeAction(ActionTypes.DELETING_USER);
     return userAPI.deleteUserById(userToBeDeleted.value!.id);
   },
   onSuccess: () => {
@@ -55,17 +48,17 @@ const isMobile = computed(() => useWindowSize().width.value < 768);
 
 const startDeletingUser = (user: User) => {
   userToBeDeleted.value = user;
-  pushAction(ActionType.DELETING_USER);
+  pushAction(ActionTypes.DELETING_USER);
 };
 
 const startEditingUser = (user: User) => {
   userToBeEdited.value = user;
-  pushAction(isMobile.value ? ActionType.EDITING_USER_MOBILE : ActionType.EDITING_USER);
+  pushAction(isMobile.value ? ActionTypes.EDITING_USER_MOBILE : ActionTypes.EDITING_USER);
 };
 
 const startSelectingUserAction = (user: User) => {
   userForActionToBeSelected.value = user;
-  if (isMobile.value) return pushAction(ActionType.SELECTING_USER_ACTION_MOBILE);
+  if (isMobile.value) return pushAction(ActionTypes.SELECTING_USER_ACTION_MOBILE);
 };
 
 const userListItemRefs = reactive<Record<string, HTMLElement>>({});
@@ -114,8 +107,8 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
     </List>
   </div>
   <Drawer
-    :visible="isCurrentAction(ActionType.SELECTING_USER_ACTION_MOBILE) && isMobile"
-    @onCancel="removeAction(ActionType.SELECTING_USER_ACTION_MOBILE)"
+    :visible="isCurrentAction(ActionTypes.SELECTING_USER_ACTION_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionTypes.SELECTING_USER_ACTION_MOBILE)"
   >
     <div v-if="isMobile" class="p-2">
       <div
@@ -138,27 +131,27 @@ const userListItemRefs = reactive<Record<string, HTMLElement>>({});
       </div>
     </div>
   </Drawer>
-  <Modal :visible="isCurrentAction(ActionType.EDITING_USER) && !isMobile" @onCancel="removeAction(ActionType.EDITING_USER)">
+  <Modal :visible="isCurrentAction(ActionTypes.EDITING_USER) && !isMobile" @onCancel="removeAction(ActionTypes.EDITING_USER)">
     <div style="width: 550px">
-      <UserForm :formActionButtonText="'Tallenna tiedot'" :user="userToBeEdited" @onSave="removeAction(ActionType.EDITING_USER)" />
+      <UserForm :formActionButtonText="'Tallenna tiedot'" :user="userToBeEdited" @onSave="removeAction(ActionTypes.EDITING_USER)" />
     </div>
   </Modal>
   <Drawer
     :fullsize="true"
-    :visible="isCurrentAction(ActionType.EDITING_USER_MOBILE) && isMobile"
-    @onCancel="removeAction(ActionType.EDITING_USER_MOBILE)"
+    :visible="isCurrentAction(ActionTypes.EDITING_USER_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionTypes.EDITING_USER_MOBILE)"
   >
-    <UserForm :formActionButtonText="'Tallenna tiedot'" :user="userToBeEdited" @onSave="removeAction(ActionType.EDITING_USER_MOBILE)" />
+    <UserForm :formActionButtonText="'Tallenna tiedot'" :user="userToBeEdited" @onSave="removeAction(ActionTypes.EDITING_USER_MOBILE)" />
   </Drawer>
-  <Modal :visible="isCurrentAction(ActionType.DELETING_USER)" @onCancel="removeAction(ActionType.DELETING_USER)">
+  <Modal :visible="isCurrentAction(ActionTypes.DELETING_USER)" @onCancel="removeAction(ActionTypes.DELETING_USER)">
     <div v-if="userToBeDeleted" style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
       <p>Poistetaanko käyttäjä? {{ userToBeDeleted.givenName }}</p>
       <div class="d-flex gap-2 justify-content-end">
         <button
-          @keyup.enter="removeAction(ActionType.DELETING_USER)"
+          @keyup.enter="removeAction(ActionTypes.DELETING_USER)"
           type="button"
           class="btn btn-secondary"
-          @click.stop="removeAction(ActionType.DELETING_USER)"
+          @click.stop="removeAction(ActionTypes.DELETING_USER)"
         >
           Peruuta
         </button>

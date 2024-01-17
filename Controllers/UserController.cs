@@ -69,6 +69,7 @@ public class UserController(
         return Json(user);
     }
 
+    [Authorize]
     [HttpDelete("{userId}")]
     public async Task<ActionResult<Result<bool>>> DeleteUser([FromRoute] string userId)
     {
@@ -76,6 +77,7 @@ public class UserController(
         return result;
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<Result<UserResponse>>> CreateUser([FromBody] UserCreatePayloadDTO userPayload)
     {
@@ -87,6 +89,7 @@ public class UserController(
         return Json(result);
     }
 
+    [Authorize]
     [HttpPatch("{userId}")]
     public async Task<ActionResult<Result<UserResponse>>> UpdateUser([FromBody] UserUpdateRequestDTO userPayload)
     {

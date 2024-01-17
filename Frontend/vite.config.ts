@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 import topLevelAwait from "vite-plugin-top-level-await";
 import vue from "@vitejs/plugin-vue";
 import basicSsl from "@vitejs/plugin-basic-ssl";
@@ -14,5 +15,6 @@ export default defineConfig({
     }),
     vue(),
     basicSsl(),
+    VitePWA({ registerType: "autoUpdate" }),
   ],
 });

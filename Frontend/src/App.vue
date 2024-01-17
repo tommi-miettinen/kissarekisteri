@@ -1,31 +1,17 @@
 <script setup lang="ts">
 import Navigation from "./components/Navigation.vue";
 import { Toaster } from "vue-sonner";
-import { onMounted, computed, ref, watch } from "vue";
+import { onMounted, computed, ref } from "vue";
 import { fetchPermissions, fetchUser } from "./store/userStore";
 import BottomNavigation from "./components/BottomNavigation.vue";
-import { useWindowSize, useActiveElement } from "@vueuse/core";
+import { useWindowSize } from "@vueuse/core";
 import { focusFirstVisibleElement } from "./utils/focusFirstVisibleElement";
-import { useSwipe } from "@vueuse/core";
 
 const mainRef = ref<HTMLElement>();
 
 onMounted(async () => {
   await fetchUser();
   await fetchPermissions();
-});
-
-const activeElement = useActiveElement();
-const { direction } = useSwipe(mainRef);
-
-console.log(direction.value);
-
-watch(direction, (dir) => {
-  console.log(dir);
-});
-
-watch(activeElement, (el) => {
-  console.log("focus changed to", el);
 });
 
 const focusMainContent = () => focusFirstVisibleElement(mainRef.value!);
