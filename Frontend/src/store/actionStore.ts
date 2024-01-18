@@ -6,7 +6,6 @@ export enum ActionTypes {
   SIDE_SHEET = "SIDE_SHEET",
   NOTIFICATIONS_MOBILE = "NOTIFICATIONS_MOBILE",
   EDITING_USER = "EDITING_USER",
-  EDITING_USER_MOBILE = "EDITING_USER_MOBILE",
   DELETING_USER = "DELETING_USER",
   SELECTING_USER_ACTION_MOBILE = "SELECTING_USER_ACTION_MOBILE",
   FULLSCREEN_IMAGE = "FULLSCREEN_IMAGE",
@@ -22,6 +21,10 @@ export enum ActionTypes {
   DELETING_CAT = "DELETING_CAT",
   ADDING_CAT = "ADDING_CAT",
   ADDING_CAT_MOBILE = "ADDING_CAT_MOBILE",
+  SETTINGS_MOBILE = "SETTINGS_MOBILE",
+  SELECTING_LANGUAGE = "SELECTING_LANGUAGE",
+  USER_SETTINGS = "USER_SETTINGS",
+  ADDING_CAT_SHOW_MOBILE = "ADDING_CAT_SHOW_MOBILE",
 }
 
 interface ActionStore {
@@ -32,7 +35,10 @@ const actionStore = reactive<ActionStore>({
   actionStack: [],
 });
 
-export const pushAction = (action: ActionTypes) => actionStore.actionStack.push(action);
+export const pushAction = (action: ActionTypes) => {
+  if (isCurrentAction(action)) return;
+  actionStore.actionStack.push(action);
+};
 
 export const popAction = () => actionStore.actionStack.pop();
 

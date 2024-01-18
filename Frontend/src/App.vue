@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import Navigation from "./components/Navigation.vue";
 import { Toaster } from "vue-sonner";
-import { onMounted, computed, ref, watch } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import { fetchPermissions, fetchUser } from "./store/userStore";
 import BottomNavigation from "./components/BottomNavigation.vue";
-import { useWindowSize } from "@vueuse/core";
 import { focusFirstVisibleElement } from "./utils/focusFirstVisibleElement";
-import { actionStack } from "./store/actionStore";
+
 import Appbar from "./components/Appbar.vue";
+import { toast } from "vue-sonner";
+import { isMobile, actionStack } from "./store/actionStore";
 
 const mainRef = ref<HTMLElement>();
 
@@ -16,13 +17,11 @@ onMounted(async () => {
   await fetchPermissions();
 });
 
-const focusMainContent = () => focusFirstVisibleElement(mainRef.value!);
-
-const isMobile = computed(() => useWindowSize().width.value < 768);
-
-watch(actionStack.value, () => {
+watchEffect(() => {
   console.log(actionStack.value);
 });
+
+const focusMainContent = () => focusFirstVisibleElement(mainRef.value!);
 </script>
 
 <template>
@@ -32,7 +31,9 @@ watch(actionStack.value, () => {
   <div style="height: 100dvh" class="d-flex flex-column align-items-center flex-grow-1">
     <Navigation v-if="!isMobile" />
     <Appbar v-if="isMobile" />
-    <Toaster closeButton :expand="true" :position="isMobile ? 'top-center' : 'bottom-right'" />
+    <div @click="toast.dismiss()">
+      <Toaster :visibleToasts="1" :position="isMobile ? 'top-center' : 'bottom-right'" />
+    </div>
     <main ref="mainRef" tabIndex="-1" class="d-flex flex-column overflow-auto w-100 h-100 overflow-auto">
       <RouterView />
     </main>

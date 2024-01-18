@@ -19,7 +19,7 @@ const fi = {
   },
   Cats: {
     cats: "Kissat",
-    searchInput: "Etsi kissoista...",
+    searchInput: "Etsi nimellä, rodulla, sukupuolella...",
     breed: "Rotu",
     birthDate: "Syntymäaika",
   },
@@ -40,7 +40,7 @@ const fi = {
   },
   CatShowList: {
     catShows: "Näyttelyt",
-    searchInput: "Etsi näyttelyistä...",
+    searchInput: "Etsi nimellä, sijainnilla...",
     addCatShow: "Lisää näyttely",
     eventNameInput: "Tapahtuman nimi",
     eventDescriptionInput: "Tapahtuman kuvaus",

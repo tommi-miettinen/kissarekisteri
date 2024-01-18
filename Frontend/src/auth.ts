@@ -9,19 +9,8 @@ export const scopes = ["openid", "offline_access", "8f374d27-54ee-40d1-bed8-ba2f
 export let msalInstance: IPublicClientApplication;
 
 export const initializeMsalInstance = async () => {
-  let config;
-
-  if (localStorage.msalConfig) {
-    config = JSON.parse(localStorage.msalConfig);
-  } else {
-    config = await configAPI.fetchConfig();
-
-    localStorage.msalConfig = JSON.stringify(config);
-  }
-
-  if (!config) {
-    return console.log("No config found");
-  }
+  const config = await configAPI.fetchConfig();
+  if (!config) return console.log("No msalconfig found");
 
   const msalConfig: Configuration = {
     auth: {
@@ -43,6 +32,8 @@ export const initializeMsalInstance = async () => {
       await fetchPermissions();
     }
   });
+
+  msalInstance.handleRedirectPromise().catch((err) => console.log(err));
 
   return msalInstance;
 };

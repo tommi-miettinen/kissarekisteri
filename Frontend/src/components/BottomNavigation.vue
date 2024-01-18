@@ -10,8 +10,8 @@ import NotificationIcon from "../icons/NotificationIcon.vue";
 import { isCurrentAction, removeAction, pushAction, ActionTypes } from "../store/actionStore";
 import { navigateTo } from "../store/routeStore";
 import { isMobile } from "../store/actionStore";
-import Drawer from "./Drawer.vue";
 import Notifications from "./Notifications.vue";
+import Overlay from "./Overlay.vue";
 
 const route = useRoute();
 
@@ -77,13 +77,13 @@ const isCurrentUser = computed(() => user.value?.id === route.params.userId);
       <span class="d-inline-block text-truncate" style="max-width: 100%"> {{ user?.givenName || "" + user?.surname }}</span>
     </div>
   </div>
-  <Drawer
-    :fullsize="true"
+  <Overlay
     :visible="isCurrentAction(ActionTypes.NOTIFICATIONS_MOBILE) && isMobile"
     @onCancel="removeAction(ActionTypes.NOTIFICATIONS_MOBILE)"
   >
-    <div style="height: 100vh">
+    <div style="height: 100vh" class="">
+      <h3 class="m-3 mb-0">Ilmoitukset</h3>
       <Notifications :navigateTo="navigateTo" />
     </div>
-  </Drawer>
+  </Overlay>
 </template>

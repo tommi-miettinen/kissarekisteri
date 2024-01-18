@@ -10,7 +10,6 @@ import { useI18n } from "vue-i18n";
 import CatListItem from "../components/CatListItem.vue";
 import { useRoute } from "vue-router";
 import CatForm from "../components/CatForm.vue";
-import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
 import Dropdown from "../components/Dropdown.vue";
 import { ActionTypes, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
@@ -109,66 +108,60 @@ const startAddingCat = () => {
     <span class="visually-hidden">Loading...</span>
   </div>
 
-  <div v-if="!isUserLoading" style="min-height: 100%" class="d-flex flex-column px-3 py-2 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-4">
+  <div v-if="!isUserLoading" style="min-height: 100%" class="d-flex flex-column px-3 py-2 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-3">
     <UserInfoCard v-if="user" :user="user" />
     <div class="d-flex flex-column rounded h-100 flex-grow-1">
       <h3 v-if="cats && cats.length > 0">{{ t("Profile.cats") }}</h3>
-      <List :searchQueryPlaceholder="t('Cats.searchInput')" v-if="cats && cats.length > 0" :items="cats" :itemsPerPage="cats.length">
-        <template v-slot="{ item: cat }">
-          <CatListItem :key="cat.id" :cat="cat">
-            <template #actions>
-              <div
-                :ref="(el) => (catListItemRefs[cat.id] = el as HTMLDivElement)"
-                @keyup.enter.stop
-                v-if="userIsLoggedInUser(user)"
-                data-testid="cat-options"
-                @click.stop="startSelectingCatAction(cat)"
-                class="d-flex"
-              >
-                <button tabIndex="0" class="btn p-2 accordion d-flex focus-ring rounded-1 border-0">
-                  <ThreeDotsIcon />
-                </button>
-                <Dropdown
-                  @onCancel="removeAction(ActionTypes.SELECTING_CAT_ACTION)"
-                  :visible="!isMobile"
-                  :placement="'left-start'"
-                  :triggerRef="catListItemRefs[cat.id]"
-                >
-                  <li
-                    @keyup.enter.stop="startEditingCat(cat)"
-                    @click="startEditingCat(cat)"
-                    tabIndex="0"
-                    class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
-                  >
-                    Muokkaa
-                  </li>
-                  <li
-                    tabIndex="0"
-                    class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
-                    data-testid="start-cat-delete"
-                    @keyup.enter="startDeletingCat(cat)"
-                    @click="startDeletingCat(cat)"
-                  >
-                    Poista
-                  </li>
-                </Dropdown>
-              </div>
-            </template>
-          </CatListItem>
-        </template>
-        <template #action>
-          <button
+      <CatListItem v-for="cat in cats" :key="cat.id" :cat="cat">
+        <template #actions>
+          <div
+            :ref="(el) => (catListItemRefs[cat.id] = el as HTMLDivElement)"
+            @keyup.enter.stop
             v-if="userIsLoggedInUser(user)"
-            @click.stop="startAddingCat"
-            @keyup.enter.stop="startAddingCat"
-            data-testid="add-new-cat-btn"
-            type="button"
-            class="btn bg-black text-white focus-ring ms-auto py-2 px-5 rounded-3 w-sm-100"
+            data-testid="cat-options"
+            @click.stop="startSelectingCatAction(cat)"
+            class="d-flex"
           >
-            {{ t("Profile.addCat") }} +
-          </button>
+            <button tabIndex="0" class="btn p-2 accordion d-flex focus-ring rounded-1 border-0">
+              <ThreeDotsIcon />
+            </button>
+            <Dropdown
+              @onCancel="removeAction(ActionTypes.SELECTING_CAT_ACTION)"
+              :visible="!isMobile"
+              :placement="'left-start'"
+              :triggerRef="catListItemRefs[cat.id]"
+            >
+              <li
+                @keyup.enter.stop="startEditingCat(cat)"
+                @click="startEditingCat(cat)"
+                tabIndex="0"
+                class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
+              >
+                Muokkaa
+              </li>
+              <li
+                tabIndex="0"
+                class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
+                data-testid="start-cat-delete"
+                @keyup.enter="startDeletingCat(cat)"
+                @click="startDeletingCat(cat)"
+              >
+                Poista
+              </li>
+            </Dropdown>
+          </div>
         </template>
-      </List>
+      </CatListItem>
+      <button
+        v-if="userIsLoggedInUser(user)"
+        @click.stop="startAddingCat"
+        @keyup.enter.stop="startAddingCat"
+        data-testid="add-new-cat-btn"
+        type="button"
+        class="mt-2 btn bg-black text-white focus-ring ms-auto py-2 px-5 rounded-3 w-sm-100"
+      >
+        {{ t("Profile.addCat") }} +
+      </button>
     </div>
   </div>
 
@@ -176,19 +169,19 @@ const startAddingCat = () => {
     :visible="isMobile && isCurrentAction(ActionTypes.SELECTING_CAT_ACTION_MOBILE)"
     @onCancel="removeAction(ActionTypes.SELECTING_CAT_ACTION_MOBILE)"
   >
-    <div class="gap-2 p-2 d-flex flex-column list-unstyled">
+    <div class="p-2 pb-5 gap-1 d-flex flex-column list-unstyled">
       <li
         @keyup.enter="startEditingCat(catForActionToBeSelected!)"
         @click.stop="startEditingCat(catForActionToBeSelected!)"
         tabIndex="0"
-        class="p-2 hover-bg rounded-3"
+        class="cursor-pointer fw-semibold px-3 p-2 hover-bg-1 rounded-3"
       >
         Muokkaa
       </li>
       <li
         tabIndex="0"
         data-testid="start-cat-delete"
-        class="p-2 hover-bg rounded-3"
+        class="cursor-pointer fw-semibold px-3 p-2 hover-bg-1 rounded-3"
         @keyup.enter="startDeletingCat(catForActionToBeSelected!)"
         @click.stop="startDeletingCat(catForActionToBeSelected!)"
       >

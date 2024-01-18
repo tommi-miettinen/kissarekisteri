@@ -81,7 +81,7 @@ const leaveEventMutation = useMutation({
 
 const { data: userCatsData, refetch: refetchUserCats } = useQuery({
   queryKey: ["userCats"],
-  queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
+  queryFn: () => user.value && userAPI.getCatsByUserId(user.value.id),
   enabled: Boolean(user.value),
 });
 
@@ -284,59 +284,59 @@ const removeSingleCat = (catId: number) => {
         <ImageGallery v-if="catShow" :photos="lightboxPhotos" />
       </div>
     </div>
-    <Modal :visible="isCurrentAction(ActionTypes.JOINING_EVENT) && !isMobile" @onCancel="removeAction(ActionTypes.JOINING_EVENT)">
-      <div style="width: 90vw; max-width: 500px" class="d-flex flex-column bg-white p-4 gap-4 rounded">
-        <div v-if="userCats && userCats.length > 0">
-          <h5>Osallistuvat kissat:</h5>
-          <div v-for="(cat, index) in userCats" :key="index">
-            <label>
-              <input
-                class="form-check-input focus-ring focus-ring-dark"
-                @keyup.enter="toggleCheckbox(cat.id)"
-                type="checkbox"
-                v-model="selectedCatIds"
-                :value="cat.id"
-              />
-              {{ cat.name }}
-            </label>
-          </div>
-        </div>
-        <div v-else>No cats available.</div>
-        <div class="d-flex gap-2">
-          <button data-testid="confirm-cat-delete" @click="leaveEvent" type="button" class="btn btn-light border w-100 rounded-3">
-            Peru osallistuminen
-          </button>
-          <button @click="joinEventMutation.mutate" type="button" class="btn bg-black text-white w-100 rounded-3">Osallistu</button>
-        </div>
-      </div>
-    </Modal>
-    <Drawer
-      :visible="isCurrentAction(ActionTypes.JOINING_EVENT_MOBILE) && isMobile"
-      @onCancel="removeAction(ActionTypes.JOINING_EVENT_MOBILE)"
-    >
-      <div class="d-flex flex-column bg-white p-4 gap-4 rounded">
-        <div v-if="userCats && userCats.length > 0">
-          <h5>Osallistuvat kissat:</h5>
-          <div v-for="(cat, index) in userCats" :key="index">
-            <label>
-              <input
-                class="form-check-input focus-ring focus-ring-dark"
-                @keyup.enter="toggleCheckbox(cat.id)"
-                type="checkbox"
-                v-model="selectedCatIds"
-                :value="cat.id"
-              />
-              {{ cat.name }}
-            </label>
-          </div>
-        </div>
-        <div v-else>No cats available.</div>
-        <div class="d-flex">
-          <button @click="joinEventMutation.mutate" type="button" class="btn bg-black text-white w-100 rounded-3">Osallistu</button>
-        </div>
-      </div>
-    </Drawer>
   </div>
+  <Modal :visible="isCurrentAction(ActionTypes.JOINING_EVENT) && !isMobile" @onCancel="removeAction(ActionTypes.JOINING_EVENT)">
+    <div style="width: 90vw; max-width: 500px" class="d-flex flex-column bg-white p-4 gap-4 rounded">
+      <div v-if="userCats && userCats.length > 0">
+        <h5>Osallistuvat kissat:</h5>
+        <div v-for="(cat, index) in userCats" :key="index">
+          <label>
+            <input
+              class="form-check-input focus-ring focus-ring-dark"
+              @keyup.enter="toggleCheckbox(cat.id)"
+              type="checkbox"
+              v-model="selectedCatIds"
+              :value="cat.id"
+            />
+            {{ cat.name }}
+          </label>
+        </div>
+      </div>
+      <div v-else>No cats available.</div>
+      <div class="d-flex gap-2">
+        <button data-testid="confirm-cat-delete" @click="leaveEvent" type="button" class="btn btn-light border w-100 rounded-3">
+          Peru osallistuminen
+        </button>
+        <button @click="joinEventMutation.mutate" type="button" class="btn bg-black text-white w-100 rounded-3">Osallistu</button>
+      </div>
+    </div>
+  </Modal>
+  <Drawer
+    :visible="isCurrentAction(ActionTypes.JOINING_EVENT_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionTypes.JOINING_EVENT_MOBILE)"
+  >
+    <div class="d-flex flex-column bg-white p-4 gap-4 rounded">
+      <div v-if="userCats && userCats.length > 0">
+        <h5>Osallistuvat kissat:</h5>
+        <div v-for="(cat, index) in userCats" :key="index">
+          <label>
+            <input
+              class="form-check-input focus-ring focus-ring-dark"
+              @keyup.enter="toggleCheckbox(cat.id)"
+              type="checkbox"
+              v-model="selectedCatIds"
+              :value="cat.id"
+            />
+            {{ cat.name }}
+          </label>
+        </div>
+      </div>
+      <div v-else>No cats available.</div>
+      <div class="d-flex">
+        <button @click="joinEventMutation.mutate" type="button" class="btn bg-black text-white w-100 rounded-3">Osallistu</button>
+      </div>
+    </div>
+  </Drawer>
 </template>
 
 <style>

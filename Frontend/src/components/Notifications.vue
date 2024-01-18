@@ -1,17 +1,13 @@
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import catAPI from "../api/catAPI";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/vue-query";
 import { QueryKeys } from "../api/queryKeys";
 import { toast } from "vue-sonner";
 import { user } from "../store/userStore";
-
-defineProps({
-  navigateTo: {
-    type: Function,
-    required: true,
-  },
-});
+import { navigateTo } from "../store/routeStore";
+import { actionStack, popAction } from "../store/actionStore";
+import { currentNotificationTab, setCurrentNotificationTab } from "../store/notificationStore";
 
 const queryClient = useQueryClient();
 
@@ -33,66 +29,72 @@ const confirmationRequestMutation = useMutation({
   },
 });
 
-const tab = ref<"personal" | "admin">("personal");
-
 const adminConfirmationRequests = computed(() => confirmationRequests.value?.filter((request) => request.confirmerId !== user.value?.id));
 const personalConfirmationRequests = computed(() =>
   confirmationRequests.value?.filter((request) => request.confirmerId === user.value?.id)
 );
 
 const confirmationRequestsToDisplay = computed(() => {
-  if (tab.value === "admin") {
+  if (currentNotificationTab.value === "admin") {
     return adminConfirmationRequests.value;
   } else {
     return personalConfirmationRequests.value;
   }
 });
+
+const navigate = (path: string) => {
+  if (actionStack.value.length > 0) {
+    popAction();
+  }
+  navigateTo(path);
+};
 </script>
 
 <template>
-  <div class="d-flex flex-column">
-    <div>
-      <div class="p-3 text-break overflow-auto d-flex flex-column">
-        <div class="d-flex gap-1">
-          <button
-            tabindex="0"
-            @click="tab = 'personal'"
-            :class="{ 'bg-black': tab === 'personal', 'text-white': tab === 'personal', 'border-black': tab === 'personal' }"
-            class="btn btn-sm border rounded-3 focus-ring col-3"
-          >
-            Omat
-          </button>
-          <button
-            tabindex="0"
-            @click="tab = 'admin'"
-            :class="{ 'bg-black': tab === 'admin', 'text-white': tab === 'admin', 'border-black': tab === 'admin' }"
-            class="btn border btn-sm rounded-3 focus-ring col-3"
-          >
-            Ylläpitäjä
-          </button>
-        </div>
-        <div v-for="request in confirmationRequestsToDisplay">
-          <div class="py-3 d-flex gap-2 d-flex flex-column">
-            <span>
-              <a class="cursor-pointer text-underline text-black" @click="navigateTo(`/users/${request.requester.id}`)">{{
-                request.requester?.givenName
-              }}</a>
-              pyytää omistajuutta kissalle
-              <a class="cursor-pointer text-underline text-black" @click="navigateTo(`/cats/${request.cat.id}`)">{{
-                request.cat?.name
-              }}</a></span
-            >
-            <button
-              @click="confirmationRequestMutation.mutate(request.id)"
-              style="min-width: 80px"
-              class="btn btn-sm rounded-3 bg-black text-white px-2 py-1 ms-auto mb-auto fs-7"
-            >
-              Hyväksy
-            </button>
-          </div>
-        </div>
-        <div class="py-3" v-if="!confirmationRequestsToDisplay || confirmationRequestsToDisplay.length === 0">Ei ilmoituksia</div>
-      </div>
+  <div class="p-3 text-break overflow-auto gap-2 d-flex flex-column">
+    <div class="d-flex gap-1">
+      <button
+        tabindex="0"
+        @click="setCurrentNotificationTab('personal')"
+        :class="{
+          'bg-black': currentNotificationTab === 'personal',
+          'text-white': currentNotificationTab === 'personal',
+          'border-black': currentNotificationTab === 'personal',
+        }"
+        class="btn btn-sm border rounded-3 focus-ring col-3"
+      >
+        Omat
+      </button>
+      <button
+        tabindex="0"
+        @click="setCurrentNotificationTab('admin')"
+        :class="{
+          'bg-black': currentNotificationTab === 'admin',
+          'text-white': currentNotificationTab === 'admin',
+          'border-black': currentNotificationTab === 'admin',
+        }"
+        class="btn border btn-sm rounded-3 focus-ring col-3"
+      >
+        Ylläpitäjä
+      </button>
     </div>
+
+    <div v-for="request in confirmationRequestsToDisplay" style="font-size: 14px" class="py-2 d-flex align-items-center gap-2 d-flex">
+      <span>
+        <a class="cursor-pointer text-underline text-black" @click="navigate(`/users/${request.requester.id}`)">{{
+          request.requester?.givenName
+        }}</a>
+        pyytää omistajuutta kissalle
+        <a class="cursor-pointer text-underline text-black" @click="navigate(`/cats/${request.cat.id}`)">{{ request.cat?.name }}</a></span
+      >
+      <button
+        @click="confirmationRequestMutation.mutate(request.id)"
+        style="min-width: 80px"
+        class="btn btn-sm rounded-3 bg-black text-white px-2 py-1 ms-auto mb-auto fs-7"
+      >
+        Hyväksy
+      </button>
+    </div>
+    <div class="py-3" v-if="!confirmationRequestsToDisplay || confirmationRequestsToDisplay.length === 0">Ei ilmoituksia</div>
   </div>
 </template>

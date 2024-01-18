@@ -1,5 +1,5 @@
 <script async lang="ts" setup>
-import { ref, onMounted, computed, nextTick } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { msalInstance } from "../auth";
 import { user } from "../store/userStore";
 import { useRouter, useRoute } from "vue-router";
@@ -16,6 +16,7 @@ import NotificationIcon from "../icons/NotificationIcon.vue";
 import moment from "moment";
 import Notifications from "./Notifications.vue";
 import { QueryKeys } from "../api/queryKeys";
+import { navigateTo } from "../store/routeStore";
 
 const route = useRoute();
 const router = useRouter();
@@ -48,12 +49,6 @@ onMounted(async () => await msalInstance.handleRedirectPromise());
 const handleAvatarClick = async () => {
   if (isMobile.value && !isCurrentAction(ActionTypes.BOTTOM_SHEET)) pushAction(ActionTypes.BOTTOM_SHEET);
   dropdownTriggerRef.value?.click();
-};
-
-const navigateTo = (route: string) => {
-  removeAction(ActionTypes.NOTIFICATIONS_MOBILE);
-  removeAction(ActionTypes.BOTTOM_SHEET);
-  nextTick(() => router.push(route));
 };
 
 const handleNotificationClick = () => {
@@ -132,7 +127,7 @@ const requestsRef = ref<HTMLDivElement>();
       <Dropdown :visible="!isMobile" :autoClose="false" :placement="'bottom-end'" :triggerRef="requestsRef">
         <template v-if="user && !isMobile">
           <div style="width: 450px">
-            <Notifications :navigateTo="navigateTo" />
+            <Notifications />
           </div>
         </template>
       </Dropdown>
@@ -152,7 +147,7 @@ const requestsRef = ref<HTMLDivElement>();
     :visible="isCurrentAction(ActionTypes.NOTIFICATIONS_MOBILE) && isMobile"
     @onCancel="removeAction(ActionTypes.NOTIFICATIONS_MOBILE)"
   >
-    <Notifications :navigateTo="navigateTo" />
+    <Notifications />
   </Drawer>
   <Drawer
     :fullsize="true"

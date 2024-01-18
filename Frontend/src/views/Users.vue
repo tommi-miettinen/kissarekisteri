@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, reactive } from "vue";
+import { ref, computed, reactive, watchEffect } from "vue";
 import userAPI from "../api/userAPI";
 import UserListItem from "../components/UserListItem.vue";
 import { useQuery } from "@tanstack/vue-query";
@@ -7,10 +7,9 @@ import { useI18n } from "vue-i18n";
 import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
 import Modal from "../components/Modal.vue";
-import { useWindowSize } from "@vueuse/core";
 import UserForm from "../components/UserForm.vue";
 import Dropdown from "../components/Dropdown.vue";
-import { ActionTypes, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { isMobile, ActionTypes, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { toast } from "vue-sonner";
 import { useMutation } from "@tanstack/vue-query";
 import { QueryKeys } from "../api/queryKeys";
@@ -28,6 +27,18 @@ const userQuery = useQuery({
 });
 
 const users = computed(() => userQuery.data.value);
+
+const translatedValues = ref<User[]>();
+
+watchEffect(() => {
+  if (!users) return;
+  translatedValues.value = users.value?.map((user) => {
+    return {
+      ...user,
+      role: user.userRole ? user.userRole.roleName : "Ylläpitäjä",
+    };
+  });
+});
 
 const userToBeDeleted = ref<User>();
 const userToBeEdited = ref<User>();
@@ -47,8 +58,6 @@ const deleteUserMutation = useMutation({
   },
 });
 
-const isMobile = computed(() => useWindowSize().width.value < 768);
-
 const startDeletingUser = (user: User) => {
   userToBeDeleted.value = user;
   pushAction(ActionTypes.DELETING_USER);
@@ -56,7 +65,7 @@ const startDeletingUser = (user: User) => {
 
 const startEditingUser = (user: User) => {
   userToBeEdited.value = user;
-  pushAction(isMobile.value ? ActionTypes.EDITING_USER_MOBILE : ActionTypes.EDITING_USER);
+  pushAction(ActionTypes.EDITING_USER);
 };
 
 const startSelectingUserAction = (user: User) => {
@@ -73,8 +82,8 @@ onMounted(() => setCurrentRouteLabel("Käyttäjät"));
   <h3 v-if="false" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
   <Spinner v-if="userQuery.isLoading.value" />
   <div v-if="!userQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto">
-    <h3 class="m-0">{{ t("Users.members") }}</h3>
-    <List :searchQueryPlaceholder="t('Users.searchInput')" v-if="users" :items="users" :itemsPerPage="20">
+    <h3 class="mb-3">{{ t("Users.members") }}</h3>
+    <List :searchQueryPlaceholder="t('Users.searchInput')" v-if="users" :items="(translatedValues as any)" :itemsPerPage="20">
       <template v-slot="{ item: user }">
         <UserListItem :user="user">
           <template v-slot:actions>
@@ -116,39 +125,32 @@ onMounted(() => setCurrentRouteLabel("Käyttäjät"));
     :visible="isCurrentAction(ActionTypes.SELECTING_USER_ACTION_MOBILE) && isMobile"
     @onCancel="removeAction(ActionTypes.SELECTING_USER_ACTION_MOBILE)"
   >
-    <div v-if="isMobile" class="p-2">
+    <div v-if="isMobile" class="p-2 pb-5 gap-1 d-flex flex-column list-unstyled">
       <div
         tabindex="0"
-        class="hover-bg-1 rounded-3 p-2 focus-ring"
+        class="cursor-pointer fw-semibold px-3 p-2 hover-bg-1 rounded-3"
         v-if="userForActionToBeSelected"
         @click="startEditingUser(userForActionToBeSelected)"
       >
-        {{ userForActionToBeSelected.givenName }}
+        Muokkaa roolia
       </div>
 
       <div
         tabIndex="0"
         v-if="userForActionToBeSelected"
         @click="startDeletingUser(userForActionToBeSelected)"
-        class="hover-bg-1 rounded-3 p-2 focus-ring"
+        class="cursor-pointer fw-semibold px-3 p-2 hover-bg-1 rounded-3"
         data-testid="start-cat-delete"
       >
-        Poista
+        Poista {{ userForActionToBeSelected.givenName }}
       </div>
     </div>
   </Drawer>
-  <Modal :visible="isCurrentAction(ActionTypes.EDITING_USER) && !isMobile" @onCancel="removeAction(ActionTypes.EDITING_USER)">
-    <div style="width: 550px">
+  <Modal :visible="isCurrentAction(ActionTypes.EDITING_USER)" @onCancel="removeAction(ActionTypes.EDITING_USER)">
+    <div style="width: 550px; max-width: 95vw" class="m-auto">
       <UserForm :formActionButtonText="'Tallenna tiedot'" :user="userToBeEdited" @onSave="removeAction(ActionTypes.EDITING_USER)" />
     </div>
   </Modal>
-  <Drawer
-    :fullsize="true"
-    :visible="isCurrentAction(ActionTypes.EDITING_USER_MOBILE) && isMobile"
-    @onCancel="removeAction(ActionTypes.EDITING_USER_MOBILE)"
-  >
-    <UserForm :formActionButtonText="'Tallenna tiedot'" :user="userToBeEdited" @onSave="removeAction(ActionTypes.EDITING_USER_MOBILE)" />
-  </Drawer>
   <Modal :visible="isCurrentAction(ActionTypes.DELETING_USER)" @onCancel="removeAction(ActionTypes.DELETING_USER)">
     <div v-if="userToBeDeleted" style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
       <p>Poistetaanko käyttäjä? {{ userToBeDeleted.givenName }}</p>

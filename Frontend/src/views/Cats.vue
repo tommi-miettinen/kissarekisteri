@@ -25,6 +25,7 @@ watchEffect(() => {
     return {
       ...cat,
       breed: t(`Breeds.${cat.breed}`),
+      translatedSex: t(`CatDetails.${cat.sex.toLowerCase()}`),
     };
   });
 });
@@ -35,7 +36,7 @@ onMounted(() => setCurrentRouteLabel("Kissat"));
 <template>
   <Spinner v-if="catsQuery.isLoading.value" />
   <div v-if="!catsQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto">
-    <h3 class="m-0">{{ t("Cats.cats") }}</h3>
+    <h3 class="mb-3">{{ t("Cats.cats") }}</h3>
     <List
       :searchQueryPlaceholder="t('Cats.searchInput')"
       v-if="translatedValues && translatedValues.length > 0"

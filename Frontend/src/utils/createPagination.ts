@@ -10,11 +10,9 @@ export const createPagination = (currentPage: number, totalPages: number, sliceS
   const leftItems = pageItems.slice(2, 2 + sliceSize);
   const rightItems = pageItems.slice(-sliceSize);
 
-  let itemsToDisplay: string | number[] = [];
+  let itemsToDisplay: number[] = [];
   let leftEllipsis;
   let rightEllipsis;
-
-  console.log(leftItems, middleItems, rightItems);
 
   if (currentPage < leftItems[leftItems.length - 1]) itemsToDisplay = leftItems;
 

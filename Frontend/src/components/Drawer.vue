@@ -2,8 +2,11 @@
 import { ref, onMounted, watch, reactive } from "vue";
 import { Offcanvas } from "bootstrap";
 import { useSwipe, useElementBounding } from "@vueuse/core";
+import { disablePullToRefresh, enablePullToRefresh } from "../utils/pullToRefresh";
 
 type Placement = "top" | "bottom" | "start" | "end";
+
+const emit = defineEmits(["onCancel"]);
 
 const props = defineProps({
   placement: {
@@ -29,8 +32,6 @@ const drawerStyle = reactive({
 
 const { height, top } = useElementBounding(sideOffcanvasRef);
 
-const emit = defineEmits(["onCancel"]);
-
 onMounted(() => {
   if (!sideOffcanvasRef.value) return console.error("ref is null");
   sideOffCanvas.value = new Offcanvas(sideOffcanvasRef.value);
@@ -41,8 +42,7 @@ watch(
   () => props.visible,
   (newValue) => {
     if (newValue) {
-      drawerStyle.transition = "all 0.3s ease-in-out";
-      drawerStyle.bottom = "0";
+      resetPositionAndTransition();
       sideOffCanvas.value?.show();
     } else {
       sideOffCanvas.value?.hide();
@@ -50,24 +50,12 @@ watch(
   }
 );
 
-const disablePullToRefresh = () => {
-  document.body.style.overscrollBehavior = "none";
-  document.documentElement.style.overscrollBehavior = "none";
-};
-
-const enablePullToRefresh = () => {
-  document.body.style.overscrollBehavior = "auto";
-  document.documentElement.style.overscrollBehavior = "auto";
-};
-
 const hideCanvasWithAnimation = () => {
   drawerStyle.transition = "all 0.3s ease-in-out";
-  setTimeout(() => {
-    sideOffCanvas.value?.hide();
-  }, 300);
+  setTimeout(() => sideOffCanvas.value?.hide(), 300);
 };
 
-const resetPosition = () => {
+const resetPositionAndTransition = () => {
   drawerStyle.transition = "all 0.3s ease-in-out";
   drawerStyle.bottom = "0";
 };
@@ -77,9 +65,7 @@ const moveDown = (time: number) => {
   drawerStyle.transition = `all ${animationTime}ms ease-in-out`;
   drawerStyle.bottom = `-100%`;
 
-  setTimeout(() => {
-    sideOffCanvas.value?.hide();
-  }, animationTime);
+  setTimeout(() => sideOffCanvas.value?.hide(), animationTime);
 };
 
 const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
@@ -109,7 +95,6 @@ const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
   onSwipeEnd() {
     swipeEnd.value = performance.now();
     const swipeLength = Math.abs(lengthY.value);
-    drawerStyle.transition = "all 0.3s ease-in-out";
     enablePullToRefresh();
 
     const remainingDistance = height.value - swipeLength;
@@ -124,7 +109,7 @@ const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
       hideCanvasWithAnimation();
       return;
     }
-    resetPosition();
+    resetPositionAndTransition();
   },
   threshold: 0,
 });
@@ -132,16 +117,16 @@ const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
 
 <template>
   <div
-    style="max-width: 100vw; height: min-content"
+    style="max-width: 100vw; height: min-content; border-radius: 24px"
     :class="['offcanvas', `offcanvas-${props.placement}`]"
-    class="sheet rounded-4 rounded-bottom-0 border-bottom"
+    class="sheet rounded-bottom-0 border-bottom"
     ref="sideOffcanvasRef"
     tabindex="-1"
     :style="drawerStyle"
     aria-labelledby="offcanvasRightLabel"
   >
-    <div class="offcanvas-header">
-      <button type="button" class="btn-close ms-auto" @click="sideOffCanvas?.hide()" aria-label="Close"></button>
+    <div class="d-flex px-3 pt-3">
+      <button type="button" class="rounded-circle p-2 btn-close ms-auto" @click="sideOffCanvas?.hide()" aria-label="Close"></button>
     </div>
     <div class="d-flex flex-column z-1">
       <slot></slot>

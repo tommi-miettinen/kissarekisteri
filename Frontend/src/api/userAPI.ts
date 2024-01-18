@@ -28,12 +28,8 @@ const getUsers = async () => {
 };
 
 const getCatsByUserId = async (userId: string) => {
-  try {
-    const result = await apiClient.get<ApiResponse<Cat[]>>(`/users/${userId}/cats`);
-    return result.data;
-  } catch (err) {
-    console.log(err);
-  }
+  const result = await apiClient.get<ApiResponse<Cat[]>>(`/users/${userId}/cats`);
+  return result.data;
 };
 
 const editUser = async (user: User) => {

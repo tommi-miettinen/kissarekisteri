@@ -19,7 +19,7 @@ const en = {
   },
   Cats: {
     cats: "Cats",
-    searchInput: "Search cats...",
+    searchInput: "Search by name, breed, gender...",
     breed: "Breed",
     birthDate: "Birth date",
   },
@@ -40,7 +40,7 @@ const en = {
   },
   CatShowList: {
     catShows: "Cat shows",
-    searchInput: "Search cat shows...",
+    searchInput: "Search by name, description, location...",
     addCatShow: "Add cat show",
     eventNameInput: "Event name",
     eventDescriptionInput: "Event description",

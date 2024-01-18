@@ -12,6 +12,7 @@ import Cropper from "./Cropper.vue";
 import Modal from "./Modal.vue";
 import { isMobile } from "../store/actionStore";
 import { Tooltip } from "bootstrap";
+import Overlay from "./Overlay.vue";
 
 const { t } = useI18n();
 const queryClient = useQueryClient();
@@ -26,6 +27,7 @@ const props = defineProps({
 const uploadAvatarMutation = useMutation({
   mutationFn: (image: File) => userAPI.uploadAvatar(image),
   onSuccess: async () => {
+    toast.dismiss();
     toast.success("Profiilikuva päivitetty");
     queryClient.invalidateQueries({ queryKey: QueryKeys.USER_BY_ID(props.user.id) });
     removeAction(ActionTypes.EDITING_AVATAR);
@@ -37,6 +39,7 @@ const uploadAvatarMutation = useMutation({
 const registerAsBreederMutation = useMutation({
   mutationFn: () => userAPI.registerAsBreeder(),
   onSuccess: () => {
+    toast.dismiss();
     toast.success("Kasvattajaksi rekisteröityminen onnistui");
     queryClient.invalidateQueries({ queryKey: QueryKeys.USER_BY_ID(props.user.id) });
   },
@@ -47,6 +50,22 @@ onMounted(() => {
   const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
   [...tooltipTriggerList].forEach((tooltipTriggerEl) => new Tooltip(tooltipTriggerEl));
 });
+
+const handleAvatarClick = () => {
+  if (
+    !userIsLoggedInUser(props.user) ||
+    isCurrentAction(ActionTypes.EDITING_AVATAR) ||
+    isCurrentAction(ActionTypes.EDITING_AVATAR_MOBILE)
+  ) {
+    return;
+  }
+  isMobile.value ? pushAction(ActionTypes.EDITING_AVATAR_MOBILE) : pushAction(ActionTypes.EDITING_AVATAR);
+};
+
+const handleStopAvatarEdit = () => {
+  removeAction(ActionTypes.EDITING_AVATAR);
+  removeAction(ActionTypes.EDITING_AVATAR_MOBILE);
+};
 </script>
 
 <template>
@@ -55,8 +74,8 @@ onMounted(() => {
       <div data-bs-toggle="tooltip" data-bs-html="true" data-bs-title="Edit avatar">
         <Avatar
           :focusable="userIsLoggedInUser(user)"
-          @click="userIsLoggedInUser(user) && pushAction(isMobile ? ActionTypes.EDITING_AVATAR_MOBILE : ActionTypes.EDITING_AVATAR)"
-          @keydown.enter="userIsLoggedInUser(user) && pushAction(isMobile ? ActionTypes.EDITING_AVATAR_MOBILE : ActionTypes.EDITING_AVATAR)"
+          @click="handleAvatarClick"
+          @keydown.enter="handleAvatarClick"
           :avatarUrl="user.avatarUrl"
           :displayText="user.givenName[0] + user.surname[0]"
         />
@@ -69,7 +88,7 @@ onMounted(() => {
     <div v-if="user.isBreeder">{{ "Kasvattaja" }}</div>
     <button
       tabIndex="0"
-      @click="registerAsBreederMutation.mutate"
+      @click="pushAction(ActionTypes.USER_SETTINGS)"
       v-if="!user.isBreeder && userIsLoggedInUser(user)"
       class="btn bg-black text-white focus-ring px-4 rounded-3 me-auto w-sm-100"
     >
@@ -77,18 +96,28 @@ onMounted(() => {
     </button>
   </div>
 
-  <Modal
-    :visible="isCurrentAction(ActionTypes.EDITING_AVATAR_MOBILE) && isMobile"
-    @onCancel="removeAction(ActionTypes.EDITING_AVATAR_MOBILE)"
-  >
+  <Modal :visible="isCurrentAction(ActionTypes.EDITING_AVATAR_MOBILE) && isMobile" @onCancel="handleStopAvatarEdit">
     <div style="width: 90vw" class="rounded-3 overflow-hidden">
       <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>
   </Modal>
 
-  <Modal :visible="isCurrentAction(ActionTypes.EDITING_AVATAR) && !isMobile" @onCancel="removeAction(ActionTypes.EDITING_AVATAR)">
+  <Modal :visible="isCurrentAction(ActionTypes.EDITING_AVATAR) && !isMobile" @onCancel="handleStopAvatarEdit">
     <div style="width: 500px" class="rounded-3 overflow-hidden">
       <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>
   </Modal>
+  <Overlay :visible="isCurrentAction(ActionTypes.USER_SETTINGS) && isMobile" @onCancel="removeAction(ActionTypes.USER_SETTINGS)">
+    <div class="p-3">
+      <h3>Asetukset</h3>
+      <button
+        tabIndex="0"
+        @click="registerAsBreederMutation.mutate"
+        v-if="!user.isBreeder && userIsLoggedInUser(user)"
+        class="btn bg-black text-white focus-ring px-4 rounded-3 me-auto w-sm-100"
+      >
+        Rekisteröidy kasvattajaksi
+      </button>
+    </div>
+  </Overlay>
 </template>

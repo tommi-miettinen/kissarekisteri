@@ -19,21 +19,13 @@ const getEvents = async (): Promise<CatShowEvent[] | undefined> => {
 };
 
 const getEventById = async (eventId: number) => {
-  try {
-    const result = await apiClient.get<CatShowEvent>(`/catshows/${eventId}`);
-    return result.data;
-  } catch (err) {
-    console.log(err);
-  }
+  const result = await apiClient.get<CatShowEvent>(`/catshows/${eventId}`);
+  return result.data;
 };
 
 const joinEvent = async (eventId: number, catIds: number[]) => {
-  try {
-    const result = await apiClient.post(`/catshows/${eventId}/join`, { catIds });
-    return result.data;
-  } catch (err) {
-    console.log(err);
-  }
+  const result = await apiClient.post(`/catshows/${eventId}/join`, { catIds });
+  return result.data;
 };
 
 const leaveEvent = async (eventId: number) => {

@@ -36,7 +36,7 @@ onUnmounted(() => modalRef.value?.removeEventListener("hide.bs.modal", close));
   <div ref="modalRef" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div
-        style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: min-content"
+        style="max-width: 100vw; display: flex; flex-direction: column; justify-content: center; align-items: center; width: min-content"
         class="modal-content m-auto"
       >
         <slot></slot>

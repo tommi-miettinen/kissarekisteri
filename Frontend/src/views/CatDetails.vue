@@ -13,10 +13,13 @@ import { user } from "../store/userStore";
 import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
 import { setCurrentRouteLabel } from "../store/routeStore";
+import Spinner from "../components/Spinner.vue";
 
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
+
+const routeParamCatId = +route.params.catId;
 
 const {
   data: catData,
@@ -70,15 +73,13 @@ const isMale = computed(() => cat.value?.sex === "Male");
 
 <template>
   <h3 v-if="isCatError && !catIsFetched" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
-  <div v-if="isLoading" class="spinner-border text-black m-auto" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
+  <Spinner v-if="isLoading" />
   <div
-    :key="cat.id"
+    :key="cat.id + routeParamCatId"
     v-if="cat"
     class="p-2 w-100 h-100 d-flex flex-column align-items-center col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5"
   >
-    <div class="p-1 flex-grow-1 pb-5 col-12 col-lg-8 gap-4 gap-sm-5 d-flex flex-column">
+    <div class="flex-grow-1 pb-2 pb-sm-5 col-12 col-lg-8 gap-4 gap-sm-5 d-flex flex-column">
       <div class="d-flex flex-column flex-sm-row gap-2" style="min-height: 300px">
         <div class="border rounded-4 hero-image" style="position: relative; min-height: 300px; overflow: hidden; width: 100%">
           <img

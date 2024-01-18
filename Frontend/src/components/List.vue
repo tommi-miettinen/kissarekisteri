@@ -36,11 +36,7 @@ const displayedItems = computed(() => {
 
 const pages = ref<string | number[]>([]);
 
-const goToPage = (pageNumber: number) => {
-  if (pageNumber >= 1 && pageNumber <= totalPages.value) {
-    currentPage.value = pageNumber;
-  }
-};
+const goToPage = (pageNumber: number) => (currentPage.value = pageNumber);
 
 const valueMatchesSearchQuery = (value: unknown) => {
   if (typeof value === "string") {
@@ -58,8 +54,6 @@ watchEffect(() => {
   }
 });
 
-console.log(totalPages.value);
-
 onMounted(() => {
   pages.value = createPagination(currentPage.value, totalPages.value, 3);
 });
@@ -71,7 +65,7 @@ watch([() => props.itemsPerPage, () => currentPage.value], () => {
 
 <template>
   <div class="w-100 h-100 d-flex flex-column">
-    <div class="d-flex gap-3 py-3 bg-white align-items-center">
+    <div class="d-flex pb-2 bg-white align-items-center">
       <div class="col-12 col-md-4">
         <input
           data-testid="cat-search-input"

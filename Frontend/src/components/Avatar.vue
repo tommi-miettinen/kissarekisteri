@@ -23,9 +23,9 @@ defineProps({
     :tabindex="focusable ? 0 : undefined"
     :class="{ 'cursor-pointer': focusable }"
     class="rounded-circle focus-ring"
-    @click="$emit('click')"
-    @keyup.enter="$emit('keyup.enter')"
-    @keydown.enter="$emit('keydown.enter')"
+    @click="$emit('click', $event)"
+    @keyup.enter="$emit('keyup.enter', $event)"
+    @keydown.enter="$emit('keydown.enter', $event)"
   >
     <img
       v-if="avatarUrl"
