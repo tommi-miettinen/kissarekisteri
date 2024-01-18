@@ -154,7 +154,11 @@ const requestsRef = ref<HTMLDivElement>();
   >
     <Notifications :navigateTo="navigateTo" />
   </Drawer>
-  <Drawer :visible="isCurrentAction(ActionTypes.BOTTOM_SHEET) && isMobile" @onCancel="removeAction(ActionTypes.BOTTOM_SHEET)">
+  <Drawer
+    :fullsize="true"
+    :visible="isCurrentAction(ActionTypes.BOTTOM_SHEET) && isMobile"
+    @onCancel="removeAction(ActionTypes.BOTTOM_SHEET)"
+  >
     <div class="p-2">
       <div tabindex="0" @click="logoutFromApp" class="hover-bg btn-border rounded-3 p-2 focus-ring">{{ t("Navigation.logout") }}</div>
     </div>

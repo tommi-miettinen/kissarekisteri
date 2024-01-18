@@ -112,7 +112,7 @@ const isFormValid = computed(() => {
 </script>
 
 <template>
-  <div class="w-100 p-3 sm-p-4 d-flex flex-column">
+  <div class="w-100 p-3 p-sm-4 d-flex flex-column">
     <div class="mb-3">
       <label for="catName" class="form-label w-100">Nimi</label>
       <input data-testid="new-cat-name-input" type="text" class="form-control" id="catName" v-model="newCat.name" />

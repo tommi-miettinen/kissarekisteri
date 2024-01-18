@@ -18,6 +18,7 @@ import Spinner from "../components/Spinner.vue";
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 import { onMounted } from "vue";
 import { setCurrentRouteLabel } from "../store/routeStore";
+import { PermissionTypes, userHasPermission } from "../store/userStore";
 
 const { t } = useI18n();
 
@@ -78,6 +79,7 @@ onMounted(() => setCurrentRouteLabel("Käyttäjät"));
         <UserListItem :user="user">
           <template v-slot:actions>
             <button
+              v-if="userHasPermission(PermissionTypes.RoleEventOrganizerWrite || PermissionTypes.RoleAdminWrite)"
               :ref="el => userListItemRefs[user.id] = el as HTMLElement"
               @keyup.enter.stop="startSelectingUserAction(user)"
               @click.stop="startSelectingUserAction(user)"

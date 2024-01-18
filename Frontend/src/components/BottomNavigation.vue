@@ -82,6 +82,8 @@ const isCurrentUser = computed(() => user.value?.id === route.params.userId);
     :visible="isCurrentAction(ActionTypes.NOTIFICATIONS_MOBILE) && isMobile"
     @onCancel="removeAction(ActionTypes.NOTIFICATIONS_MOBILE)"
   >
-    <Notifications :navigateTo="navigateTo" />
+    <div style="height: 100vh">
+      <Notifications :navigateTo="navigateTo" />
+    </div>
   </Drawer>
 </template>

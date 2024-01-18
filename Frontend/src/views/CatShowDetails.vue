@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, watchEffect } from "vue";
 import userAPI from "../api/userAPI";
 import { userHasPermission, user } from "../store/userStore";
 import { useRoute } from "vue-router";
@@ -19,6 +19,7 @@ import { isMobile } from "../store/actionStore";
 import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
 import { PermissionTypes } from "../store/userStore";
+import { setCurrentRouteLabel } from "../store/routeStore";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -87,6 +88,12 @@ const { data: userCatsData, refetch: refetchUserCats } = useQuery({
 const userCats = computed(() => userCatsData.value?.data);
 
 watch(user, () => refetchUserCats());
+
+watchEffect(() => {
+  if (catShow.value) {
+    setCurrentRouteLabel(catShow.value.name);
+  }
+});
 
 const leavingEvent = ref(false);
 
