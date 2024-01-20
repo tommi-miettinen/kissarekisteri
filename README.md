@@ -59,8 +59,6 @@
 
 # Screenshots
 
-![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/7c121dd3-a1be-41a0-87aa-a09aaa905302)
+![firefox_81Ay1hMwhh](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/279aecac-f070-4180-9f53-dc76e8521168) ![firefox_rehfvQM8VM](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/79b792ad-4e57-498b-9dd9-7e63f299524e)
 
-![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/5cbae06f-942e-492a-9734-1e96c31896d7)
 
-![kuva](https://github.com/tommi-miettinen/kissarekisteri/assets/63008431/21b92de3-fc7f-4bb0-b69f-ed03f1794cae)
