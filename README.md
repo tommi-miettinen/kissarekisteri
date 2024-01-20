@@ -5,7 +5,7 @@
 ## Documentation
 
 - [Role-based Access Control](role-based-access-control.md)
-- [Swagger](https://localhost:44316/swagger/index.html)
+- [Swagger](https://kissarekisteri-app.azurewebsites.net/swagger/index.html)
 
 ## Features
 - Microsoft Azure B2C Authentication
