@@ -13,6 +13,10 @@ namespace Kissarekisteri.Models
         public required string UserId { get; set; }
         public bool IsBreeder { get; set; }
         public string AvatarUrl { get; set; }
+        public string PhoneNumber { get; set; }
+        public bool ShowEmail { get; set; }
+
+        public bool ShowPhoneNumber { get; set; }
 
     }
 }

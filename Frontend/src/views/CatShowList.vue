@@ -42,6 +42,21 @@ const formatDate = (start: string, end: string) => {
   return `${startDate} - ${endDate}, ${startTime} - ${endTime}`;
 };
 
+const searchKeys: SearchKeys<CatShowEvent> = [
+  {
+    key: "name",
+  },
+  {
+    key: "location",
+  },
+  {
+    key: "startDate",
+  },
+  {
+    key: "endDate",
+  },
+];
+
 onMounted(() => setCurrentRouteLabel("Näyttelyt"));
 </script>
 
@@ -54,6 +69,7 @@ onMounted(() => setCurrentRouteLabel("Näyttelyt"));
   >
     <h3 class="mb-3">{{ t("CatShowList.catShows") }}</h3>
     <List
+      :searchKeys="searchKeys"
       :searchQueryPlaceholder="t('CatShowList.searchInput')"
       v-if="catShowsQuery.data.value"
       :items="catShowsQuery.data.value"
@@ -100,7 +116,8 @@ onMounted(() => setCurrentRouteLabel("Näyttelyt"));
         v-if="userHasPermission(PermissionTypes.CatShowWrite)"
         @click="pushAction(ActionTypes.ADDING_CAT_SHOW_MOBILE)"
         type="button"
-        class="btn bg-black text-white rounded-3 px-5 py-2 ms-auto w-sm-100"
+        style="background-color: black"
+        class="btn text-white rounded-3 px-5 py-2 ms-auto w-sm-100"
       >
         {{ t("CatShowList.addCatShow") }} +
       </button>

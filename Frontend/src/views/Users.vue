@@ -28,14 +28,14 @@ const userQuery = useQuery({
 
 const users = computed(() => userQuery.data.value);
 
-const translatedValues = ref<User[]>();
+const translatedValues = ref<(User & { role: string })[]>([]);
 
 watchEffect(() => {
-  if (!users) return;
+  if (!users.value) return;
   translatedValues.value = users.value?.map((user) => {
     return {
       ...user,
-      role: user.userRole ? user.userRole.roleName : "Ylläpitäjä",
+      role: user.userRole ? user.userRole.roleName : "",
     };
   });
 });
@@ -75,6 +75,21 @@ const startSelectingUserAction = (user: User) => {
 
 const userListItemRefs = reactive<Record<string, HTMLElement>>({});
 
+const searchKeys: SearchKeys<User & { role: string }> = [
+  {
+    key: "givenName",
+  },
+  {
+    key: "surname",
+  },
+  {
+    key: "email",
+  },
+  {
+    key: "role",
+  },
+];
+
 onMounted(() => setCurrentRouteLabel("Käyttäjät"));
 </script>
 
@@ -83,7 +98,13 @@ onMounted(() => setCurrentRouteLabel("Käyttäjät"));
   <Spinner v-if="userQuery.isLoading.value" />
   <div v-if="!userQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto">
     <h3 class="mb-3">{{ t("Users.members") }}</h3>
-    <List :searchQueryPlaceholder="t('Users.searchInput')" v-if="users" :items="(translatedValues as any)" :itemsPerPage="20">
+    <List
+      :searchKeys="searchKeys"
+      :searchQueryPlaceholder="t('Users.searchInput')"
+      v-if="users"
+      :items="translatedValues"
+      :itemsPerPage="20"
+    >
       <template v-slot="{ item: user }">
         <UserListItem :user="user">
           <template v-slot:actions>

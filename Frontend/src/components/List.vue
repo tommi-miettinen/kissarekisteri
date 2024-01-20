@@ -1,8 +1,14 @@
 <script lang="ts" setup>
-import { watchEffect, watch, onMounted } from "vue";
+import { watchEffect } from "vue";
 import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { createPagination } from "../utils/createPagination";
+
+interface SearchProp {
+  key: string;
+  exactMatch?: boolean;
+  startsWith?: boolean;
+}
 
 const props = defineProps({
   items: {
@@ -17,32 +23,39 @@ const props = defineProps({
     type: String,
     default: "List.Search",
   },
+  searchKeys: {
+    type: Array as () => SearchProp[],
+    required: true,
+  },
 });
 
 const { t } = useI18n();
 
 const searchQuery = ref("");
 const currentPage = ref(1);
+const filteredItems = ref<any>([]);
+const pages = ref<string | number[]>([]);
+
 const totalPages = computed(() => {
   return Math.ceil(filteredItems.value.length / props.itemsPerPage);
 });
-
-const filteredItems = ref<any>([]);
 
 const displayedItems = computed(() => {
   const startIndex = (currentPage.value - 1) * props.itemsPerPage;
   return filteredItems.value.slice(startIndex, startIndex + props.itemsPerPage);
 });
 
-const pages = ref<string | number[]>([]);
-
 const goToPage = (pageNumber: number) => (currentPage.value = pageNumber);
 
-const valueMatchesSearchQuery = (value: unknown) => {
-  if (typeof value === "string") {
-    return value.toLowerCase().includes(searchQuery.value.toLowerCase());
-  }
-  return false;
+const valueMatchesSearchQuery = (item: any, searchKey: SearchProp) => {
+  const itemValue = item[searchKey.key];
+  const queryValue = searchQuery.value.toLowerCase();
+
+  if (typeof itemValue !== "string") return false;
+
+  if (searchKey.exactMatch) return itemValue.toLowerCase() === queryValue;
+  if (searchKey.startsWith) return itemValue.toLowerCase().startsWith(queryValue);
+  return itemValue.toLowerCase().includes(queryValue);
 };
 
 watchEffect(() => {
@@ -50,17 +63,11 @@ watchEffect(() => {
     filteredItems.value = props.items;
   } else {
     currentPage.value = 1;
-    filteredItems.value = props.items.filter((item) => Object.values(item).some((value) => valueMatchesSearchQuery(value)));
+    filteredItems.value = props.items.filter((item) => props.searchKeys.some((searchKey) => valueMatchesSearchQuery(item, searchKey)));
   }
 });
 
-onMounted(() => {
-  pages.value = createPagination(currentPage.value, totalPages.value, 3);
-});
-
-watch([() => props.itemsPerPage, () => currentPage.value], () => {
-  pages.value = createPagination(currentPage.value, totalPages.value, 3);
-});
+watchEffect(() => (pages.value = createPagination(currentPage.value, totalPages.value, 3)));
 </script>
 
 <template>
@@ -97,7 +104,6 @@ watch([() => props.itemsPerPage, () => currentPage.value], () => {
           </li>
         </div>
       </nav>
-
       <slot name="action"></slot>
     </div>
   </div>

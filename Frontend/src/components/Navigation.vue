@@ -124,12 +124,10 @@ const requestsRef = ref<HTMLDivElement>();
           >{{ confirmationRequests.length }}</span
         >
       </div>
-      <Dropdown :visible="!isMobile" :autoClose="false" :placement="'bottom-end'" :triggerRef="requestsRef">
-        <template v-if="user && !isMobile">
-          <div style="width: 450px">
-            <Notifications />
-          </div>
-        </template>
+      <Dropdown :visible="!isMobile && Boolean(user)" :autoClose="false" :placement="'bottom-end'" :triggerRef="requestsRef">
+        <div v-if="user && !isMobile" style="width: 450px">
+          <Notifications />
+        </div>
       </Dropdown>
       <a
         v-if="!isMobile"

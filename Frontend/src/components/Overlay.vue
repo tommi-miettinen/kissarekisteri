@@ -7,6 +7,10 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  headerText: {
+    type: String,
+    required: false,
+  },
 });
 
 const internalVisible = ref(false);
@@ -34,7 +38,8 @@ watch(
     class="position-fixed"
     style="width: 100vw; height: 100vh; background-color: white; left: 0px; top: 0px; z-index: 1000"
   >
-    <div class="d-flex p-2">
+    <div class="d-flex p-3">
+      <h2 class="m-0">{{ headerText }}</h2>
       <button type="button" class="rounded-circle p-2 btn-close ms-auto" @click="$emit('onCancel')" aria-label="Close"></button>
     </div>
     <slot></slot>

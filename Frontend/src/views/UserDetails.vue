@@ -38,7 +38,7 @@ const {
 });
 
 const { data: catsData, refetch: refetchCats } = useQuery({
-  queryKey: QueryKeys.USERS_CATS,
+  queryKey: QueryKeys.USERS_CATS_BY_ID(user.value?.id as string),
   queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
   enabled: Boolean(user.value?.id),
 });
@@ -67,7 +67,7 @@ const deleteMutation = useMutation({
 });
 
 watch(
-  [route, user],
+  [() => route, () => user.value],
   () => {
     user.value && setCurrentRouteLabel(user.value.givenName);
     refetchCats();

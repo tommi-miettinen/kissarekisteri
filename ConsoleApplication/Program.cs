@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace KissarekisteriConsole.ConsoleApplication;
 
@@ -22,12 +20,10 @@ public class Program
         int selectedOption = KeyboardNavigation.GetMenuChoice("Choose Environment", envOptions);
         var env = envOptions[selectedOption];
 
-        Assembly assembly = Assembly.Load("Kissarekisteri");
-
         var config = new ConfigurationBuilder()
             .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddUserSecrets(assembly)
+            .AddUserSecrets(Assembly.Load("Kissarekisteri"))
             .Build();
 
         var instance = config["AzureAdB2C:Instance"];
@@ -42,8 +38,7 @@ public class Program
                 : config.GetConnectionString("AzureSQL");
 
         var clientSecretCredential = new ClientSecretCredential(domain, appId, clientSecret);
-        var scopes = new[] { "https://graph.microsoft.com/.default" };
-        var graphClient = new GraphServiceClient(clientSecretCredential, scopes);
+        var graphClient = new GraphServiceClient(clientSecretCredential, ["https://graph.microsoft.com/.default"]);
 
         var options = new DbContextOptionsBuilder<KissarekisteriDbContext>()
             .UseSqlServer(dbConnectionString)
@@ -58,32 +53,20 @@ public class Program
         var catShowService = new CatShowService(dbContext, uploadService, permissionService);
         var seedService = new SeedService(userService, catService, catShowService, dbContext);
 
-        /*
-        await seedService.SeedPermissions();
-        await seedService.SeedRoles();
-        await seedService.SeedRolePermissions();
-        */
+
+        string[] actionOptions = [
+            "1. Create Roles",
+            "2. Assign Role to User",
+            "3. Seed Cats",
+            "4. Seed Cat Shows",
+            "5. Create Database",
+            "6. Exit"
+        ];
 
         while (true)
         {
-            var actionOptions = new string[]
-            {
-                "1. Create Roles",
-                "2. Assign Role to User",
-                "3. Seed Cats",
-                "4. Seed Cat Shows",
-                "5. Create Database",
-                "6. Exit",
-            };
             var selectedAction = KeyboardNavigation.GetMenuChoice("Select action", actionOptions) + 1;
 
-            var jsonSerializerOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                ReferenceHandler = ReferenceHandler.IgnoreCycles
-            };
-
-            string Json(object obj) => JsonSerializer.Serialize(obj, jsonSerializerOptions);
 
             bool confirmed;
             string[] confirmOptions;
@@ -98,14 +81,14 @@ public class Program
                     break;
 
                 case 2:
-                    var userss = await userService.GetUsers();
+                    var users = await userService.GetUsers();
                     var roles = await permissionService.GetRoles();
 
                     var selectedUserIndex = KeyboardNavigation.GetMenuChoice(
                         "Select user",
-                        userss.Select(u => u.Email).ToArray()
+                        users.Select(u => u.Email).ToArray()
                     );
-                    var selectedUser = userss[selectedUserIndex];
+                    var selectedUser = users[selectedUserIndex];
 
                     var selectedRoleIndex = KeyboardNavigation.GetMenuChoice(
                         "Select role",
@@ -167,11 +150,9 @@ public class Program
                         confirmOptions = ["Yes", "No"];
                         selectedOptionIndex = KeyboardNavigation.GetMenuChoice(
                                                        $"Create database in {env}?",
-                                                       confirmOptions
-                                                                                                         );
-                        confirmed = confirmOptions[selectedOptionIndex] == "Yes";
+                                                       confirmOptions);
 
-                        if (!confirmed)
+                        if (confirmOptions[selectedOptionIndex] != "Yes")
                         {
                             break;
                         }

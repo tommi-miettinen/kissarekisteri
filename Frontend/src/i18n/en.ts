@@ -40,7 +40,7 @@ const en = {
   },
   CatShowList: {
     catShows: "Cat shows",
-    searchInput: "Search by name, description, location...",
+    searchInput: "Search by name, location...",
     addCatShow: "Add cat show",
     eventNameInput: "Event name",
     eventDescriptionInput: "Event description",

@@ -5,8 +5,9 @@ import { useEventListener } from "@vueuse/core";
 import { onLongPress } from "@vueuse/core";
 import Drawer from "./Drawer.vue";
 import { isMobile } from "../store/actionStore";
+import { onMounted } from "vue";
 
-defineProps({
+const props = defineProps({
   thumbnailActionButtonText: {
     type: String,
     required: false,
@@ -25,6 +26,7 @@ defineProps({
 const drawerOpen = ref(false);
 const currentImage = ref<HTMLElement>();
 const currentIndex = ref(0);
+const currentImageUrl = ref("");
 
 const handleImageClick = async (index: number) => {
   pushAction(ActionTypes.FULLSCREEN_IMAGE);
@@ -40,15 +42,6 @@ const handleImageClick = async (index: number) => {
 };
 
 const thumbnailRefs = reactive<Record<number, HTMLElement>>({});
-
-Object.values(thumbnailRefs).forEach((thumbnailRef, index) => {
-  onLongPress(thumbnailRef, () => {
-    if (!isMobile.value) return;
-    currentImage.value = images[index];
-    drawerOpen.value = true;
-    thumbnailRef.focus();
-  });
-});
 
 const scrollContainer = ref<HTMLElement>();
 const images = reactive<Record<number, HTMLElement>>({});
@@ -73,6 +66,18 @@ const getClosestImage = () => {
   });
 };
 
+onMounted(() => {
+  Object.values(thumbnailRefs).forEach((thumbnailRef, index) => {
+    onLongPress(thumbnailRef, () => {
+      if (!isMobile.value) return;
+      currentImage.value = images[index];
+      currentImageUrl.value = props.photos[index];
+      drawerOpen.value = true;
+      thumbnailRef.focus();
+    });
+  });
+});
+
 useEventListener(scrollContainer, "scroll", getClosestImage);
 </script>
 
@@ -96,6 +101,7 @@ useEventListener(scrollContainer, "scroll", getClosestImage);
           alt="Cat image"
           class="image thumbnail scale-up-animation"
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
+          oncontextmenu="return false;"
         />
         <div v-if="showThumbnailActionButton && !isMobile" class="d-flex position-absolute w-100 bottom-0">
           <button
@@ -111,7 +117,7 @@ useEventListener(scrollContainer, "scroll", getClosestImage);
   </div>
   <Drawer :visible="drawerOpen" @onCancel="drawerOpen = false">
     <div style="height: 150px">
-      <div @click="$emit('onThumbnailActionClick', currentImage), (drawerOpen = false)" class="rounded-3 w-100 p-3">
+      <div @click="$emit('onThumbnailActionClick', currentImageUrl), (drawerOpen = false)" class="rounded-3 w-100 p-3">
         Aseta profiilikuvaksi
       </div>
     </div>

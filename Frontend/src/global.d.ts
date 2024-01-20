@@ -121,3 +121,11 @@ interface UserPayload {
   Email: string;
   Role: string;
 }
+
+interface SearchKey<T> {
+  key: keyof T;
+  exactMatch?: boolean;
+  startsWith?: boolean;
+}
+
+type SearchKeys<T> = SearchKey<T>[];

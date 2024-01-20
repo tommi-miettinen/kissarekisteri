@@ -51,6 +51,10 @@
   transition: 0.3s ease-in-out;
 }
 
+.form-control {
+  border-radius: 8px !important;
+}
+
 .focus-ring:focus {
   --focus-ring-width: 0.25rem;
   --focus-ring-opacity: 0.25;
@@ -82,7 +86,7 @@
 }
 
 .fs-7 {
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .image-gallery {

@@ -82,9 +82,14 @@ const handleStopAvatarEdit = () => {
       </div>
       <h3 class="mb-1">{{ `${user.givenName}  ${user.surname}` }}</h3>
     </div>
-    <div v-if="user.userRole && user.userRole.role.name !== 'User'">
+    <div
+      style="background-color: #ddd6fe; font-size: 12px"
+      class="text-black badge rounded-pill bg-opacity-75 me-auto px-4"
+      v-if="user.userRole && user.userRole.role.name !== 'User'"
+    >
       {{ t(`Roles.${user.userRole.roleName}`) }}
     </div>
+    <div>{{ user.email }}</div>
     <div v-if="user.isBreeder">{{ "Kasvattaja" }}</div>
     <button
       tabIndex="0"
@@ -107,17 +112,56 @@ const handleStopAvatarEdit = () => {
       <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>
   </Modal>
-  <Overlay :visible="isCurrentAction(ActionTypes.USER_SETTINGS) && isMobile" @onCancel="removeAction(ActionTypes.USER_SETTINGS)">
-    <div class="p-3">
-      <h3>Asetukset</h3>
-      <button
-        tabIndex="0"
-        @click="registerAsBreederMutation.mutate"
-        v-if="!user.isBreeder && userIsLoggedInUser(user)"
-        class="btn bg-black text-white focus-ring px-4 rounded-3 me-auto w-sm-100"
-      >
-        Rekisteröidy kasvattajaksi
-      </button>
+  <Overlay
+    :headerText="'Profiilin asetukset'"
+    :visible="isCurrentAction(ActionTypes.USER_SETTINGS) && isMobile"
+    @onCancel="removeAction(ActionTypes.USER_SETTINGS)"
+  >
+    <div class="p-3 d-flex flex-column gap-2">
+      <div class="d-flex flex-column gap-2">
+        <div class="form-check form-switch align-items-center p-0 d-flex gap-2">
+          <label class="form-check-label fw-semibold me-auto" for="show-email">Näytä sähköposti</label>
+          <input
+            style="height: 24px; width: 48px"
+            class="form-check-input form-check form-switch"
+            type="checkbox"
+            role="switch"
+            id="show-email"
+          />
+        </div>
+        <div class="form-check form-switch align-items-center p-0 d-flex gap-2">
+          <label class="form-check-label fw-semibold me-auto" for="show-phone">Näytä puhelinnumero</label>
+          <input
+            style="height: 24px; width: 48px"
+            class="form-check-input form-check form-switch"
+            type="checkbox"
+            role="switch"
+            id="show-phone"
+          />
+        </div>
+        <div class="form-check form-switch align-items-center p-0 d-flex gap-2">
+          <label class="form-check-label fw-semibold me-auto" for="show-phone">Rekisteröidy kasvattajaksi</label>
+          <input
+            style="height: 24px; width: 48px"
+            class="form-check-input form-check form-switch"
+            type="checkbox"
+            role="switch"
+            id="show-phone"
+          />
+        </div>
+        <div>
+          <label for="password" class="form-label w-100 fw-semibold">Puhelin</label>
+          <input id="password" data-testid="new-cat-birthdate-input" type="text" class="form-control" />
+        </div>
+        <button
+          tabIndex="0"
+          @click="registerAsBreederMutation.mutate"
+          v-if="!user.isBreeder && userIsLoggedInUser(user)"
+          class="btn bg-black text-white focus-ring px-4 rounded-3 me-auto w-sm-100"
+        >
+          Tallenna muutokset
+        </button>
+      </div>
     </div>
   </Overlay>
 </template>

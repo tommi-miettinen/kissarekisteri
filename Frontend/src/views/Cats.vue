@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watchEffect } from "vue";
+import { ref, watchEffect, computed } from "vue";
 import catAPI from "../api/catAPI";
 import { useQuery } from "@tanstack/vue-query";
 import { useI18n } from "vue-i18n";
@@ -10,7 +10,7 @@ import Spinner from "../components/Spinner.vue";
 import { onMounted } from "vue";
 import { setCurrentRouteLabel } from "../store/routeStore";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const catsQuery = useQuery({
   queryKey: QueryKeys.CATS,
@@ -30,6 +30,21 @@ watchEffect(() => {
   });
 });
 
+const searchKeys = computed<SearchKeys<Cat & { translatedSex: string }>>(() => {
+  return [
+    {
+      key: "name",
+    },
+    {
+      key: "breed",
+    },
+    {
+      key: "translatedSex",
+      startsWith: locale.value === "en",
+    },
+  ];
+});
+
 onMounted(() => setCurrentRouteLabel("Kissat"));
 </script>
 
@@ -38,6 +53,7 @@ onMounted(() => setCurrentRouteLabel("Kissat"));
   <div v-if="!catsQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto">
     <h3 class="mb-3">{{ t("Cats.cats") }}</h3>
     <List
+      :searchKeys="searchKeys"
       :searchQueryPlaceholder="t('Cats.searchInput')"
       v-if="translatedValues && translatedValues.length > 0"
       :items="translatedValues"
