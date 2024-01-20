@@ -19,13 +19,13 @@ provider "azuread" {
  # tenant_id = "d128e5ef-7125-45c2-8e8c-4fd41c0c862e"
 }
 
-/*
+
 variable "sql_admin_password" {
   description = "The admin password for SQL Server"
   type        = string
   sensitive   = true
 }
-*/
+
 
 locals {
   #https://learn.microsoft.com/en-us/graph/permissions-reference
@@ -115,7 +115,7 @@ resource "azurerm_mssql_server" "sqlserver" {
   location                     = azurerm_resource_group.rg.location
   version                      = "12.0"
   administrator_login          = "kissarekisterisqladmin"
-  administrator_login_password = "4-v3ry-53cr37-p455w0rd"
+  administrator_login_password = var.sql_admin_password
 }
 
 
