@@ -1,24 +1,19 @@
 <script setup lang="ts">
 import Navigation from "./components/Navigation.vue";
 import { Toaster } from "vue-sonner";
-import { onMounted, ref, watchEffect } from "vue";
+import { onMounted, ref } from "vue";
 import { fetchPermissions, fetchUser } from "./store/userStore";
 import BottomNavigation from "./components/BottomNavigation.vue";
 import { focusFirstVisibleElement } from "./utils/focusFirstVisibleElement";
-
 import Appbar from "./components/Appbar.vue";
 import { toast } from "vue-sonner";
-import { isMobile, actionStack } from "./store/actionStore";
+import { isMobile } from "./store/actionStore";
 
 const mainRef = ref<HTMLElement>();
 
 onMounted(async () => {
   await fetchUser();
   await fetchPermissions();
-});
-
-watchEffect(() => {
-  console.log(actionStack.value);
 });
 
 const focusMainContent = () => focusFirstVisibleElement(mainRef.value!);

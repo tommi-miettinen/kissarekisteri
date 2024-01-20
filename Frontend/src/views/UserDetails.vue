@@ -18,9 +18,11 @@ import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 import { isMobile } from "../store/actionStore";
 import UserInfoCard from "../components/UserInfoCard.vue";
 import { setCurrentRouteLabel } from "../store/routeStore";
+import Spinner from "../components/Spinner.vue";
 
 const { t } = useI18n();
 const route = useRoute();
+const routeParamUserId = route.params.userId as string;
 
 const catToBeDeleted = ref<Cat>();
 const catToBeEdited = ref<Cat>();
@@ -33,14 +35,13 @@ const {
   isLoading: isUserLoading,
   refetch: refetchUser,
 } = useQuery({
-  queryKey: QueryKeys.USER_BY_ID(route.params.userId as string),
-  queryFn: () => userAPI.getUserById(route.params.userId as string),
+  queryKey: QueryKeys.USER_BY_ID(routeParamUserId),
+  queryFn: () => userAPI.getUserById(routeParamUserId),
 });
 
 const { data: catsData, refetch: refetchCats } = useQuery({
-  queryKey: QueryKeys.USERS_CATS_BY_ID(user.value?.id as string),
-  queryFn: () => userAPI.getCatsByUserId(user.value?.id as string),
-  enabled: Boolean(user.value?.id),
+  queryKey: QueryKeys.USERS_CATS_BY_ID(routeParamUserId),
+  queryFn: () => userAPI.getCatsByUserId(routeParamUserId),
 });
 
 const cats = computed(() => catsData.value?.data);
@@ -67,7 +68,7 @@ const deleteMutation = useMutation({
 });
 
 watch(
-  [() => route, () => user.value],
+  [() => route.path, () => user.value],
   () => {
     user.value && setCurrentRouteLabel(user.value.givenName);
     refetchCats();
@@ -97,17 +98,12 @@ const startEditingCat = (cat: Cat) => {
   pushAction(isMobile.value ? ActionTypes.EDITING_CAT_MOBILE : ActionTypes.EDITING_CAT);
 };
 
-const startAddingCat = () => {
-  pushAction(isMobile.value ? ActionTypes.ADDING_CAT_MOBILE : ActionTypes.ADDING_CAT);
-};
+const startAddingCat = () => pushAction(isMobile.value ? ActionTypes.ADDING_CAT_MOBILE : ActionTypes.ADDING_CAT);
 </script>
 
 <template>
-  <h3 v-if="isUserError && !isUserFetched" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
-  <div v-if="isUserLoading" class="spinner-border text-black m-auto" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-
+  <h3 v-if="isUserError && isUserFetched" class="m-5 fw-bold">{{ t("Profile.404") }}</h3>
+  <Spinner v-if="isUserLoading" />
   <div v-if="!isUserLoading" style="min-height: 100%" class="d-flex flex-column px-3 py-2 p-sm-5 rounded col-12 col-lg-8 mx-auto gap-3">
     <UserInfoCard v-if="user" :user="user" />
     <div class="d-flex flex-column rounded h-100 flex-grow-1">

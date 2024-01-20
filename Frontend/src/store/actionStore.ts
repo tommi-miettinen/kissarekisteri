@@ -31,7 +31,7 @@ interface ActionStore {
   actionStack: ActionTypes[];
 }
 
-const actionStore = reactive<ActionStore>({
+export const actionStore = reactive<ActionStore>({
   actionStack: [],
 });
 
@@ -40,7 +40,9 @@ export const pushAction = (action: ActionTypes) => {
   actionStore.actionStack.push(action);
 };
 
-export const popAction = () => actionStore.actionStack.pop();
+export const popAction = () => {
+  actionStore.actionStack.pop();
+};
 
 export const actionStack = computed(() => actionStore.actionStack);
 
@@ -48,7 +50,8 @@ export const isCurrentAction = (actionType: ActionTypes) => actionStack.value[ac
 
 export const resetActionStack = () => (actionStore.actionStack = []);
 
-export const removeAction = (actionType: ActionTypes) =>
-  (actionStore.actionStack = actionStore.actionStack.filter((action) => action !== actionType));
+export const removeAction = (actionType: ActionTypes) => {
+  actionStore.actionStack = actionStore.actionStack.filter((action) => action !== actionType);
+};
 
 export const isMobile = computed(() => useWindowSize().width.value < 768);

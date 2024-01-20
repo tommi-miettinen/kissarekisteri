@@ -59,6 +59,9 @@ interface User {
   cats?: Cat[];
   permissions: Permission[];
   userRole: any;
+  showPhoneNumber: boolean;
+  showEmail: boolean;
+  phoneNumber: string;
 }
 
 interface CatPayload {

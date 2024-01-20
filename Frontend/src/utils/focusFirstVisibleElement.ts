@@ -1,15 +1,3 @@
-export const focusFirstVisibleElement = (parentElem: HTMLElement) => {
-  const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-  const focusableElements = [...parentElem.querySelectorAll(focusableSelectors)] || [];
-
-  for (const elem of focusableElements) {
-    if (isElementVisible(elem as HTMLElement)) {
-      (elem as HTMLElement).focus();
-      break;
-    }
-  }
-};
-
 const isElementVisible = (element: HTMLElement) => {
   const rect = element.getBoundingClientRect();
   const style = getComputedStyle(element);
@@ -24,4 +12,16 @@ const isElementVisible = (element: HTMLElement) => {
     rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
     rect.right <= (window.innerWidth || document.documentElement.clientWidth)
   );
+};
+
+export const focusFirstVisibleElement = (parentElem: HTMLElement) => {
+  const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+  const focusableElements = [...parentElem.querySelectorAll(focusableSelectors)] || [];
+
+  for (const elem of focusableElements) {
+    if (isElementVisible(elem as HTMLElement)) {
+      (elem as HTMLElement).focus();
+      break;
+    }
+  }
 };

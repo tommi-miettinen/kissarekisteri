@@ -7,6 +7,7 @@ import { toast } from "vue-sonner";
 import { user } from "../store/userStore";
 import { navigateTo } from "../store/routeStore";
 import { actionStack, popAction } from "../store/actionStore";
+import { user as loggedInUser } from "../store/userStore";
 import { currentNotificationTab, setCurrentNotificationTab } from "../store/notificationStore";
 
 const queryClient = useQueryClient();
@@ -48,11 +49,13 @@ const navigate = (path: string) => {
   }
   navigateTo(path);
 };
+
+console.log(loggedInUser.value);
 </script>
 
 <template>
   <div class="p-3 text-break overflow-auto gap-2 d-flex flex-column">
-    <div class="d-flex gap-1">
+    <div v-if="loggedInUser?.userRole.roleName === 'Admin'" class="d-flex gap-1">
       <button
         tabindex="0"
         @click="setCurrentNotificationTab('personal')"

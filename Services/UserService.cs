@@ -196,6 +196,9 @@ public class UserService(
                 Email = user.Identities.FirstOrDefault().IssuerAssignedId,
                 AvatarUrl = userInfo?.AvatarUrl ?? null,
                 IsBreeder = userInfo?.IsBreeder ?? false,
+                ShowPhoneNumber = userInfo?.ShowPhoneNumber ?? false,
+                ShowEmail = userInfo?.ShowEmail ?? false,
+                PhoneNumber = userInfo?.PhoneNumber ?? "",
                 UserRole = await permissionService.GetUserRole(user.Id) ?? null
             };
 

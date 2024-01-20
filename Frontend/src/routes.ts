@@ -18,7 +18,6 @@ const router = createRouter({
     { path: "/users/:userId", component: UserDetails },
     {
       path: "/:pathMatch(.*)*",
-      name: "not-found",
       beforeEnter: (to, _, next) => {
         if (to.path.includes("swagger") || to.path.includes("api")) {
           window.location.href = to.fullPath;
@@ -32,7 +31,7 @@ const router = createRouter({
 });
 
 router.beforeEach((_, __, next) => {
-  if (actionStack.value.length > 0) {
+  if (actionStack.value && actionStack.value.length > 0) {
     popAction();
     return next(false);
   }

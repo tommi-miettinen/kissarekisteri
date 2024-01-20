@@ -89,7 +89,10 @@ const handleStopAvatarEdit = () => {
     >
       {{ t(`Roles.${user.userRole.roleName}`) }}
     </div>
-    <div>{{ user.email }}</div>
+    <div>
+      <div>{{ user.email }}</div>
+      <div>{{ user.phoneNumber }}</div>
+    </div>
     <div v-if="user.isBreeder">{{ "Kasvattaja" }}</div>
     <button
       tabIndex="0"
@@ -118,10 +121,12 @@ const handleStopAvatarEdit = () => {
     @onCancel="removeAction(ActionTypes.USER_SETTINGS)"
   >
     <div class="p-3 d-flex flex-column gap-2">
+      <h2 class="mb-4">Profiilin asetukset</h2>
       <div class="d-flex flex-column gap-2">
         <div class="form-check form-switch align-items-center p-0 d-flex gap-2">
           <label class="form-check-label fw-semibold me-auto" for="show-email">Näytä sähköposti</label>
           <input
+            :checked="user.showEmail"
             style="height: 24px; width: 48px"
             class="form-check-input form-check form-switch"
             type="checkbox"
@@ -132,6 +137,7 @@ const handleStopAvatarEdit = () => {
         <div class="form-check form-switch align-items-center p-0 d-flex gap-2">
           <label class="form-check-label fw-semibold me-auto" for="show-phone">Näytä puhelinnumero</label>
           <input
+            :checked="user.showPhoneNumber"
             style="height: 24px; width: 48px"
             class="form-check-input form-check form-switch"
             type="checkbox"
@@ -142,6 +148,7 @@ const handleStopAvatarEdit = () => {
         <div class="form-check form-switch align-items-center p-0 d-flex gap-2">
           <label class="form-check-label fw-semibold me-auto" for="show-phone">Rekisteröidy kasvattajaksi</label>
           <input
+            :checked="user.isBreeder"
             style="height: 24px; width: 48px"
             class="form-check-input form-check form-switch"
             type="checkbox"
