@@ -24,8 +24,12 @@
 - Upload photos for cat shows (requires EventOrganizer or Admin role)
 - Request ownership of cats that they dont own
 - Accept ownership requests of their cats to transfer to the requester
+- View and filter cats by name, breed and sex
+- View and filter users by name and role
+- View and filter cat shows by name and location
+- Assign roles to other users (requires Admin role)
 
-## Used technologies
+## Technologies
 
 ### Frontend
 - TypeScript
@@ -45,10 +49,12 @@
 - Azure Blob Storage for file storage
 - Azure App Services for hosting
 - Azure SQL Server for data storage
+- Azure Adb2C for authorization & authentication
 
 ### Other
 - Terraform for infrastructure management
 - Docker for development database
+- Github Actions for deployment pipeline
 
 
 # Screenshots
