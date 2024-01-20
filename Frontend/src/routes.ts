@@ -19,15 +19,14 @@ const router = createRouter({
     {
       path: "/:pathMatch(.*)*",
       name: "not-found",
-      component: {
-        beforeRouteEnter(to, _, next) {
-          if (to.path.includes("swagger") || to.path.includes("api")) {
-            window.location.href = to.fullPath;
-          } else {
-            next("/cats");
-          }
-        },
+      beforeEnter: (to, _, next) => {
+        if (to.path.includes("swagger") || to.path.includes("api")) {
+          window.location.href = to.fullPath;
+        } else {
+          next("/cats");
+        }
       },
+      redirect: "/cats",
     },
   ],
 });
@@ -37,7 +36,6 @@ router.beforeEach((_, __, next) => {
     popAction();
     return next(false);
   }
-
   next();
 });
 
