@@ -5,30 +5,24 @@ using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-
 namespace Kissarekisteri.Controllers;
 
-[ApiController]
-[Route("api/users")]
-public class UserController(
-    UserService userService,
-    CatService catService,
-    PermissionService permissionService
-    ) : Controller
+public class UserController(UserService userService, PermissionService permissionService) : ODataController
 {
-
     [Authorize]
-    [HttpGet("{userId}/permissions")]
+    [HttpGet("api/users/{userId}/permissions")]
     public async Task<ActionResult<List<Permission>>> GetPermissionsByUserId(string userId)
     {
         var permissions = await permissionService.GetPermissions(userId);
-        return Json(permissions);
+        return Ok(permissions);
     }
-
 
     [HttpGet("{userId}")]
     public async Task<ActionResult<UserResponse>> GetUser([FromRoute] string userId)
@@ -38,39 +32,34 @@ public class UserController(
         {
             return NotFound();
         }
-        return Json(user);
+        return Ok(user);
     }
 
-    [HttpGet]
+    [HttpGet("/api/users")]
     public async Task<ActionResult<List<UserResponse>>> GetUsers()
     {
         var users = await userService.GetUsers();
-        return Json(users);
+        return Ok(users);
     }
 
-    [HttpGet("roles")]
-    public async Task<ActionResult<List<Role>>> GetRoles()
+    [HttpGet("odata/roles")]
+    [EnableQuery]
+    public ActionResult<IQueryable> GetRoles()
     {
-        var roles = await permissionService.GetRoles();
-        return Json(roles);
+        return Ok(permissionService.GetRoles());
     }
 
-    /// <summary>
-    /// Endpoint for getting the currently logged in user.
-    /// </summary>
-    /// <remarks>Needs a logged in user</remarks>
-    /// <returns>The logged in user</returns>
     [Authorize]
-    [HttpGet("me")]
+    [HttpGet("api/users/me")]
     public async Task<ActionResult<UserResponse>> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await userService.GetUserById(userId);
-        return Json(user);
+        return Ok(user);
     }
 
     [Authorize]
-    [HttpDelete("{userId}")]
+    [HttpDelete("api/users/{userId}")]
     public async Task<ActionResult<Result<bool>>> DeleteUser([FromRoute] string userId)
     {
         var result = await userService.DeleteUserByIdAsync(userId);
@@ -78,7 +67,7 @@ public class UserController(
     }
 
     [Authorize]
-    [HttpPost]
+    [HttpPost("/api/users")]
     public async Task<ActionResult<Result<UserResponse>>> CreateUser([FromBody] UserCreatePayloadDTO userPayload)
     {
         var result = await userService.CreateUser(userPayload);
@@ -86,11 +75,11 @@ public class UserController(
         {
             return HttpStatusMapper.Map(result.Errors);
         }
-        return Json(result);
+        return Ok(result);
     }
 
     [Authorize]
-    [HttpPatch("{userId}")]
+    [HttpPatch("api/users/{userId}")]
     public async Task<ActionResult<Result<UserResponse>>> UpdateUser([FromBody] UserUpdateRequestDTO userPayload)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -99,34 +88,16 @@ public class UserController(
         {
             return HttpStatusMapper.Map(result.Errors);
         }
-        return Json(result);
+        return Ok(result);
     }
 
-
-    /// <summary>
-    /// Endpoint for uploading a user avatar.
-    /// </summary>
-    /// <param name="file"></param>
-    /// <returns></returns>
     [Authorize]
-    [HttpPost("avatar")]
+    [HttpPost("api/users/avatar")]
     public async Task<ActionResult<UserResponse>> UploadUserAvatar(IFormFile file)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await userService.UploadUserPhotoAsync(userId, file);
-        return Json(user);
-    }
-
-    /// <summary>
-    /// Gets all cats owned by a user.
-    /// </summary>
-    /// <param name="userId">The ID of the user</param>
-    /// <returns>The cats owned by the user</returns>
-    [HttpGet("{userId}/cats")]
-    public async Task<ActionResult<Cat>> GetCatsByUserId(string userId)
-    {
-        var catsByUserId = await catService.GetCatByUserIdAsync(userId);
-        return Json(catsByUserId);
+        return Ok(user);
     }
 }
 

@@ -1,7 +1,6 @@
 ﻿using Kissarekisteri.Database;
 using Kissarekisteri.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,19 +32,12 @@ public class PermissionService(KissarekisteriDbContext dbContext)
 
     public async Task<UserRole> GetUserRole(string userId)
     {
-        try
-        {
-            var userRole = await dbContext.UserRoles
-                .Where(ur => ur.UserId == userId)
-                .Include(ur => ur.Role)
-                .FirstOrDefaultAsync();
+        var userRole = await dbContext.UserRoles
+            .Where(ur => ur.UserId == userId)
+            .Include(ur => ur.Role)
+            .FirstOrDefaultAsync();
 
-            return userRole;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        return userRole;
     }
 
     public async Task AssignRoleWithoutPermissionCheck(string userId, int roleId)
@@ -85,8 +77,8 @@ public class PermissionService(KissarekisteriDbContext dbContext)
         return role;
     }
 
-    public async Task<List<Role>> GetRoles()
+    public IQueryable<Role> GetRoles()
     {
-        return await dbContext.Roles.ToListAsync();
+        return dbContext.Roles;
     }
 }

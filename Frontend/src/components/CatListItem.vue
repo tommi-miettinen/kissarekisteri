@@ -13,14 +13,12 @@ const props = defineProps({
 const { t } = useI18n();
 
 const navigateToCat = (cat: Cat) => navigateTo(`/cats/${cat.id}`);
-
-const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainecoon_jb2.jpg/250px-Mainecoon_jb2.jpg";
-
 const isMale = computed(() => props.cat.sex === "Male");
+const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainecoon_jb2.jpg/450px-Mainecoon_jb2.jpg?20070329082601";
 </script>
 
 <template>
-  <div class="border-bottom py-1 w-100">
+  <div v-if="cat" class="border-bottom py-1 w-100">
     <div
       :id="'cat-list-item' + cat.id"
       tabindex="0"

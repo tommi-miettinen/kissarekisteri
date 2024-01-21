@@ -44,7 +44,7 @@ const { data: catsData, refetch: refetchCats } = useQuery({
   queryFn: () => userAPI.getCatsByUserId(routeParamUserId),
 });
 
-const cats = computed(() => catsData.value?.data);
+const cats = computed(() => catsData.value);
 
 const addCatMutation = useMutation({
   mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),

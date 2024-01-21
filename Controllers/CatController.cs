@@ -14,7 +14,6 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
 
-
 public class CatController(CatService catService) : ODataController
 {
     [HttpGet("odata/cats")]
@@ -64,7 +63,6 @@ public class CatController(CatService catService) : ODataController
     public async Task<ActionResult<Result<CatTransfer>>> TransferCat([FromRoute] int catId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
         var result = await catService.CreateTransferRequest(userId, catId);
 
         if (!result.IsSuccess)

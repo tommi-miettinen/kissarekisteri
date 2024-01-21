@@ -17,12 +17,10 @@ public class CatService(
     UserService userService
 )
 {
-    public async Task<Result<Cat>> UploadCatPhoto(int catId, IFormFile file)
+    public async Task<Result<bool>> UploadCatPhoto(int catId, IFormFile file)
     {
-        var result = new Result<Cat>();
-
+        var result = new Result<bool>();
         var cat = await dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
-
         var uploadedPhoto = await uploadService.UploadFile(file);
 
         if (uploadedPhoto == null)
@@ -30,17 +28,9 @@ public class CatService(
             return result.AddError(CatErrors.PhotoUploadError);
         }
 
-        await dbContext.CatPhotos.AddAsync(
-            new CatPhoto { CatId = cat.Id, Url = uploadedPhoto.Uri.AbsoluteUri }
-        );
-
+        await dbContext.CatPhotos.AddAsync(new CatPhoto { CatId = cat.Id, Url = uploadedPhoto.Uri.AbsoluteUri });
         await dbContext.SaveChangesAsync();
-
-        var catWithPhotos = await dbContext.Cats
-            .Include(c => c.Photos)
-            .FirstOrDefaultAsync(cat => cat.Id == catId);
-
-        return result.Success(catWithPhotos);
+        return result.Success(true);
     }
 
     public async Task<Result<Cat>> UpdateCatByIdAsync(int catId, CatRequest catPayload)
@@ -59,39 +49,12 @@ public class CatService(
         cat.ImageUrl = catPayload.ImageUrl;
 
         await dbContext.SaveChangesAsync();
-
-        return result.Success(cat);
-    }
-
-
-    public async Task<Result<Cat>> GetCatByIdAsync(int catId)
-    {
-        var result = new Result<Cat>();
-
-        var cat = await dbContext.Cats
-            .Include(c => c.Photos)
-            .Include(c => c.Results)
-            .ThenInclude(Results => Results.CatShow)
-            .Include(c => c.Parents)
-            .ThenInclude(parent => parent.ParentCat)
-            .Include(c => c.Kittens)
-            .ThenInclude(kitten => kitten.ChildCat)
-            .FirstOrDefaultAsync(cat => cat.Id == catId);
-
-        if (cat == null)
-            return result.AddError(CatErrors.NotFound);
-
-        cat.Owner = await userService.GetUserById(cat.OwnerId);
-        cat.Breeder = await userService.GetUserById(cat.BreederId);
-
-
         return result.Success(cat);
     }
 
     public async Task<Result<CatTransfer>> CreateTransferRequest(string userId, int catId)
     {
         var result = new Result<CatTransfer>();
-
         var cat = await dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
 
         if (cat == null)
@@ -108,7 +71,6 @@ public class CatService(
 
         await dbContext.CatTransfers.AddAsync(catTransfer);
         await dbContext.SaveChangesAsync();
-
         return result.Success(catTransfer);
     }
 
@@ -129,12 +91,12 @@ public class CatService(
 
         foreach (var transfer in catTransfers)
         {
-            var cat = await GetCatByIdAsync(transfer.CatId);
+            var cat = await dbContext.Cats.FirstOrDefaultAsync(c => c.Id == transfer.CatId);
             var dto = new CatTransferResultDTO
             {
                 Id = transfer.Id,
                 CatId = transfer.CatId,
-                Cat = cat.Data,
+                Cat = cat,
                 RequesterId = transfer.RequesterId,
                 ConfirmerId = transfer.ConfirmerId,
                 Confirmed = transfer.Confirmed,
@@ -146,7 +108,6 @@ public class CatService(
 
         return result.Success(catTransferResultDTOs);
     }
-
 
     public async Task<Result<bool>> ConfirmTransferRequest(string userId, int transferId)
     {
@@ -174,7 +135,6 @@ public class CatService(
 
         return result.Success(true);
     }
-
 
     public IQueryable<Cat> GetCats()
     {
@@ -216,42 +176,34 @@ public class CatService(
 
         if (newCatRequest.MotherId.HasValue)
         {
-            var motherResult = await GetCatByIdAsync(newCatRequest.MotherId.Value);
-            if (motherResult.IsSuccess)
+            var mother = await dbContext.Cats.AnyAsync(c => c.Id == newCatRequest.MotherId.Value);
+
+            if (mother)
             {
                 var motherRelation = new CatRelation
                 {
                     ParentId = newCatRequest.MotherId.Value,
                     KittenId = cat.Id
                 };
-                dbContext.CatRelations.Add(motherRelation);
-            }
-            else
-            {
-                result.AddError(CatErrors.MotherNotFound);
+                await dbContext.CatRelations.AddAsync(motherRelation);
             }
         }
 
         if (newCatRequest.FatherId.HasValue)
         {
-            var fatherResult = await GetCatByIdAsync(newCatRequest.FatherId.Value);
-            if (fatherResult.IsSuccess)
+            var father = await dbContext.Cats.AnyAsync(c => c.Id == newCatRequest.FatherId.Value);
+            if (father)
             {
                 var fatherRelation = new CatRelation
                 {
                     ParentId = newCatRequest.FatherId.Value,
                     KittenId = cat.Id
                 };
-                dbContext.CatRelations.Add(fatherRelation);
-            }
-            else
-            {
-                result.AddError(CatErrors.FatherNotFound);
+                await dbContext.CatRelations.AddAsync(fatherRelation);
             }
         }
 
         await dbContext.SaveChangesAsync();
-
         return result.Success(cat);
     }
 

@@ -8,6 +8,8 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     try {
+      if (!msalInstance) return config;
+
       const accounts = msalInstance.getAllAccounts();
 
       if (accounts.length === 0) return config;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, watchEffect } from "vue";
+import { ref, watch } from "vue";
 import catAPI from "../api/catAPI";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery, useMutation } from "@tanstack/vue-query";
@@ -65,12 +65,15 @@ const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainec
 
 const userIsCatOwner = computed(() => user.value && cat.value && user.value.id === cat.value.ownerId);
 
-watchEffect(() => {
-  console.log(catData.value);
-});
-
 watch(route, () => refetch());
-watch(cat, () => cat.value && setCurrentRouteLabel(cat.value.name), { immediate: true });
+watch(
+  cat,
+  () => {
+    console.log(cat.value);
+    cat.value && setCurrentRouteLabel(cat.value.name);
+  },
+  { immediate: true }
+);
 
 const isMale = computed(() => cat.value?.sex === "Male");
 </script>
@@ -119,7 +122,7 @@ const isMale = computed(() => cat.value?.sex === "Male");
 
       <div v-if="cat.results && cat.results.length > 0">
         <h5 class="m-2">{{ t("CatDetails.placings") }}</h5>
-        <div v-for="result in cat.results" class="border-bottom py-1">
+        <div v-if="cat.results" v-for="result in cat.results" class="border-bottom py-1">
           <div
             tabindex="0"
             @keyup.enter="() => navigateToCatShow(result.catShowId)"

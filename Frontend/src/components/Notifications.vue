@@ -49,12 +49,10 @@ const navigate = (path: string) => {
   }
   navigateTo(path);
 };
-
-console.log(loggedInUser.value);
 </script>
 
 <template>
-  <div v-if="false" class="p-3 text-break overflow-auto gap-2 d-flex flex-column">
+  <div class="p-3 text-break overflow-auto gap-2 d-flex flex-column">
     <div v-if="loggedInUser?.userRole.roleName === 'Admin'" class="d-flex gap-1">
       <button
         tabindex="0"

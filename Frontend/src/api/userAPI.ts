@@ -28,8 +28,8 @@ const getUsers = async () => {
 };
 
 const getCatsByUserId = async (userId: string) => {
-  const result = await apiClient.get<ApiResponse<Cat[]>>(`/api/users/${userId}/cats`);
-  return result.data;
+  const result = await apiClient.get<OdataResponse<Cat>>(`/odata/cats?$filter=OwnerId eq '${userId}'`);
+  return result.data.value;
 };
 
 const editUser = async (user: User) => {
@@ -65,10 +65,15 @@ const createUser = async (userPayload: any) => {
   }
 };
 
+interface Role {
+  id: number;
+  name: string;
+}
+
 const getRoles = async () => {
   try {
-    const result = await apiClient.get<any[]>(`/api/users/roles`);
-    return result.data;
+    const result = await apiClient.get<OdataResponse<Role>>(`/odata/roles`);
+    return result.data.value;
   } catch (err) {
     console.log(err);
   }

@@ -9,18 +9,20 @@ const createCatShowEvent = async (catShowEvent: CatShowEvent) => {
   }
 };
 
-const getEvents = async (): Promise<CatShowEvent[] | undefined> => {
+const getEvents = async () => {
   try {
-    const result = await apiClient.get(`/api/catshows`);
-    return result.data;
+    const result = await apiClient.get<OdataResponse<CatShowEvent>>(`/odata/catshows?$orderby=StartDate desc`);
+    return result.data.value;
   } catch (err) {
     console.log(err);
   }
 };
 
 const getEventById = async (eventId: number) => {
-  const result = await apiClient.get<CatShowEvent>(`api/catshows/${eventId}`);
-  return result.data;
+  const result = await apiClient.get<OdataResponse<CatShowEvent>>(
+    `/odata/catshows?$filter=Id eq ${eventId}&$expand=Cats($expand=Cat),Photos,Results`
+  );
+  return result.data.value[0];
 };
 
 const joinEvent = async (eventId: number, catIds: number[]) => {

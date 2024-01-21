@@ -26,7 +26,6 @@ const { data: confirmationRequestsData } = useQuery({
   queryKey: QueryKeys.CONFIRMATION_REQUESTS,
   queryFn: () => catAPI.getConfirmationRequests(),
   refetchInterval: 5000,
-  enabled: Boolean(user.value?.id),
 });
 
 const confirmationRequests = computed(() => confirmationRequestsData.value?.data);

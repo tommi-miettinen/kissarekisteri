@@ -101,6 +101,8 @@ modelBuilder.EnableLowerCamelCase();
 modelBuilder.EntitySet<MsalConfigDTO>("MsalConfig").EntityType.HasKey(dto => dto.Id);
 modelBuilder.EntitySet<Cat>("Cats");
 modelBuilder.EntitySet<CatBreed>("CatBreeds");
+modelBuilder.EntitySet<CatShow>("CatShows");
+modelBuilder.EntitySet<Role>("Roles");
 
 builder.Services
     .AddControllers(options => options.Filters.Add(new ModelValidationFilter()))
@@ -109,6 +111,7 @@ builder.Services
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, false));
     }).AddOData(
     options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null).AddRouteComponents(
         "odata",

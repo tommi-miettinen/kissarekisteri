@@ -85,7 +85,7 @@ const { data: userCatsData, refetch: refetchUserCats } = useQuery({
   enabled: Boolean(user.value),
 });
 
-const userCats = computed(() => userCatsData.value?.data);
+const userCats = computed(() => userCatsData.value);
 
 watch(user, () => refetchUserCats());
 

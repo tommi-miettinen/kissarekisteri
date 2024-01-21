@@ -35,8 +35,8 @@ interface Cat {
   results: CatShowResult[];
   parents: { parentCat: Cat }[];
   kittens: { childCat: Cat }[];
-  owner: User | null;
-  breeder: User | null;
+  owner?: User;
+  breeder?: User;
 }
 
 interface CatShowResult {

@@ -18,12 +18,18 @@ const showFatherCatSuggestions = ref(false);
 
 const { data: motherCats, refetch: refetchMotherCats } = useQuery({
   queryKey: ["motherCats" + motherCatQuery.value],
-  queryFn: () => catAPI.getCats(`name=${motherCatQuery.value}&breed=${newCat.value.breed}&limit=3&sex=female`),
+  queryFn: () =>
+    catAPI.getCats({
+      filter: `name=${motherCatQuery.value}&breed=${newCat.value.breed}&limit=3&sex=female`,
+    }),
 });
 
 const { data: fatherCats, refetch: refetchFatherCats } = useQuery({
   queryKey: ["fatherCats" + fatherCatQuery.value],
-  queryFn: () => catAPI.getCats(`name=${fatherCatQuery.value}&breed=${newCat.value.breed}&limit=3&sex=male`),
+  queryFn: () =>
+    catAPI.getCats({
+      filter: `name=${fatherCatQuery.value}&breed=${newCat.value.breed}&limit=3&sex=male`,
+    }),
 });
 
 const { data: catBreedData } = useQuery({
@@ -31,7 +37,7 @@ const { data: catBreedData } = useQuery({
   queryFn: () => catAPI.getCatBreeds(),
 });
 
-const catBreeds = computed(() => catBreedData.value?.data);
+const catBreeds = computed(() => catBreedData.value);
 
 const newCat = ref<CatPayload>({
   name: "",

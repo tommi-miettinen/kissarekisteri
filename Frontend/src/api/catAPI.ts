@@ -1,5 +1,6 @@
 import apiClient from "./apiClient";
 import userAPI from "./userAPI";
+import buildQuery from "odata-query";
 
 const addCat = async (cat: CatPayload) => {
   try {
@@ -15,9 +16,24 @@ const deleteCatById = async (catId: number): Promise<true | undefined> => {
   return true;
 };
 
-const getCats = async (query?: string) => {
+interface Query {
+  filter?: string;
+  expand?: string;
+  top?: number;
+  skip?: number;
+  orderBy?: string;
+}
+
+const getCats = async (query?: Query) => {
   try {
-    const result = await apiClient.get<OdataResponse<Cat>>(`odata/cats`);
+    const filter = query?.filter ? `$filter=${query.filter}` : "";
+    const expand = query?.expand ? `$expand=${query.expand}` : "";
+    const top = query?.top ? `$top=${query.top}` : "";
+    const skip = query?.skip ? `$skip=${query.skip}` : "";
+    const orderBy = query?.orderBy ? `$orderby=${query.orderBy}` : "";
+    const url = `odata/cats?${filter}&${expand}&${top}&${skip}&${orderBy}`;
+
+    const result = await apiClient.get<OdataResponse<Cat>>(url);
     return result.data.value;
   } catch (err) {
     console.log(err);
@@ -27,31 +43,30 @@ const getCats = async (query?: string) => {
 const getCatWithOwnerAndBreeder = async (catId: number) => {
   try {
     const cat = await getCatById(catId);
+    if (!cat) return;
+
     const owner = await userAPI.getUserById(cat.ownerId);
     const breeder = await userAPI.getUserById(cat.breederId);
 
-    cat.owner = owner ? owner : null;
-    cat.breeder = breeder ? breeder : null;
+    cat.owner = owner;
+    cat.breeder = breeder;
 
-    console.log(cat);
     return cat;
   } catch (err) {
     console.log(err);
   }
 };
 
-const getCatsByUserId = async (userId: string) => {
-  try {
-    const result = await apiClient.get<ApiResponse<Cat>>(`/users/${userId}/cats`);
-    return result.data;
-  } catch (err) {
-    console.log(err);
-  }
-};
-
 const getCatById = async (catId: number) => {
-  const result = await apiClient.get<OdataResponse<Cat>>(`odata/cats?$filter=Id eq ${catId}&$expand=photos`);
-  return result.data.value[0];
+  try {
+    const filter = `Id eq ${catId}`;
+    const expand = `Kittens($expand=ChildCat),Parents($expand=ParentCat),Photos,Results($expand=CatShow)`;
+    const url = `odata/cats?$filter=${filter}&$expand=${expand}`;
+    const result = await apiClient.get<OdataResponse<Cat>>(url);
+    return result.data.value[0];
+  } catch (error) {
+    console.error("Error fetching cat data:", error);
+  }
 };
 
 const editCat = async (updatedCat: EditCatPayload) => {
@@ -88,7 +103,7 @@ const requestOwnershipTransfer = async (catId: number) => {
 
 const getConfirmationRequests = async () => {
   try {
-    const result = await apiClient.get<ApiResponse<CatTransferRequest[]>>(`/cats/transfer-requests`);
+    const result = await apiClient.get<ApiResponse<CatTransferRequest[]>>(`/api/cats/transfer-requests`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -106,8 +121,8 @@ const confirmTransferRequest = async (requestId: number) => {
 
 const getCatBreeds = async () => {
   try {
-    const result = await apiClient.get<ApiResponse<CatBreed[]>>(`/cats/breeds`);
-    return result.data;
+    const result = await apiClient.get<OdataResponse<CatBreed>>(`odata/catbreeds`);
+    return result.data.value;
   } catch (err) {
     console.log(err);
   }
@@ -118,7 +133,6 @@ export default {
   getCatById,
   deleteCatById,
   getCats,
-  getCatsByUserId,
   editCat,
   uploadCatImage,
   getCatBreeds,
