@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch, watchEffect } from "vue";
+import { ref, computed, watchEffect } from "vue";
 import userAPI from "../api/userAPI";
 import { userHasPermission, user } from "../store/userStore";
 import { useRoute } from "vue-router";
@@ -16,10 +16,11 @@ import { ActionTypes, isCurrentAction, removeAction, pushAction } from "../store
 import ThreeDotsIcon from "../icons/ThreeDotsIcon.vue";
 import Drawer from "../components/Drawer.vue";
 import { isMobile } from "../store/actionStore";
-import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
 import { PermissionTypes } from "../store/userStore";
 import { setCurrentRouteLabel } from "../store/routeStore";
+import { useFileDialog } from "@vueuse/core";
+import { formatDate } from "../utils/formatDate";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -34,15 +35,12 @@ const {
   isError,
 } = useQuery({ queryKey: QueryKeys.CAT_SHOW_BY_ID(eventId), queryFn: () => catShowAPI.getEventById(eventId) });
 
-watch(
-  [() => catShow.value, () => user.value],
-  () => {
-    if (catShow.value?.cats) {
-      selectedCatIds.value = catShow.value.cats.filter((c) => c.cat.ownerId === user.value?.id).map((c) => c.cat.id);
-    }
-  },
-  { immediate: true }
-);
+const usersAttendingCats = computed(() => catShow.value?.cats.filter((c) => c.cat.ownerId === user.value?.id) || []);
+const isUserAnAttendee = computed(() => catShow.value && catShow.value.cats.some((cat) => cat.cat.ownerId === user.value?.id));
+
+watchEffect(() => {
+  selectedCatIds.value = catShow.value ? usersAttendingCats.value.map((c) => c.cat.id) : [];
+});
 
 const joinEventMutation = useMutation({
   mutationFn: () => catShowAPI.joinEvent(eventId, selectedCatIds.value),
@@ -64,9 +62,7 @@ const updatePlacingMutation = useMutation({
 });
 
 const uploadMutation = useMutation({
-  mutationFn: (file: File) => {
-    return catShowAPI.addCatShowPhoto(eventId, file);
-  },
+  mutationFn: (file: File) => catShowAPI.addCatShowPhoto(eventId, file),
   onSuccess: () => refetch(),
 });
 
@@ -79,38 +75,24 @@ const leaveEventMutation = useMutation({
   },
 });
 
-const { data: userCatsData, refetch: refetchUserCats } = useQuery({
+const { data: userCats, refetch: refetchUserCats } = useQuery({
   queryKey: ["userCats"],
   queryFn: () => user.value && userAPI.getCatsByUserId(user.value.id),
   enabled: Boolean(user.value),
 });
 
-const userCats = computed(() => userCatsData.value);
-
-watch(user, () => refetchUserCats());
-
-watchEffect(() => {
-  if (catShow.value) {
-    setCurrentRouteLabel(catShow.value.name);
-  }
-});
+watchEffect(() => user && refetchUserCats());
+watchEffect(() => catShow.value && setCurrentRouteLabel(catShow.value.name));
 
 const leavingEvent = ref(false);
 
-const isUserAnAttendee = computed(() => catShow.value && catShow.value.cats.some((cat) => cat.cat.ownerId === user.value?.id));
+const { onChange, open } = useFileDialog({
+  accept: "image/*",
+});
 
-const handleFileChange = async (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  if (!input || !input.files) return;
-
-  uploadMutation.mutate(input.files[0]);
-};
-
-const lightboxPhotos = computed(() => {
-  if (catShow.value?.photos) {
-    return catShow.value.photos.map((photo) => photo.url);
-  }
-  return [];
+onChange((files) => {
+  if (!files) return;
+  uploadMutation.mutate(files[0]);
 });
 
 const catsGroupedByBreed = computed(() => {
@@ -129,9 +111,6 @@ const catsGroupedByBreed = computed(() => {
   }
   return {};
 });
-
-const inputRef = ref();
-const triggerFileInput = () => inputRef.value?.click();
 
 const leaveEvent = () => {
   leaveEventMutation.mutate();
@@ -152,17 +131,8 @@ const dropdownRefs = ref<Record<string, HTMLDivElement>>({});
 
 const startJoiningCatShow = () => (isMobile.value ? pushAction(ActionTypes.JOINING_EVENT_MOBILE) : pushAction(ActionTypes.JOINING_EVENT));
 
-const formatDate = (start: string, end: string) => {
-  const startDate = moment(start).format("ll");
-  const endDate = moment(end).format("ll");
-  const startTime = moment(start).format("LT");
-  const endTime = moment(end).format("LT");
-  return `${startDate} - ${endDate}, ${startTime} - ${endTime}`;
-};
-
 const removeSingleCat = (catId: number) => {
   const userCats = catShow.value?.cats.filter((c) => c.cat.ownerId === user.value?.id && c.cat.id !== catId);
-
   selectedCatIds.value = userCats?.map((c) => c.cat.id) || [];
   joinEventMutation.mutate();
 };
@@ -275,13 +245,12 @@ const removeSingleCat = (catId: number) => {
       <div class="d-flex flex-column gap-2">
         <button
           v-if="userHasPermission(PermissionTypes.CatShowWrite)"
-          @click="triggerFileInput"
+          @click="() => open()"
           class="btn bg-black text-white rounded-3 px-5 py-2 me-auto focus-ring w-sm-100"
         >
-          <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
           Lisää kuva +
         </button>
-        <ImageGallery v-if="catShow" :photos="lightboxPhotos" />
+        <ImageGallery v-if="catShow && catShow.photos" :photos="catShow.photos" />
       </div>
     </div>
   </div>

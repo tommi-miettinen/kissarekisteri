@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watch } from "vue";
+import { ref } from "vue";
 import { userIsLoggedInUser } from "../store/userStore";
 import { toast } from "vue-sonner";
 import userAPI from "../api/userAPI";
@@ -19,6 +19,7 @@ import { isMobile } from "../store/actionStore";
 import UserInfoCard from "../components/UserInfoCard.vue";
 import { setCurrentRouteLabel } from "../store/routeStore";
 import Spinner from "../components/Spinner.vue";
+import { watchEffect } from "vue";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -33,18 +34,15 @@ const {
   isError: isUserError,
   isFetched: isUserFetched,
   isLoading: isUserLoading,
-  refetch: refetchUser,
 } = useQuery({
   queryKey: QueryKeys.USER_BY_ID(routeParamUserId),
   queryFn: () => userAPI.getUserById(routeParamUserId),
 });
 
-const { data: catsData, refetch: refetchCats } = useQuery({
+const { data: cats, refetch: refetchCats } = useQuery({
   queryKey: QueryKeys.USERS_CATS_BY_ID(routeParamUserId),
   queryFn: () => userAPI.getCatsByUserId(routeParamUserId),
 });
-
-const cats = computed(() => catsData.value);
 
 const addCatMutation = useMutation({
   mutationFn: (newCatPayload: CatPayload) => catAPI.addCat(newCatPayload),
@@ -67,19 +65,9 @@ const deleteMutation = useMutation({
   onError: () => toast.error("Jokin meni vikaan."),
 });
 
-watch(
-  [() => route.path, () => user.value],
-  () => {
-    user.value && setCurrentRouteLabel(user.value.givenName);
-    refetchCats();
-    refetchUser();
-  },
-  { immediate: true }
-);
+watchEffect(() => user.value && setCurrentRouteLabel(user.value.givenName));
 
-const editCat = async (updatedCat: EditCatPayload) => {
-  await catAPI.editCat(updatedCat);
-};
+const editCat = (updatedCat: EditCatPayload) => catAPI.editCat(updatedCat);
 
 const catListItemRefs = ref<Record<number, HTMLElement>>({});
 
@@ -190,7 +178,9 @@ const startAddingCat = () => pushAction(isMobile.value ? ActionTypes.ADDING_CAT_
     :visible="isCurrentAction(ActionTypes.ADDING_CAT_MOBILE) && isMobile"
     @onCancel="removeAction(ActionTypes.ADDING_CAT_MOBILE)"
   >
-    <CatForm @onSave="addCatMutation.mutate" />
+    <div style="min-height: 92vh">
+      <CatForm @onSave="addCatMutation.mutate" />
+    </div>
   </Drawer>
   <Modal :visible="isCurrentAction(ActionTypes.ADDING_CAT) && !isMobile" @onCancel="removeAction(ActionTypes.ADDING_CAT)">
     <div style="width: 550px">
@@ -207,7 +197,9 @@ const startAddingCat = () => pushAction(isMobile.value ? ActionTypes.ADDING_CAT_
     :visible="isCurrentAction(ActionTypes.EDITING_CAT_MOBILE) && isMobile"
     @onCancel="removeAction(ActionTypes.EDITING_CAT_MOBILE)"
   >
-    <CatForm :cat="catToBeEdited" @onSave="editCat" />
+    <div class="height:100vh">
+      <CatForm :cat="catToBeEdited" @onSave="editCat" />
+    </div>
   </Drawer>
   <Modal @onCancel="removeAction(ActionTypes.DELETING_CAT)" :visible="isCurrentAction(ActionTypes.DELETING_CAT)">
     <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">

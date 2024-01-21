@@ -38,7 +38,7 @@ public class CatShowController(CatShowService catShowService) : ODataController
         return Ok("Left cat show successfully");
     }
 
-    [HttpGet("catshows")]
+    [HttpGet]
     [EnableQuery]
     public ActionResult<IQueryable<CatShow>> GetEvents()
     {

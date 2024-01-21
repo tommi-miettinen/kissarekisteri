@@ -7,10 +7,6 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
-  headerText: {
-    type: String,
-    required: false,
-  },
 });
 
 const internalVisible = ref(false);

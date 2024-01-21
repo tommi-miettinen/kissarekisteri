@@ -1,25 +1,17 @@
 import apiClient from "./apiClient";
 
 const createCatShowEvent = async (catShowEvent: CatShowEvent) => {
-  try {
-    const result = await apiClient.post(`/catshows`, catShowEvent);
-    return result.data;
-  } catch (err) {
-    console.log(err);
-  }
+  const result = await apiClient.post(`/catshows`, catShowEvent);
+  return result.data;
 };
 
 const getEvents = async () => {
-  try {
-    const result = await apiClient.get<OdataResponse<CatShowEvent>>(`/catshows?$orderby=StartDate desc`);
-    return result.data.value;
-  } catch (err) {
-    console.log(err);
-  }
+  const result = await apiClient.get<OdataResponse<CatShowEvent[]>>(`/catshows?$orderby=StartDate desc`);
+  return result.data.value;
 };
 
 const getEventById = async (eventId: number) => {
-  const result = await apiClient.get<OdataResponse<CatShowEvent>>(
+  const result = await apiClient.get<OdataResponse<CatShowEvent[]>>(
     `/catshows?$filter=Id eq ${eventId}&$expand=Cats($expand=Cat),Photos,Results`
   );
   return result.data.value[0];
@@ -31,12 +23,8 @@ const joinEvent = async (eventId: number, catIds: number[]) => {
 };
 
 const leaveEvent = async (eventId: number) => {
-  try {
-    const result = await apiClient.delete(`/catshows/${eventId}/leave`);
-    return result.data;
-  } catch (err) {
-    console.log(err);
-  }
+  const result = await apiClient.delete(`/catshows/${eventId}/leave`);
+  return result.data;
 };
 
 const assignCatPlacing = async (eventId: number, payload: CatShowResultPayload) => {
@@ -47,15 +35,11 @@ const assignCatPlacing = async (eventId: number, payload: CatShowResultPayload) 
 const addCatShowPhoto = async (eventId: number, image: File) => {
   if (!image) return;
 
-  try {
-    const formData = new FormData();
-    formData.append("file", image);
+  const formData = new FormData();
+  formData.append("file", image);
 
-    const result = await apiClient.post(`/catshows/${eventId}/photos`, formData);
-    return result.data;
-  } catch (err) {
-    console.log(err);
-  }
+  const result = await apiClient.post(`/catshows/${eventId}/photos`, formData);
+  return result.data;
 };
 
 export default {

@@ -14,6 +14,14 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  closeOnFocusLost: {
+    type: Boolean,
+    default: true,
+  },
+  closeOnOutsideClick: {
+    type: Boolean,
+    default: true,
+  },
   placement: {
     type: String as () => Placement,
     default: "bottom-start",
@@ -29,11 +37,17 @@ const hasBeenFocused = ref(false);
 
 const handleDropdownClose = (event: MouseEvent | KeyboardEvent) => {
   const target = event.target as HTMLElement;
-  if (event instanceof KeyboardEvent && event.key === "Escape") {
+  const isEscapeKey = event instanceof KeyboardEvent && event.key === "Escape";
+  const isInsideDropdown = dropdownContentRef.value?.contains(target);
+  const isInsideTrigger = props.triggerRef?.contains(target);
+
+  if (isEscapeKey) {
     return dropdown.value?.hide();
   }
 
-  if (!dropdownContentRef.value?.contains(target) && !props.triggerRef?.contains(target)) {
+  if (!props.closeOnOutsideClick) return;
+
+  if (!isInsideDropdown && !isInsideTrigger) {
     return dropdown.value?.hide();
   }
 };
@@ -56,10 +70,12 @@ watch(
 
     useEventListener(document, "keyup", handleDropdownClose);
     onClickOutside(dropdownContentRef, handleDropdownClose);
-  }
+  },
+  { immediate: true }
 );
 
 watch(focused, (isFocused) => {
+  if (!props.closeOnFocusLost) return;
   if (isFocused) hasBeenFocused.value = true;
   if (!isFocused && hasBeenFocused.value) {
     dropdown.value?.hide();

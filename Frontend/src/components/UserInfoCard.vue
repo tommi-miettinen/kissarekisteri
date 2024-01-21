@@ -36,6 +36,7 @@ const uploadAvatarMutation = useMutation({
   },
 });
 
+/*
 const registerAsBreederMutation = useMutation({
   mutationFn: () => userAPI.registerAsBreeder(),
   onSuccess: () => {
@@ -44,6 +45,7 @@ const registerAsBreederMutation = useMutation({
     queryClient.invalidateQueries({ queryKey: QueryKeys.USER_BY_ID(props.user.id) });
   },
 });
+*/
 
 onMounted(() => {
   if (!userIsLoggedInUser(props.user)) return;
@@ -115,11 +117,7 @@ const handleStopAvatarEdit = () => {
       <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>
   </Modal>
-  <Overlay
-    :headerText="'Profiilin asetukset'"
-    :visible="isCurrentAction(ActionTypes.USER_SETTINGS) && isMobile"
-    @onCancel="removeAction(ActionTypes.USER_SETTINGS)"
-  >
+  <Overlay :visible="isCurrentAction(ActionTypes.USER_SETTINGS) && isMobile" @onCancel="removeAction(ActionTypes.USER_SETTINGS)">
     <div class="p-3 d-flex flex-column gap-2">
       <h2 class="mb-4">Profiilin asetukset</h2>
       <div class="d-flex flex-column gap-2">
@@ -162,7 +160,6 @@ const handleStopAvatarEdit = () => {
         </div>
         <button
           tabIndex="0"
-          @click="registerAsBreederMutation.mutate"
           v-if="!user.isBreeder && userIsLoggedInUser(user)"
           class="btn bg-black text-white focus-ring px-4 rounded-3 me-auto w-sm-100"
         >

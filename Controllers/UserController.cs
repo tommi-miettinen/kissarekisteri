@@ -30,7 +30,6 @@ public class UserController(UserService userService, PermissionService permissio
     public async Task<ActionResult<UserResponse>> GetUser([FromRoute] string userId)
     {
         var user = await userService.GetUserById(userId);
-        List<UserResponse> users = [user];
         return Ok(user);
     }
 

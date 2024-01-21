@@ -22,7 +22,7 @@ const { data: roles } = useQuery({
 const newUser = ref({
   name: "",
   password: "",
-  role: roles.value ? roles.value[0].value : "",
+  role: roles.value ? roles.value[0] : "",
 });
 
 watchEffect(() => {
@@ -41,7 +41,7 @@ const createUserPayload = computed(() => {
     DisplayName: newUser.value.name,
     Password: newUser.value.password,
     Email: name[0] + "." + name[1] + "@gmail.com",
-    Role: newUser.value.role,
+    Role: "User",
   };
   return payload;
 });

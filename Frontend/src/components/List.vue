@@ -12,7 +12,7 @@ interface SearchProp {
 
 const props = defineProps({
   items: {
-    type: Array as () => any[],
+    type: Array as () => unknown[],
     required: true,
   },
   itemsPerPage: {

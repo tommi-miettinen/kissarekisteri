@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from "vue";
 import Modal from "../components/Modal.vue";
 import { useI18n } from "vue-i18n";
 import catShowAPI from "../api/catShowAPI";
@@ -9,17 +8,15 @@ import { userHasPermission } from "../store/userStore";
 import List from "../components/List.vue";
 import Drawer from "../components/Drawer.vue";
 import CatShowForm from "../components/CatShowForm.vue";
-import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
 import Spinner from "../components/Spinner.vue";
 import { PermissionTypes } from "../store/userStore";
 import { navigateTo, setCurrentRouteLabel } from "../store/routeStore";
 import { onMounted } from "vue";
 import { isMobile, ActionTypes, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
+import { formatDate } from "../utils/formatDate";
 
 const { t } = useI18n();
-
-const addingEvent = ref(false);
 
 const catShowsQuery = useQuery({
   queryKey: QueryKeys.CAT_SHOWS,
@@ -33,14 +30,6 @@ const createCatShowMutation = useMutation({
     catShowsQuery.refetch();
   },
 });
-
-const formatDate = (start: string, end: string) => {
-  const startDate = moment(start).format("l");
-  const endDate = moment(end).format("l");
-  const startTime = moment(start).format("LT");
-  const endTime = moment(end).format("LT");
-  return `${startDate} - ${endDate}, ${startTime} - ${endTime}`;
-};
 
 const searchKeys: SearchKeys<CatShowEvent> = [
   {
@@ -102,7 +91,7 @@ onMounted(() => setCurrentRouteLabel("Näyttelyt"));
       <template #action>
         <button
           v-if="!isMobile && userHasPermission(PermissionTypes.CatShowWrite)"
-          @click="addingEvent = true"
+          @click="pushAction(ActionTypes.ADDING_CAT_SHOW)"
           type="button"
           class="btn bg-black text-white rounded-3 px-5 ms-auto w-sm-100"
         >
@@ -130,7 +119,7 @@ onMounted(() => setCurrentRouteLabel("Näyttelyt"));
   >
     <CatShowForm v-if="isMobile" @onSave="createCatShowMutation.mutate" />
   </Drawer>
-  <Modal @onCancel="addingEvent = false" :visible="addingEvent && !isMobile">
+  <Modal :visible="isCurrentAction(ActionTypes.ADDING_CAT_SHOW) && !isMobile" @onCancel="removeAction(ActionTypes.ADDING_CAT_SHOW)">
     <div style="width: 550px">
       <CatShowForm v-if="!isMobile" @onSave="createCatShowMutation.mutate" />
     </div>

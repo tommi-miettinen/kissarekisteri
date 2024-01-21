@@ -108,7 +108,7 @@ interface ApiResponse<T> {
 }
 
 interface OdataResponse<T> {
-  value: T[];
+  value: T;
 }
 
 interface CatTransferRequest {
@@ -141,4 +141,12 @@ type SearchKeys<T> = SearchKey<T>[];
 interface Role {
   id: number;
   name: string;
+}
+
+interface Query {
+  filter?: string;
+  expand?: string;
+  top?: number;
+  skip?: number;
+  orderBy?: string;
 }

@@ -24,7 +24,7 @@ public class CatController(CatService catService) : ODataController
         return Ok(catService.GetCats());
     }
 
-    [HttpGet("ocatbreeds")]
+    [HttpGet("catbreeds")]
     [EnableQuery]
     public ActionResult<IQueryable<CatBreed>> GetBreeds()
     {

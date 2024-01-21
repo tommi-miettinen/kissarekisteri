@@ -14,9 +14,7 @@ const props = defineProps({
 const { t } = useI18n();
 
 const colors = ["#818cf8", "#fb7185", "#34d399", "#f87171", "#facc15"];
-const selectedColor = computed(() => {
-  if (props.user) return colors[(props.user.givenName + props.user.surname).length % colors.length];
-});
+const selectedColor = computed(() => props.user && colors[(props.user.givenName + props.user.surname).length % colors.length]);
 </script>
 
 <template>

@@ -18,7 +18,7 @@ const props = defineProps({
     default: false,
   },
   photos: {
-    type: Array as () => string[],
+    type: Array as () => { url: string }[],
     required: true,
   },
 });
@@ -71,7 +71,7 @@ onMounted(() => {
     onLongPress(thumbnailRef, () => {
       if (!isMobile.value) return;
       currentImage.value = images[index];
-      currentImageUrl.value = props.photos[index];
+      currentImageUrl.value = props.photos[index].url;
       drawerOpen.value = true;
       thumbnailRef.focus();
     });
@@ -89,7 +89,7 @@ useEventListener(scrollContainer, "scroll", getClosestImage);
         :ref="el => thumbnailRefs[index] = el as HTMLDivElement"
         tabindex="0"
         v-for="(photo, index) in photos"
-        :key="photo"
+        :key="photo.url"
         class="border image-container rounded-4 d-flex focus-ring"
         style="position: relative; width: 100%; overflow: hidden"
         @keyup.enter="handleImageClick(index)"
@@ -97,7 +97,7 @@ useEventListener(scrollContainer, "scroll", getClosestImage);
       >
         <div style="width: 100%; padding-top: 100%; position: relative"></div>
         <img
-          :src="photo"
+          :src="photo.url"
           alt="Cat image"
           class="image thumbnail scale-up-animation"
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
@@ -140,7 +140,7 @@ useEventListener(scrollContainer, "scroll", getClosestImage);
       <img
         :ref="el => images[index] = el as HTMLImageElement"
         @click.stop
-        :src="photos[index]"
+        :src="photos[index].url"
         alt="Cat image"
         class="lightbox-image"
         style="object-fit: contain; height: min-content; scroll-snap-align: center"

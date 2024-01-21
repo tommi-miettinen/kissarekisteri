@@ -110,6 +110,21 @@
   opacity: 0.8;
 }
 
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background-color: white;
+
+  padding: 8px;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 8px;
+  left: 8px;
+}
+
 $form-check-input-border: var(--#{$prefix}border-width) solid #000;
 $form-check-input-focus-border: #000;
 $form-check-input-checked-bg-color: #000;

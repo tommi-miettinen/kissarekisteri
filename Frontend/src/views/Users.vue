@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, reactive, watchEffect } from "vue";
+import { ref, reactive, watchEffect } from "vue";
 import userAPI from "../api/userAPI";
 import UserListItem from "../components/UserListItem.vue";
 import { useQuery } from "@tanstack/vue-query";
@@ -21,12 +21,14 @@ import { PermissionTypes, userHasPermission } from "../store/userStore";
 
 const { t } = useI18n();
 
-const userQuery = useQuery({
+const {
+  data: users,
+  refetch: refetchUsers,
+  isLoading: isUserLoading,
+} = useQuery({
   queryKey: QueryKeys.USERS,
   queryFn: userAPI.getUsers,
 });
-
-const users = computed(() => userQuery.data.value);
 
 const translatedValues = ref<(User & { role: string })[]>([]);
 
@@ -51,7 +53,7 @@ const deleteUserMutation = useMutation({
   },
   onSuccess: () => {
     toast.info("Käyttäjä poistettu");
-    userQuery.refetch();
+    refetchUsers();
   },
   onError: () => {
     toast.error("Käyttäjän poistaminen epäonnistui");
@@ -95,8 +97,8 @@ onMounted(() => setCurrentRouteLabel("Käyttäjät"));
 
 <template>
   <h3 v-if="false" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
-  <Spinner v-if="userQuery.isLoading.value" />
-  <div v-if="!userQuery.isLoading.value" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto">
+  <Spinner v-if="isUserLoading" />
+  <div v-if="!isUserLoading" style="min-height: 100%" class="d-flex flex-column p-3 p-sm-5 rounded col-12 col-lg-8 mx-auto">
     <h3 class="mb-3">{{ t("Users.members") }}</h3>
     <List
       :searchKeys="searchKeys"

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import Navigation from "./components/Navigation.vue";
 import { Toaster } from "vue-sonner";
-import { onMounted, ref } from "vue";
-import { fetchPermissions, fetchUser } from "./store/userStore";
+import { ref } from "vue";
 import BottomNavigation from "./components/BottomNavigation.vue";
 import { focusFirstVisibleElement } from "./utils/focusFirstVisibleElement";
 import Appbar from "./components/Appbar.vue";
@@ -10,13 +9,7 @@ import { toast } from "vue-sonner";
 import { isMobile } from "./store/actionStore";
 
 const mainRef = ref<HTMLElement>();
-
-onMounted(async () => {
-  await fetchUser();
-  await fetchPermissions();
-});
-
-const focusMainContent = () => focusFirstVisibleElement(mainRef.value!);
+const focusMainContent = () => mainRef.value && focusFirstVisibleElement(mainRef.value);
 </script>
 
 <template>
@@ -35,20 +28,3 @@ const focusMainContent = () => focusFirstVisibleElement(mainRef.value!);
     <BottomNavigation v-if="isMobile" />
   </div>
 </template>
-
-<style>
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background-color: white;
-
-  padding: 8px;
-  z-index: 100;
-}
-
-.skip-link:focus {
-  top: 8px;
-  left: 8px;
-}
-</style>

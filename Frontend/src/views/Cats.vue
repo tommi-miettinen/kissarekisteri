@@ -21,7 +21,6 @@ const translatedValues = ref<Cat[]>();
 
 watchEffect(() => {
   if (!catsQuery.data.value) return;
-
   translatedValues.value = catsQuery.data.value.map((cat) => {
     return {
       ...cat,

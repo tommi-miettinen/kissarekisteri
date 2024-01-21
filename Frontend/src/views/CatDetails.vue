@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { watchEffect } from "vue";
 import catAPI from "../api/catAPI";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { useQuery, useMutation } from "@tanstack/vue-query";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
@@ -14,15 +14,19 @@ import moment from "moment";
 import { QueryKeys } from "../api/queryKeys";
 import { setCurrentRouteLabel } from "../store/routeStore";
 import Spinner from "../components/Spinner.vue";
+import { useFileDialog } from "@vueuse/core";
+import { catAltUrl } from "../placeholders";
+import { navigateTo } from "../store/routeStore";
 
 const { t } = useI18n();
-const router = useRouter();
 const route = useRoute();
-
 const routeParamCatId = +route.params.catId;
 
+const isMale = computed(() => cat.value?.sex === "Male");
+const userIsCatOwner = computed(() => user.value && cat.value && user.value.id === cat.value.ownerId);
+
 const {
-  data: catData,
+  data: cat,
   refetch,
   isError: isCatError,
   isLoading,
@@ -30,9 +34,8 @@ const {
 } = useQuery({
   queryKey: QueryKeys.CAT_BY_ID(+route.params.catId),
   queryFn: () => catAPI.getCatWithOwnerAndBreeder(+route.params.catId),
+  enabled: Boolean(routeParamCatId),
 });
-
-const cat = computed(() => catData.value);
 
 const uploadMutation = useMutation({
   mutationFn: (file: File) => catAPI.uploadCatImage(cat.value!.id, file),
@@ -44,38 +47,16 @@ const catMutation = useMutation({
   onSuccess: () => refetch(),
 });
 
-const requestOwnershipTransfer = async () => {
-  await catAPI.requestOwnershipTransfer(cat.value!.id);
-};
+const requestOwnershipTransfer = async () => catAPI.requestOwnershipTransfer(cat.value!.id);
 
-const navigateToCatShow = (catShowId: number) => router.push(`/catshows/${catShowId}`);
+const { onChange: onFileChange, open } = useFileDialog({
+  accept: "image/*",
+});
 
-const handleFileChange = async (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  if (!input || !input.files) return;
+onFileChange((files) => files && uploadMutation.mutate(files[0]));
 
-  uploadMutation.mutate(input.files[0]);
-};
-
-const inputRef = ref();
-const triggerFileInput = () => inputRef.value?.click();
-
-const catPhotos = computed(() => (cat.value ? cat.value.photos.map((photo) => photo.url) : []));
-const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainecoon_jb2.jpg/450px-Mainecoon_jb2.jpg?20070329082601";
-
-const userIsCatOwner = computed(() => user.value && cat.value && user.value.id === cat.value.ownerId);
-
-watch(route, () => refetch());
-watch(
-  cat,
-  () => {
-    console.log(cat.value);
-    cat.value && setCurrentRouteLabel(cat.value.name);
-  },
-  { immediate: true }
-);
-
-const isMale = computed(() => cat.value?.sex === "Male");
+watchEffect(() => cat.value && setCurrentRouteLabel(cat.value.name));
+watchEffect(() => route.path && refetch());
 </script>
 
 <template>
@@ -91,7 +72,7 @@ const isMale = computed(() => cat.value?.sex === "Male");
         <div class="border rounded-4 hero-image" style="position: relative; min-height: 300px; overflow: hidden; width: 100%">
           <img
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
-            :src="cat.imageUrl || altUrl"
+            :src="cat.imageUrl || catAltUrl"
             alt="Cat image"
           />
         </div>
@@ -125,8 +106,8 @@ const isMale = computed(() => cat.value?.sex === "Male");
         <div v-if="cat.results" v-for="result in cat.results" class="border-bottom py-1">
           <div
             tabindex="0"
-            @keyup.enter="() => navigateToCatShow(result.catShowId)"
-            @click="() => navigateToCatShow(result.catShowId)"
+            @keyup.enter="() => navigateTo(`/catshows/${result.catShowId}`)"
+            @click="() => navigateTo(`/catshows/${result.catShowId}`)"
             class="hover-bg-1 p-3 d-flex rounded-3 flex align-items-center focus-ring cursor-pointer"
           >
             <div class="d-flex align-items-center gap-2">
@@ -138,7 +119,6 @@ const isMale = computed(() => cat.value?.sex === "Male");
           </div>
         </div>
       </div>
-
       <div v-if="cat.parents && cat.parents.length > 0">
         <h5 class="m-2">{{ t("CatDetails.parents") }}</h5>
         <CatListItem v-for="parent in cat.parents" :cat="parent.parentCat" />
@@ -160,17 +140,17 @@ const isMale = computed(() => cat.value?.sex === "Male");
       <div class="d-flex flex-column gap-2">
         <button
           v-if="userIsCatOwner"
-          @click="triggerFileInput"
+          type="button"
+          @click="() => open()"
           class="btn bg-black rounded-3 text-white px-5 py-2 me-auto focus-ring focus-ring-dark w-sm-100"
         >
-          <input class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
           {{ t("CatDetails.uploadImage") }} +
         </button>
         <ImageGallery
           :key="cat.id"
           :thumbnailActionButtonText="t('CatDetails.setAsProfilePicture')"
           showThumbnailActionButton
-          :photos="catPhotos"
+          :photos="cat.photos || []"
           @onThumbnailActionClick="catMutation.mutate"
         />
       </div>
@@ -178,7 +158,7 @@ const isMale = computed(() => cat.value?.sex === "Male");
   </div>
 </template>
 
-<style>
+<style scoped>
 .cat-image {
   max-width: 100%;
 }
