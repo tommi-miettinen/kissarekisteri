@@ -54,7 +54,7 @@ console.log(loggedInUser.value);
 </script>
 
 <template>
-  <div class="p-3 text-break overflow-auto gap-2 d-flex flex-column">
+  <div v-if="false" class="p-3 text-break overflow-auto gap-2 d-flex flex-column">
     <div v-if="loggedInUser?.userRole.roleName === 'Admin'" class="d-flex gap-1">
       <button
         tabindex="0"
@@ -98,6 +98,6 @@ console.log(loggedInUser.value);
         Hyväksy
       </button>
     </div>
-    <div class="py-3" v-if="!confirmationRequestsToDisplay || confirmationRequestsToDisplay.length === 0">Ei ilmoituksia</div>
+    <div class="py-3" v-if="!confirmationRequestsToDisplay">Ei ilmoituksia</div>
   </div>
 </template>

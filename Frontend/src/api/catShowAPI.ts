@@ -2,7 +2,7 @@ import apiClient from "./apiClient";
 
 const createCatShowEvent = async (catShowEvent: CatShowEvent) => {
   try {
-    const result = await apiClient.post(`/catshows`, catShowEvent);
+    const result = await apiClient.post(`/api/catshows`, catShowEvent);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -11,7 +11,7 @@ const createCatShowEvent = async (catShowEvent: CatShowEvent) => {
 
 const getEvents = async (): Promise<CatShowEvent[] | undefined> => {
   try {
-    const result = await apiClient.get(`/catshows`);
+    const result = await apiClient.get(`/api/catshows`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -19,18 +19,18 @@ const getEvents = async (): Promise<CatShowEvent[] | undefined> => {
 };
 
 const getEventById = async (eventId: number) => {
-  const result = await apiClient.get<CatShowEvent>(`/catshows/${eventId}`);
+  const result = await apiClient.get<CatShowEvent>(`api/catshows/${eventId}`);
   return result.data;
 };
 
 const joinEvent = async (eventId: number, catIds: number[]) => {
-  const result = await apiClient.post(`/catshows/${eventId}/join`, { catIds });
+  const result = await apiClient.post(`/api/catshows/${eventId}/join`, { catIds });
   return result.data;
 };
 
 const leaveEvent = async (eventId: number) => {
   try {
-    const result = await apiClient.delete(`/catshows/${eventId}/leave`);
+    const result = await apiClient.delete(`/api/catshows/${eventId}/leave`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -38,7 +38,7 @@ const leaveEvent = async (eventId: number) => {
 };
 
 const assignCatPlacing = async (eventId: number, payload: CatShowResultPayload) => {
-  const result = await apiClient.post(`/catshows/${eventId}/place`, payload);
+  const result = await apiClient.post(`/api/catshows/${eventId}/place`, payload);
   return result.data;
 };
 

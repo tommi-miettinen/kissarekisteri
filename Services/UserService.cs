@@ -183,8 +183,7 @@ public class UserService(
 
             var user = await graphClient.Users[userId].GetAsync(requestConfiguration =>
             {
-                requestConfiguration.QueryParameters.Select =
-                new string[] { "givenName", "surname", "id", "displayName", "identities" };
+                requestConfiguration.QueryParameters.Select = ["givenName", "surname", "id", "displayName", "identities"];
             });
 
             var response = new UserResponse

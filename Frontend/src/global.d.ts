@@ -35,8 +35,8 @@ interface Cat {
   results: CatShowResult[];
   parents: { parentCat: Cat }[];
   kittens: { childCat: Cat }[];
-  owner: User;
-  breeder: User;
+  owner: User | null;
+  breeder: User | null;
 }
 
 interface CatShowResult {
@@ -101,9 +101,14 @@ interface MsalConfig {
 }
 
 interface ApiResponse<T> {
+  value: T[];
   isSuccess: boolean;
   data: T;
   errors: any[];
+}
+
+interface OdataResponse<T> {
+  value: T[];
 }
 
 interface CatTransferRequest {

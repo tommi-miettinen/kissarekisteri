@@ -1,13 +1,16 @@
 ﻿using Azure.Identity;
 using Azure.Storage.Blobs;
 using Kissarekisteri.Database;
+using Kissarekisteri.DTOs;
 using Kissarekisteri.Filters;
+using Kissarekisteri.Models;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,10 +18,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OData.ModelBuilder;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,13 +94,27 @@ builder.Services
         };
     });
 
-builder.Services.AddDbContext<KissarekisteriDbContext>(options => options.UseSqlServer(config.GetConnectionString("AzureSQL")));
+builder.Services.AddDbContext<KissarekisteriDbContext>(options => options.UseSqlServer(config.GetConnectionString("AzureSQL")), ServiceLifetime.Scoped);
+
+var modelBuilder = new ODataConventionModelBuilder();
+modelBuilder.EnableLowerCamelCase();
+modelBuilder.EntitySet<MsalConfigDTO>("MsalConfig").EntityType.HasKey(dto => dto.Id);
+modelBuilder.EntitySet<Cat>("Cats");
+modelBuilder.EntitySet<CatBreed>("CatBreeds");
 
 builder.Services
     .AddControllers(options => options.Filters.Add(new ModelValidationFilter()))
-    .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+    }).AddOData(
+    options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null).AddRouteComponents(
+        "odata",
+        modelBuilder.GetEdmModel()));
 
-builder.Services.AddControllers();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddJWTAuth();

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, watchEffect } from "vue";
 import catAPI from "../api/catAPI";
 import { useRoute, useRouter } from "vue-router";
 import { useQuery, useMutation } from "@tanstack/vue-query";
@@ -29,10 +29,10 @@ const {
   isFetched: catIsFetched,
 } = useQuery({
   queryKey: QueryKeys.CAT_BY_ID(+route.params.catId),
-  queryFn: () => catAPI.getCatById(+route.params.catId),
+  queryFn: () => catAPI.getCatWithOwnerAndBreeder(+route.params.catId),
 });
 
-const cat = computed(() => catData.value?.data);
+const cat = computed(() => catData.value);
 
 const uploadMutation = useMutation({
   mutationFn: (file: File) => catAPI.uploadCatImage(cat.value!.id, file),
@@ -64,6 +64,10 @@ const catPhotos = computed(() => (cat.value ? cat.value.photos.map((photo) => ph
 const altUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mainecoon_jb2.jpg/450px-Mainecoon_jb2.jpg?20070329082601";
 
 const userIsCatOwner = computed(() => user.value && cat.value && user.value.id === cat.value.ownerId);
+
+watchEffect(() => {
+  console.log(catData.value);
+});
 
 watch(route, () => refetch());
 watch(cat, () => cat.value && setCurrentRouteLabel(cat.value.name), { immediate: true });

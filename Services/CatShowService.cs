@@ -86,10 +86,9 @@ namespace Kissarekisteri.Services
             return result.Success(true);
         }
 
-        public async Task<List<CatShow>> GetCatShows()
+        public IQueryable<CatShow> GetCatShows()
         {
-            var catShows = await dbContext.CatShows.ToListAsync();
-            return catShows;
+            return dbContext.CatShows;
         }
 
         public async Task<CatShow> UploadCatShowPhoto(string userId, int catShowId, IFormFile file)

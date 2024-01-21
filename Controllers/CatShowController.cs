@@ -4,7 +4,9 @@ using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -12,7 +14,7 @@ namespace Kissarekisteribackend.Controllers;
 
 [ApiController]
 [Route("api/catshows")]
-public class CatShowController(CatShowService catShowService) : Controller
+public class CatShowController(CatShowService catShowService) : ODataController
 {
     [Authorize]
     [HttpPost("{catShowId}/join")]
@@ -39,10 +41,10 @@ public class CatShowController(CatShowService catShowService) : Controller
 
 
     [HttpGet]
-    public async Task<ActionResult<List<CatShow>>> GetEvents()
+    [EnableQuery]
+    public ActionResult<IQueryable<CatShow>> GetEvents()
     {
-        var catShows = await catShowService.GetCatShows();
-        return Json(catShows);
+        return Ok(catShowService.GetCatShows());
     }
 
     [Authorize]
@@ -51,7 +53,7 @@ public class CatShowController(CatShowService catShowService) : Controller
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var catShow = await catShowService.UploadCatShowPhoto(userId, catShowId, file);
-        return Json(catShow);
+        return Ok(catShow);
     }
 
     [HttpGet("{catShowId}")]
@@ -62,7 +64,7 @@ public class CatShowController(CatShowService catShowService) : Controller
         {
             return NotFound();
         }
-        return Json(catShow);
+        return Ok(catShow);
     }
 
     [Authorize]
@@ -70,7 +72,7 @@ public class CatShowController(CatShowService catShowService) : Controller
     public async Task<ActionResult<CatShowResult>> AssignCatPlacing(int catShowId, [FromBody] CatShowResultDTO resultPayload)
     {
         var result = await catShowService.AssignCatPlacing(catShowId, resultPayload);
-        return Json(result);
+        return Ok(result);
     }
 
     [Authorize]
@@ -78,6 +80,6 @@ public class CatShowController(CatShowService catShowService) : Controller
     public async Task<ActionResult<CatShow>> CreateEvent([FromBody] CatShow newCatShow)
     {
         var catShow = await catShowService.CreateCatShow(newCatShow);
-        return Json(catShow);
+        return Ok(catShow);
     }
 }

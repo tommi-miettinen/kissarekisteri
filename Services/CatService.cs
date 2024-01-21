@@ -176,48 +176,14 @@ public class CatService(
     }
 
 
-    public async Task<Result<List<Cat>>> GetCatsAsync(CatQueryParamsDTO queryParams = null)
+    public IQueryable<Cat> GetCats()
     {
-        var result = new Result<List<Cat>>();
-        queryParams ??= new CatQueryParamsDTO();
-
-        var queryableCats = dbContext.Cats.AsQueryable();
-
-
-        if (!string.IsNullOrEmpty(queryParams.Name))
-        {
-            queryableCats = queryableCats.Where(c => c.Name.Contains(queryParams.Name));
-        }
-
-        if (!string.IsNullOrEmpty(queryParams.Breed))
-        {
-            queryableCats = queryableCats.Where(c => c.Breed == queryParams.Breed);
-        }
-
-        if (!string.IsNullOrEmpty(queryParams.Sex))
-        {
-            queryableCats = queryableCats.Where(c => c.Sex == queryParams.Sex);
-        }
-
-        if (queryParams.Limit.HasValue)
-        {
-            queryableCats = queryableCats.Take(queryParams.Limit.Value);
-        }
-
-
-        var filteredCats = await queryableCats.ToListAsync();
-
-        result.AddError(CatErrors.NotFound);
-
-
-        return result.Success(filteredCats);
+        return dbContext.Cats;
     }
 
-    public async Task<Result<List<CatBreed>>> GetBreedsAsync()
+    public IQueryable<CatBreed> GetBreeds()
     {
-        var result = new Result<List<CatBreed>>();
-        var breeds = await dbContext.CatBreeds.ToListAsync();
-        return result.Success(breeds);
+        return dbContext.CatBreeds;
     }
 
     public async Task<Result<bool>> DeleteCatByIdAsync(int catId)

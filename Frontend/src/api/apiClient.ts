@@ -2,7 +2,7 @@ import { msalInstance, scopes } from "../auth";
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.DEV ? "https://localhost:44316/api" : "/api",
+  baseURL: import.meta.env.DEV ? "https://localhost:44316" : "/",
 });
 
 apiClient.interceptors.request.use(

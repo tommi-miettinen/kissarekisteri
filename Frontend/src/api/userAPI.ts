@@ -2,7 +2,7 @@ import apiClient from "./apiClient";
 
 const getCurrentUser = async () => {
   try {
-    const result = await apiClient.get<User>(`/users/me`);
+    const result = await apiClient.get<User>(`/api/users/me`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -11,7 +11,7 @@ const getCurrentUser = async () => {
 
 const getUserById = async (userId: string) => {
   try {
-    const result = await apiClient.get<User>(`/users/${userId}`);
+    const result = await apiClient.get<User>(`/api/users/${userId}`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -20,7 +20,7 @@ const getUserById = async (userId: string) => {
 
 const getUsers = async () => {
   try {
-    const result = await apiClient.get<User[]>(`/users`);
+    const result = await apiClient.get<User[]>(`/api/users`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -28,13 +28,13 @@ const getUsers = async () => {
 };
 
 const getCatsByUserId = async (userId: string) => {
-  const result = await apiClient.get<ApiResponse<Cat[]>>(`/users/${userId}/cats`);
+  const result = await apiClient.get<ApiResponse<Cat[]>>(`/api/users/${userId}/cats`);
   return result.data;
 };
 
 const editUser = async (user: User) => {
   try {
-    const result = await apiClient.put(`/users/${user.id}`, user);
+    const result = await apiClient.put(`/api/users/${user.id}`, user);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -43,7 +43,7 @@ const editUser = async (user: User) => {
 
 const getPermissions = async (userId: string) => {
   try {
-    const result = await apiClient.get<Permission[]>(`users/${userId}/permissions`);
+    const result = await apiClient.get<Permission[]>(`/api/users/${userId}/permissions`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -58,7 +58,7 @@ const deleteUserById = async (userId: string) => {
 const createUser = async (userPayload: any) => {
   console.log(userPayload);
   try {
-    const result = await apiClient.post(`/users`, userPayload);
+    const result = await apiClient.post(`/api/users`, userPayload);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -67,7 +67,7 @@ const createUser = async (userPayload: any) => {
 
 const getRoles = async () => {
   try {
-    const result = await apiClient.get<any[]>(`users/roles`);
+    const result = await apiClient.get<any[]>(`/api/users/roles`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -83,7 +83,7 @@ const uploadAvatar = async (image: File) => {
     const formData = new FormData();
     formData.append("file", image);
 
-    const result = await apiClient.post<ApiResponse<Cat>>(`/users/avatar`, formData);
+    const result = await apiClient.post<ApiResponse<Cat>>(`/api/users/avatar`, formData);
     return result.data;
   } catch (err) {
     console.log(err);

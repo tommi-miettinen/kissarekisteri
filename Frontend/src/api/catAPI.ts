@@ -1,4 +1,5 @@
 import apiClient from "./apiClient";
+import userAPI from "./userAPI";
 
 const addCat = async (cat: CatPayload) => {
   try {
@@ -16,8 +17,24 @@ const deleteCatById = async (catId: number): Promise<true | undefined> => {
 
 const getCats = async (query?: string) => {
   try {
-    const result = await apiClient.get<ApiResponse<Cat[]>>(`/cats?${query || ""}`);
-    return result.data.data;
+    const result = await apiClient.get<OdataResponse<Cat>>(`odata/cats`);
+    return result.data.value;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const getCatWithOwnerAndBreeder = async (catId: number) => {
+  try {
+    const cat = await getCatById(catId);
+    const owner = await userAPI.getUserById(cat.ownerId);
+    const breeder = await userAPI.getUserById(cat.breederId);
+
+    cat.owner = owner ? owner : null;
+    cat.breeder = breeder ? breeder : null;
+
+    console.log(cat);
+    return cat;
   } catch (err) {
     console.log(err);
   }
@@ -33,9 +50,8 @@ const getCatsByUserId = async (userId: string) => {
 };
 
 const getCatById = async (catId: number) => {
-  const result = await apiClient.get<ApiResponse<Cat>>(`/cats/${catId}`);
-  result.data.errors = ["test", "test2"];
-  return result.data;
+  const result = await apiClient.get<OdataResponse<Cat>>(`odata/cats?$filter=Id eq ${catId}&$expand=photos`);
+  return result.data.value[0];
 };
 
 const editCat = async (updatedCat: EditCatPayload) => {
@@ -109,4 +125,5 @@ export default {
   requestOwnershipTransfer,
   getConfirmationRequests,
   confirmTransferRequest,
+  getCatWithOwnerAndBreeder,
 };
