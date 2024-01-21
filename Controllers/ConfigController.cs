@@ -7,12 +7,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 
-
 namespace Kissarekisteri.Controllers
 {
+    [Route("odata")]
     public class ConfigController(IConfiguration config, IHostEnvironment env) : ODataController
     {
-        [HttpGet("odata/msalconfig")]
+        [HttpGet("msalconfig")]
         [EnableQuery]
         public ActionResult Get()
         {

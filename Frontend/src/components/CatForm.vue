@@ -3,6 +3,7 @@ import { ref, watchEffect, nextTick, computed, watch } from "vue";
 import catAPI from "../api/catAPI";
 import { useQuery } from "@tanstack/vue-query";
 import moment from "moment";
+import { QueryKeys } from "../api/queryKeys";
 
 const motherCatQuery = ref("");
 const fatherCatQuery = ref("");
@@ -20,20 +21,24 @@ const { data: motherCats, refetch: refetchMotherCats } = useQuery({
   queryKey: ["motherCats" + motherCatQuery.value],
   queryFn: () =>
     catAPI.getCats({
-      filter: `name=${motherCatQuery.value}&breed=${newCat.value.breed}&limit=3&sex=female`,
+      filter: `contains(Name, '${motherCatQuery.value}') and breed eq '${newCat.value.breed}' and sex eq 'female'`,
+      top: 3,
     }),
+  enabled: motherCatQuery.value !== "",
 });
 
 const { data: fatherCats, refetch: refetchFatherCats } = useQuery({
   queryKey: ["fatherCats" + fatherCatQuery.value],
   queryFn: () =>
     catAPI.getCats({
-      filter: `name=${fatherCatQuery.value}&breed=${newCat.value.breed}&limit=3&sex=male`,
+      filter: `contains(Name, '${fatherCatQuery.value}') and breed eq '${newCat.value.breed}' and sex eq 'male'`,
+      top: 3,
     }),
+  enabled: fatherCatQuery.value !== "",
 });
 
 const { data: catBreedData } = useQuery({
-  queryKey: ["catBreeds"],
+  queryKey: QueryKeys.CAT_BREEDS,
   queryFn: () => catAPI.getCatBreeds(),
 });
 

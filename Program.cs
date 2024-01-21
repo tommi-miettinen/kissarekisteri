@@ -103,6 +103,7 @@ modelBuilder.EntitySet<Cat>("Cats");
 modelBuilder.EntitySet<CatBreed>("CatBreeds");
 modelBuilder.EntitySet<CatShow>("CatShows");
 modelBuilder.EntitySet<Role>("Roles");
+modelBuilder.EntitySet<UserResponse>("Users");
 
 builder.Services
     .AddControllers(options => options.Filters.Add(new ModelValidationFilter()))

@@ -12,10 +12,11 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
 
+[Route("odata/catshows")]
 public class CatShowController(CatShowService catShowService) : ODataController
 {
     [Authorize]
-    [HttpPost("api/{catShowId}/join")]
+    [HttpPost("{catShowId}/join")]
     public async Task<IActionResult> JoinCatShow(
         int catShowId,
         [FromBody] CatShowCatAttendeeIds catIds
@@ -28,7 +29,7 @@ public class CatShowController(CatShowService catShowService) : ODataController
     }
 
     [Authorize]
-    [HttpDelete("api/{catShowId}/leave")]
+    [HttpDelete("{catShowId}/leave")]
     public async Task<IActionResult> LeaveCatShow(int catShowId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -37,8 +38,7 @@ public class CatShowController(CatShowService catShowService) : ODataController
         return Ok("Left cat show successfully");
     }
 
-
-    [HttpGet("odata/catshows")]
+    [HttpGet("catshows")]
     [EnableQuery]
     public ActionResult<IQueryable<CatShow>> GetEvents()
     {
@@ -46,7 +46,7 @@ public class CatShowController(CatShowService catShowService) : ODataController
     }
 
     [Authorize]
-    [HttpPost("api/{catShowId}/photos")]
+    [HttpPost("{catShowId}/photos")]
     public async Task<ActionResult<CatShow>> UploadCatShowPhoto(int catShowId, IFormFile file)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -66,7 +66,7 @@ public class CatShowController(CatShowService catShowService) : ODataController
     }
 
     [Authorize]
-    [HttpPost("api/{catShowId}/place")]
+    [HttpPost("{catShowId}/place")]
     public async Task<ActionResult<CatShowResult>> AssignCatPlacing(int catShowId, [FromBody] CatShowResultDTO resultPayload)
     {
         var result = await catShowService.AssignCatPlacing(catShowId, resultPayload);

@@ -11,4 +11,5 @@ export const QueryKeys = {
   CAT_BY_ID: (catId: number) => ["cat", catId],
   CONFIRMATION_REQUESTS: ["confirmationRequests"],
   ROLES: ["roles"],
+  CAT_BREEDS: ["catBreeds"],
 };

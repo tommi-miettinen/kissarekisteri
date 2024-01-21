@@ -137,3 +137,8 @@ interface SearchKey<T> {
 }
 
 type SearchKeys<T> = SearchKey<T>[];
+
+interface Role {
+  id: number;
+  name: string;
+}

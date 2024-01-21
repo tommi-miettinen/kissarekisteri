@@ -27,11 +27,11 @@ interface Query {
 const getCats = async (query?: Query) => {
   try {
     const filter = query?.filter ? `$filter=${query.filter}` : "";
-    const expand = query?.expand ? `$expand=${query.expand}` : "";
-    const top = query?.top ? `$top=${query.top}` : "";
-    const skip = query?.skip ? `$skip=${query.skip}` : "";
-    const orderBy = query?.orderBy ? `$orderby=${query.orderBy}` : "";
-    const url = `odata/cats?${filter}&${expand}&${top}&${skip}&${orderBy}`;
+    const expand = query?.expand ? `&$expand=${query.expand}` : "";
+    const top = query?.top ? `&$top=${query.top}` : "";
+    const skip = query?.skip ? `&$skip=${query.skip}` : "";
+    const orderBy = query?.orderBy ? `&$orderby=${query.orderBy}` : "";
+    const url = `odata/cats?${filter}${expand}${top}${skip}${orderBy}`;
 
     const result = await apiClient.get<OdataResponse<Cat>>(url);
     return result.data.value;
@@ -61,7 +61,7 @@ const getCatById = async (catId: number) => {
   try {
     const filter = `Id eq ${catId}`;
     const expand = `Kittens($expand=ChildCat),Parents($expand=ParentCat),Photos,Results($expand=CatShow)`;
-    const url = `odata/cats?$filter=${filter}&$expand=${expand}`;
+    const url = `/cats?$filter=${filter}&$expand=${expand}`;
     const result = await apiClient.get<OdataResponse<Cat>>(url);
     return result.data.value[0];
   } catch (error) {
@@ -103,7 +103,7 @@ const requestOwnershipTransfer = async (catId: number) => {
 
 const getConfirmationRequests = async () => {
   try {
-    const result = await apiClient.get<ApiResponse<CatTransferRequest[]>>(`/api/cats/transfer-requests`);
+    const result = await apiClient.get<ApiResponse<CatTransferRequest[]>>(`/cats/transfer-requests`);
     return result.data;
   } catch (err) {
     console.log(err);
@@ -121,7 +121,7 @@ const confirmTransferRequest = async (requestId: number) => {
 
 const getCatBreeds = async () => {
   try {
-    const result = await apiClient.get<OdataResponse<CatBreed>>(`odata/catbreeds`);
+    const result = await apiClient.get<OdataResponse<CatBreed>>(`/catbreeds`);
     return result.data.value;
   } catch (err) {
     console.log(err);

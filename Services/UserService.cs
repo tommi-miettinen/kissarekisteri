@@ -21,14 +21,11 @@ public class UserService(
     )
 {
 
-    public async Task<List<UserResponse>> GetUsers()
+    public async Task<List<UserResponse>> FetchUsersAsync()
     {
         var users = await graphClient.Users.GetAsync(requestConfiguration =>
         {
-            requestConfiguration.QueryParameters.Select = new string[]
-            {
-            "givenName", "surname", "id", "displayName", "identities",
-            };
+            requestConfiguration.QueryParameters.Select = ["givenName", "surname", "id", "displayName", "identities"];
         });
 
         var userIds = users.Value.Select(u => u.Id).ToList();
@@ -57,11 +54,9 @@ public class UserService(
                     IsBreeder = userInfo?.IsBreeder ?? false,
                     UserRole = await permissionService.GetUserRole(u.Id) ?? null
                 };
-
                 responses.Add(userResponse);
             }
         }
-
         return responses;
     }
 

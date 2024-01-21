@@ -14,25 +14,25 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteribackend.Controllers;
 
+[Route("odata/cats")]
 public class CatController(CatService catService) : ODataController
 {
-    [HttpGet("odata/cats")]
+    [HttpGet]
     [EnableQuery]
     public ActionResult<IQueryable> GetCats()
     {
         return Ok(catService.GetCats());
     }
 
-    [HttpGet("odata/catbreeds")]
+    [HttpGet("ocatbreeds")]
     [EnableQuery]
     public ActionResult<IQueryable<CatBreed>> GetBreeds()
     {
         return Ok(catService.GetBreeds());
     }
 
-
     [Authorize]
-    [HttpPost("api/cats/{catId}/photo")]
+    [HttpPost("{catId}/photo")]
     public async Task<ActionResult<Cat>> UploadCatPhoto(int catId, IFormFile file)
     {
         var result = await catService.UploadCatPhoto(catId, file);
@@ -43,9 +43,8 @@ public class CatController(CatService catService) : ODataController
         return Ok(result.Data);
     }
 
-
     [Authorize]
-    [HttpPut("api/cats/{catId}")]
+    [HttpPut("{catId}")]
     public async Task<ActionResult<Cat>> EditCat(int catId, [FromBody] CatRequest catPayload)
     {
         var result = await catService.UpdateCatByIdAsync(catId, catPayload);
@@ -59,7 +58,7 @@ public class CatController(CatService catService) : ODataController
     }
 
     [Authorize]
-    [HttpPost("api/cats/{catId}/transfer")]
+    [HttpPost("{catId}/transfer")]
     public async Task<ActionResult<Result<CatTransfer>>> TransferCat([FromRoute] int catId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -74,7 +73,7 @@ public class CatController(CatService catService) : ODataController
     }
 
     [Authorize]
-    [HttpGet("api/cats/transfer-requests")]
+    [HttpGet("transfer-requests")]
     public async Task<ActionResult<Result<List<CatTransfer>>>> GetTransferRequests()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -90,7 +89,7 @@ public class CatController(CatService catService) : ODataController
     }
 
     [Authorize]
-    [HttpPost("api/cats/transfer-requests/{transferId}/confirm")]
+    [HttpPost("transfer-requests/{transferId}/confirm")]
     public async Task<ActionResult<Result<CatTransfer>>> ConfirmTransferRequest([FromRoute] int transferId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -106,7 +105,7 @@ public class CatController(CatService catService) : ODataController
     }
 
     [Authorize]
-    [HttpPost("api/cats")]
+    [HttpPost]
     public async Task<ActionResult<Cat>> CreateCat([FromBody] CatRequest catPayload)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -118,9 +117,8 @@ public class CatController(CatService catService) : ODataController
         return Ok(newCat);
     }
 
-
     [Authorize]
-    [HttpDelete("api/cats/{catId}")]
+    [HttpDelete("{catId}")]
     public async Task<ActionResult> DeleteCat(int catId)
     {
         await catService.DeleteCatByIdAsync(catId);

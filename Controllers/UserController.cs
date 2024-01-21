@@ -14,10 +14,11 @@ using System.Threading.Tasks;
 
 namespace Kissarekisteri.Controllers;
 
+[Route("odata/users")]
 public class UserController(UserService userService, PermissionService permissionService) : ODataController
 {
     [Authorize]
-    [HttpGet("api/users/{userId}/permissions")]
+    [HttpGet("{userId}/permissions")]
     public async Task<ActionResult<List<Permission>>> GetPermissionsByUserId(string userId)
     {
         var permissions = await permissionService.GetPermissions(userId);
@@ -25,24 +26,23 @@ public class UserController(UserService userService, PermissionService permissio
     }
 
     [HttpGet("{userId}")]
+    [EnableQuery]
     public async Task<ActionResult<UserResponse>> GetUser([FromRoute] string userId)
     {
         var user = await userService.GetUserById(userId);
-        if (user == null)
-        {
-            return NotFound();
-        }
+        List<UserResponse> users = [user];
         return Ok(user);
     }
 
-    [HttpGet("/api/users")]
-    public async Task<ActionResult<List<UserResponse>>> GetUsers()
+    [HttpGet]
+    [EnableQuery]
+    public async Task<ActionResult<IQueryable<UserResponse>>> GetUsers()
     {
-        var users = await userService.GetUsers();
-        return Ok(users);
+        var users = await userService.FetchUsersAsync();
+        return Ok(users.AsQueryable());
     }
 
-    [HttpGet("odata/roles")]
+    [HttpGet("roles")]
     [EnableQuery]
     public ActionResult<IQueryable> GetRoles()
     {
@@ -50,7 +50,8 @@ public class UserController(UserService userService, PermissionService permissio
     }
 
     [Authorize]
-    [HttpGet("api/users/me")]
+    [HttpGet("me")]
+    [EnableQuery]
     public async Task<ActionResult<UserResponse>> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -59,7 +60,7 @@ public class UserController(UserService userService, PermissionService permissio
     }
 
     [Authorize]
-    [HttpDelete("api/users/{userId}")]
+    [HttpDelete("{userId}")]
     public async Task<ActionResult<Result<bool>>> DeleteUser([FromRoute] string userId)
     {
         var result = await userService.DeleteUserByIdAsync(userId);
@@ -67,7 +68,7 @@ public class UserController(UserService userService, PermissionService permissio
     }
 
     [Authorize]
-    [HttpPost("/api/users")]
+    [HttpPost]
     public async Task<ActionResult<Result<UserResponse>>> CreateUser([FromBody] UserCreatePayloadDTO userPayload)
     {
         var result = await userService.CreateUser(userPayload);
@@ -79,7 +80,7 @@ public class UserController(UserService userService, PermissionService permissio
     }
 
     [Authorize]
-    [HttpPatch("api/users/{userId}")]
+    [HttpPatch("{userId}")]
     public async Task<ActionResult<Result<UserResponse>>> UpdateUser([FromBody] UserUpdateRequestDTO userPayload)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -92,7 +93,7 @@ public class UserController(UserService userService, PermissionService permissio
     }
 
     [Authorize]
-    [HttpPost("api/users/avatar")]
+    [HttpPost("avatar")]
     public async Task<ActionResult<UserResponse>> UploadUserAvatar(IFormFile file)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
