@@ -35,9 +35,6 @@ jobs:
           New-Item -ItemType Directory -Force -Path ${{env.DOTNET_ROOT}}/myapp/wwwroot
           Move-Item -Path Frontend/dist/* -Destination ${{env.DOTNET_ROOT}}/myapp/wwwroot -Force
 
-      - name: Clean project
-        run: dotnet clean Kissarekisteri.csproj
-
       - name: Build with dotnet
         run: dotnet build --configuration Release Kissarekisteri.csproj
 

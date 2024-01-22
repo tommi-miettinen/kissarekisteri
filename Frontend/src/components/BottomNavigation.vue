@@ -12,7 +12,9 @@ import { navigateTo } from "../store/routeStore";
 import { isMobile } from "../store/actionStore";
 import Notifications from "./Notifications.vue";
 import Overlay from "./Overlay.vue";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const route = useRoute();
 
 const isCurrentUser = computed(() => user.value?.id === route.params.userId);
@@ -82,7 +84,7 @@ const isCurrentUser = computed(() => user.value?.id === route.params.userId);
     @onCancel="removeAction(ActionTypes.NOTIFICATIONS_MOBILE)"
   >
     <div style="height: 100vh" class="">
-      <h3 class="m-3 mb-0">Ilmoitukset</h3>
+      <h3 class="m-3 mb-0">{{ t("Notifications.notifications") }}</h3>
       <Notifications :navigateTo="navigateTo" />
     </div>
   </Overlay>

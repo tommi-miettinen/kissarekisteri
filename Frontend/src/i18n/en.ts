@@ -67,11 +67,13 @@ const en = {
     ["Maine Coon"]: "Maine Coon",
   },
   Notifications: {
+    notifications: "Notifications",
     admin: "Admin",
     personal: "Personal",
     requestingCatOwnership: "is requesting ownership for",
   },
   Buttons: {
+    requestOwnership: "Request ownership",
     accept: "Accept",
     cancel: "Cancel",
     edit: "Edit",

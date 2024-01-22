@@ -2,7 +2,7 @@
 
 namespace Kissarekisteri.DTOs
 {
-    public class CatShowCatAttendeeIds
+    public class CatIdsDTO
     {
         public required List<int> CatIds { get; set; }
     }

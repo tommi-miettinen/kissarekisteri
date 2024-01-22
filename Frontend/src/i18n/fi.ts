@@ -66,11 +66,13 @@ const fi = {
     ["Maine Coon"]: "Maine Coon",
   },
   Notifications: {
+    notifications: "Ilmoitukset",
     admin: "Ylläpitäjä",
     personal: "Omat",
     requestingCatOwnership: "pyytää omistajuutta kissalle",
   },
   Buttons: {
+    requestOwnership: "Pyydä omistajuutta",
     accept: "Hyväksy",
     cancel: "Peruuta",
     edit: "Muokkaa",

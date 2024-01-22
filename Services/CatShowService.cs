@@ -1,7 +1,6 @@
 ﻿using Kissarekisteri.AccessControl;
 using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
-using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -17,17 +16,16 @@ namespace Kissarekisteri.Services
         PermissionService permissionService
     )
     {
-        public async Task<Result<bool>> JoinCatShowAsync(
+        public async Task<bool> JoinCatShowAsync(
             int catShowId,
             string userId,
-            CatShowCatAttendeeIds catIds
+            List<int> catIds
         )
         {
-            var result = new Result<bool>();
             var catShow = dbContext.CatShows.FirstOrDefault(e => e.Id == catShowId);
             if (catShow == null)
             {
-                return result.AddError(CatShowErrors.NotFound);
+                return false;
             }
 
             var catsThatHavePlacingIds = await dbContext.CatShowResults
@@ -46,7 +44,7 @@ namespace Kissarekisteri.Services
             await dbContext.SaveChangesAsync();
 
             var cats = await dbContext.Cats
-                .Where(c => catIds.CatIds.Contains(c.Id))
+                .Where(c => catIds.Contains(c.Id))
                 .Where(c => c.OwnerId == userId)
                 .Where(c => !catsThatHavePlacingIds.Contains(c.Id))
                 .ToListAsync();
@@ -61,13 +59,12 @@ namespace Kissarekisteri.Services
             dbContext.CatShowCats.AddRange(catsToAdd);
             await dbContext.SaveChangesAsync();
 
-            return result.Success(true);
+            return true;
         }
 
 
-        public async Task<Result<bool>> LeaveCatShowAsync(int catShowId, string userId)
+        public async Task<bool> LeaveCatShowAsync(int catShowId, string userId)
         {
-            var result = new Result<bool>();
             var catsThatHavePlacingIds = await dbContext.CatShowResults
        .Where(c => c.CatShowId == catShowId)
        .Select(c => c.CatId)
@@ -83,7 +80,7 @@ namespace Kissarekisteri.Services
 
             await dbContext.SaveChangesAsync();
 
-            return result.Success(true);
+            return true;
         }
 
         public IQueryable<CatShow> GetCatShows()
@@ -134,22 +131,29 @@ namespace Kissarekisteri.Services
             return catShow;
         }
 
-        public async Task<Result<CatShowResult>> AssignCatPlacing(
+        public async Task<CatShowResult> AssignCatPlacing(
+            string userId,
             int catShowId,
             CatShowResultDTO newPlacing
         )
         {
-            var result = new Result<CatShowResult>();
+            var hasPermission = await permissionService.HasPermission(userId, Permissions.CatShowWrite);
+
+            if (!hasPermission)
+            {
+                return null;
+            }
+
             var catShowExists = await dbContext.CatShows.AnyAsync(e => e.Id == catShowId);
 
             if (!catShowExists)
             {
-                return result.AddError(CatShowErrors.NotFound);
+                return null;
             }
 
             var conflictingResults = await dbContext.CatShowResults
             .Where(v => v.CatShowId == catShowId)
-            .Where(v => v.Breed == newPlacing.Breed && v.Place == (Place)newPlacing.Place ||
+            .Where(v => v.Breed == newPlacing.Breed && v.Place == (Models.Place)newPlacing.Place ||
                         v.CatId == newPlacing.CatId)
             .ToListAsync();
 
@@ -164,12 +168,12 @@ namespace Kissarekisteri.Services
                 CatId = newPlacing.CatId,
                 Breed = newPlacing.Breed,
                 CatShowId = catShowId,
-                Place = (Place)newPlacing.Place
+                Place = (Models.Place)newPlacing.Place
             };
             dbContext.CatShowResults.Add(newCatShowResult);
 
             await dbContext.SaveChangesAsync();
-            return result.Success(newCatShowResult);
+            return newCatShowResult;
         }
 
         public async Task<CatShow> CreateCatShow(CatShow newCatShow)

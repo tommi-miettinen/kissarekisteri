@@ -1,7 +1,6 @@
 ﻿using Kissarekisteri.AccessControl;
 using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
-using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -17,30 +16,28 @@ public class CatService(
     UserService userService
 )
 {
-    public async Task<Result<bool>> UploadCatPhoto(int catId, IFormFile file)
+    public async Task<bool> UploadCatPhoto(int catId, IFormFile file)
     {
-        var result = new Result<bool>();
         var cat = await dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
         var uploadedPhoto = await uploadService.UploadFile(file);
 
         if (uploadedPhoto == null)
         {
-            return result.AddError(CatErrors.PhotoUploadError);
+            return false;
         }
 
         await dbContext.CatPhotos.AddAsync(new CatPhoto { CatId = cat.Id, Url = uploadedPhoto.Uri.AbsoluteUri });
         await dbContext.SaveChangesAsync();
-        return result.Success(true);
+        return true;
     }
 
-    public async Task<Result<Cat>> UpdateCatByIdAsync(int catId, CatRequest catPayload)
+    public async Task<Cat> UpdateCatByIdAsync(int catId, CatCreateRequestDTO catPayload)
     {
-        var result = new Result<Cat>();
         var cat = await dbContext.Cats.FirstOrDefaultAsync(c => c.Id == catId);
 
         if (cat == null)
         {
-            return result.AddError(CatErrors.NotFound);
+            return null;
         }
 
         cat.Name = catPayload.Name;
@@ -49,17 +46,16 @@ public class CatService(
         cat.ImageUrl = catPayload.ImageUrl;
 
         await dbContext.SaveChangesAsync();
-        return result.Success(cat);
+        return cat;
     }
 
-    public async Task<Result<CatTransfer>> CreateTransferRequest(string userId, int catId)
+    public async Task<CatTransfer> CreateTransferRequest(string userId, int catId)
     {
-        var result = new Result<CatTransfer>();
         var cat = await dbContext.Cats.FirstOrDefaultAsync(cat => cat.Id == catId);
 
         if (cat == null)
         {
-            return result.AddError(CatErrors.NotFound);
+            return null;
         }
 
         var catTransfer = new CatTransfer
@@ -71,13 +67,11 @@ public class CatService(
 
         await dbContext.CatTransfers.AddAsync(catTransfer);
         await dbContext.SaveChangesAsync();
-        return result.Success(catTransfer);
+        return catTransfer;
     }
 
-    public async Task<Result<List<CatTransferResultDTO>>> GetTransferRequests(string userId)
+    public async Task<List<CatTransferResultDTO>> GetTransferRequests(string userId)
     {
-        var result = new Result<List<CatTransferResultDTO>>();
-
         var user = await userService.GetUserById(userId);
         var userIsAdmin = user?.UserRole?.Role?.Name == Roles.Admin;
 
@@ -85,7 +79,6 @@ public class CatService(
             .Where(ct => !ct.Confirmed)
             .Where(ct => ct.ConfirmerId == userId || userIsAdmin)
             .ToListAsync();
-
 
         var catTransferResultDTOs = new List<CatTransferResultDTO>();
 
@@ -106,13 +99,11 @@ public class CatService(
             catTransferResultDTOs.Add(dto);
         }
 
-        return result.Success(catTransferResultDTOs);
+        return catTransferResultDTOs;
     }
 
-    public async Task<Result<bool>> ConfirmTransferRequest(string userId, int transferId)
+    public async Task<bool> ConfirmTransferRequest(string userId, int transferId)
     {
-        var result = new Result<bool>();
-
         var user = await userService.GetUserById(userId);
 
         var transfer = await dbContext.CatTransfers
@@ -121,11 +112,6 @@ public class CatService(
                (ct.Id == transferId && user.UserRole.Role.Name == "Admin")
            );
 
-        if (transfer == null)
-        {
-            return result.AddError(CatErrors.NotFound);
-        }
-
         transfer.Confirmed = true;
         await dbContext.SaveChangesAsync();
 
@@ -133,7 +119,7 @@ public class CatService(
         updatedCat.OwnerId = transfer.RequesterId;
         await dbContext.SaveChangesAsync();
 
-        return result.Success(true);
+        return true;
     }
 
     public IQueryable<Cat> GetCats()
@@ -146,20 +132,16 @@ public class CatService(
         return dbContext.CatBreeds;
     }
 
-    public async Task<Result<bool>> DeleteCatByIdAsync(int catId)
+    public async Task<bool> DeleteCatByIdAsync(int catId)
     {
-        var result = new Result<bool>();
         var cat = await dbContext.Cats.FirstOrDefaultAsync(c => c.Id == catId);
         dbContext.Cats.Remove(cat);
         await dbContext.SaveChangesAsync();
-
-
-        return result.Success(true);
+        return true;
     }
 
-    public async Task<Result<Cat>> CreateCat(CatRequest newCatRequest)
+    public async Task<Cat> CreateCat(CatCreateRequestDTO newCatRequest)
     {
-        var result = new Result<Cat>();
         var cat = new Cat
         {
             Name = newCatRequest.Name,
@@ -204,14 +186,6 @@ public class CatService(
         }
 
         await dbContext.SaveChangesAsync();
-        return result.Success(cat);
-    }
-
-
-    public async Task<Result<List<Cat>>> GetCatByUserIdAsync(string userId)
-    {
-        var result = new Result<List<Cat>>();
-        var cats = await dbContext.Cats.Where(cat => cat.OwnerId == userId).ToListAsync();
-        return result.Success(cats);
+        return cat;
     }
 }

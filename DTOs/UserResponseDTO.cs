@@ -2,7 +2,7 @@
 
 namespace Kissarekisteri.DTOs
 {
-    public class UserResponse
+    public class UserResponseDTO
     {
         public string Id { get; set; }
         public string DisplayName { get; set; }

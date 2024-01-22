@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Kissarekisteri.DTOs
 {
-    public class CatRequest
+    public class CatCreateRequestDTO
     {
         [Required]
         public required string Name { get; set; }

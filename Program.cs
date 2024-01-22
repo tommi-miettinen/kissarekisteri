@@ -5,6 +5,7 @@ using Kissarekisteri.DTOs;
 using Kissarekisteri.Filters;
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
+using Kissarekisteri.StartupExtensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -103,7 +104,7 @@ modelBuilder.EntitySet<Cat>("Cats");
 modelBuilder.EntitySet<CatBreed>("CatBreeds");
 modelBuilder.EntitySet<CatShow>("CatShows");
 modelBuilder.EntitySet<Role>("Roles");
-modelBuilder.EntitySet<UserResponse>("Users");
+modelBuilder.EntitySet<UserResponseDTO>("Users");
 
 builder.Services
     .AddControllers(options => options.Filters.Add(new ModelValidationFilter()))

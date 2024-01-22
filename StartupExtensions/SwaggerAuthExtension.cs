@@ -5,7 +5,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Kissarekisteri.Filters;
+namespace Kissarekisteri.StartupExtensions;
 
 public static class SwaggerAuthExtension
 {

@@ -28,7 +28,6 @@
 		<UserSecretsId>28a3d5f7-e8ca-4dee-98c7-06ee1f6e088a</UserSecretsId>
 	</PropertyGroup>
 
-
 	<ItemGroup>
     <PackageReference Include="AutoMapper" Version="12.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />

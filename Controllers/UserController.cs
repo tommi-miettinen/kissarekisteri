@@ -1,5 +1,4 @@
 ﻿using Kissarekisteri.DTOs;
-using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -27,7 +26,7 @@ public class UserController(UserService userService, PermissionService permissio
 
     [HttpGet("{userId}")]
     [EnableQuery]
-    public async Task<ActionResult<UserResponse>> GetUser([FromRoute] string userId)
+    public async Task<ActionResult<UserResponseDTO>> GetUser([FromRoute] string userId)
     {
         var user = await userService.GetUserById(userId);
         return Ok(user);
@@ -35,7 +34,7 @@ public class UserController(UserService userService, PermissionService permissio
 
     [HttpGet]
     [EnableQuery]
-    public async Task<ActionResult<IQueryable<UserResponse>>> GetUsers()
+    public async Task<ActionResult<IQueryable<UserResponseDTO>>> GetUsers()
     {
         var users = await userService.FetchUsersAsync();
         return Ok(users.AsQueryable());
@@ -51,7 +50,7 @@ public class UserController(UserService userService, PermissionService permissio
     [Authorize]
     [HttpGet("me")]
     [EnableQuery]
-    public async Task<ActionResult<UserResponse>> GetCurrentUser()
+    public async Task<ActionResult<UserResponseDTO>> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await userService.GetUserById(userId);
@@ -60,7 +59,7 @@ public class UserController(UserService userService, PermissionService permissio
 
     [Authorize]
     [HttpDelete("{userId}")]
-    public async Task<ActionResult<Result<bool>>> DeleteUser([FromRoute] string userId)
+    public async Task<ActionResult<bool>> DeleteUser([FromRoute] string userId)
     {
         var result = await userService.DeleteUserByIdAsync(userId);
         return result;
@@ -68,32 +67,24 @@ public class UserController(UserService userService, PermissionService permissio
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Result<UserResponse>>> CreateUser([FromBody] UserCreatePayloadDTO userPayload)
+    public async Task<ActionResult<UserResponseDTO>> CreateUser([FromBody] UserCreatePayloadDTO userPayload)
     {
         var result = await userService.CreateUser(userPayload);
-        if (!result.IsSuccess)
-        {
-            return HttpStatusMapper.Map(result.Errors);
-        }
         return Ok(result);
     }
 
     [Authorize]
     [HttpPatch("{userId}")]
-    public async Task<ActionResult<Result<UserResponse>>> UpdateUser([FromBody] UserUpdateRequestDTO userPayload)
+    public async Task<ActionResult<UserResponseDTO>> UpdateUser([FromBody] UserUpdateRequestDTO userPayload)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var result = await userService.UpdateUser(userId, userPayload);
-        if (!result.IsSuccess)
-        {
-            return HttpStatusMapper.Map(result.Errors);
-        }
         return Ok(result);
     }
 
     [Authorize]
     [HttpPost("avatar")]
-    public async Task<ActionResult<UserResponse>> UploadUserAvatar(IFormFile file)
+    public async Task<ActionResult<UserResponseDTO>> UploadUserAvatar(IFormFile file)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var user = await userService.UploadUserPhotoAsync(userId, file);

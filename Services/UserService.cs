@@ -1,6 +1,5 @@
 ﻿using Kissarekisteri.Database;
 using Kissarekisteri.DTOs;
-using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -20,8 +19,7 @@ public class UserService(
     PermissionService permissionService
     )
 {
-
-    public async Task<List<UserResponse>> FetchUsersAsync()
+    public async Task<List<UserResponseDTO>> FetchUsersAsync()
     {
         var users = await graphClient.Users.GetAsync(requestConfiguration =>
         {
@@ -33,7 +31,7 @@ public class UserService(
                                        .Where(ui => userIds.Contains(ui.UserId))
                                        .ToListAsync();
 
-        var responses = new List<UserResponse>();
+        var responses = new List<UserResponseDTO>();
 
         foreach (var u in users.Value)
         {
@@ -43,7 +41,7 @@ public class UserService(
             {
                 var userInfo = userInfos.FirstOrDefault(ui => ui.UserId == u.Id);
 
-                var userResponse = new UserResponse
+                var userResponse = new UserResponseDTO
                 {
                     GivenName = u.GivenName,
                     Id = u.Id,
@@ -60,40 +58,32 @@ public class UserService(
         return responses;
     }
 
-    public async Task<UserResponse> UploadUserPhotoAsync(string userId, IFormFile file)
+    public async Task<UserResponseDTO> UploadUserPhotoAsync(string userId, IFormFile file)
     {
         var uploadedFile = await uploadService.UploadFile(file);
-
-
         var userInfo = await dbContext.UserInfos.FirstOrDefaultAsync(u => u.UserId == userId);
+
         if (userInfo != null)
         {
             userInfo.AvatarUrl = uploadedFile.Uri.AbsoluteUri;
         }
         else
         {
-            var userInfoPayload = new UserInfo
+            dbContext.UserInfos.Add(new UserInfo
             {
                 AvatarUrl = uploadedFile.Uri.AbsoluteUri,
                 UserId = userId
-            };
-
-            dbContext.UserInfos.Add(userInfoPayload);
+            });
         }
 
         await dbContext.SaveChangesAsync();
-
         var user = await GetUserById(userId);
-
         return user;
     }
 
-
-    public async Task<Result<UserResponse>> UpdateUser(string userId, UserUpdateRequestDTO updatePayload)
+    public async Task<UserResponseDTO> UpdateUser(string userId, UserUpdateRequestDTO updatePayload)
     {
-        var result = new Result<UserResponse>();
         var userInfo = await dbContext.UserInfos.FirstOrDefaultAsync(u => u.UserId == userId);
-
         if (userInfo != null)
         {
             userInfo.IsBreeder = updatePayload.IsBreeder;
@@ -101,70 +91,58 @@ public class UserService(
         }
 
         var user = await GetUserById(userId);
-        return result.Success(user);
+        return user;
     }
 
-    public async Task<Result<User>> CreateUser(UserCreatePayloadDTO userPayload)
+    public async Task<User> CreateUser(UserCreatePayloadDTO userPayload)
     {
-        var result = new Result<User>();
-        try
+        var user = await graphClient.Users.PostAsync(new User
         {
-            var user = await graphClient.Users.PostAsync(new User
+            AccountEnabled = true,
+            MailNickname = userPayload.MailNickname,
+            GivenName = userPayload.GivenName,
+            Surname = userPayload.Surname,
+            DisplayName = userPayload.DisplayName,
+            PasswordProfile = new()
             {
-                AccountEnabled = true,
-                MailNickname = userPayload.MailNickname,
-                GivenName = userPayload.GivenName,
-                Surname = userPayload.Surname,
-                DisplayName = userPayload.DisplayName,
-                PasswordProfile = new()
+                Password = userPayload.Password,
+                ForceChangePasswordNextSignIn = false,
+            },
+            Identities =
+            [
+                new()
                 {
-                    Password = userPayload.Password,
-                    ForceChangePasswordNextSignIn = false,
-                },
-                Identities =
-                [
-                    new()
-                    {
-                        SignInType = "emailAddress",
-                        Issuer = "kissarekisteri.onmicrosoft.com",
-                        IssuerAssignedId = userPayload.Email
+                    SignInType = "emailAddress",
+                    Issuer = "kissarekisteri.onmicrosoft.com",
+                    IssuerAssignedId = userPayload.Email
 
-                    }
-                ],
-                PasswordPolicies = "DisablePasswordExpiration",
-            });
-
-
-
-
-            if (!string.IsNullOrEmpty(userPayload.Role))
-            {
-                var role = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == userPayload.Role);
-
-                if (role != null)
-                {
-                    dbContext.UserRoles.Add(
-                        new UserRole
-                        {
-                            UserId = user.Id,
-                            RoleId = role.Id,
-                            RoleName = role.Name.ToString()
-                        }
-                        );
-
-                    await dbContext.SaveChangesAsync();
                 }
-            }
+            ],
+            PasswordPolicies = "DisablePasswordExpiration",
+        });
 
-            return result.Success(user);
-        }
-        catch (Exception ex)
+        if (!string.IsNullOrEmpty(userPayload.Role))
         {
-            return result.AddError(new Error(ex.Message, "CreateFail"));
+            var role = await dbContext.Roles.FirstOrDefaultAsync(r => r.Name == userPayload.Role);
+
+            if (role != null)
+            {
+                dbContext.UserRoles.Add(
+                    new UserRole
+                    {
+                        UserId = user.Id,
+                        RoleId = role.Id,
+                        RoleName = role.Name.ToString()
+                    }
+                    );
+
+                await dbContext.SaveChangesAsync();
+            }
         }
+        return user;
     }
 
-    public async Task<UserResponse> GetUserById(string userId)
+    public async Task<UserResponseDTO> GetUserById(string userId)
     {
         try
         {
@@ -181,7 +159,7 @@ public class UserService(
                 requestConfiguration.QueryParameters.Select = ["givenName", "surname", "id", "displayName", "identities"];
             });
 
-            var response = new UserResponse
+            var response = new UserResponseDTO
             {
                 GivenName = user.GivenName,
                 Id = user.Id,
@@ -207,20 +185,11 @@ public class UserService(
         }
     }
 
-    public async Task<Result<bool>> DeleteUserByIdAsync(string userId)
+    public async Task<bool> DeleteUserByIdAsync(string userId)
     {
-        var result = new Result<bool>();
         await graphClient.Users[userId].DeleteAsync();
-
         var user = await GetUserById(userId);
-
-        if (user != null)
-        {
-            return result.AddError(new Error("User deletion failed", "DeleteFail"));
-
-        }
-
-        return result.Success(true);
+        return user != null;
     }
 
     public async Task<UserRole> CreateUserRole(UserRole userRole)

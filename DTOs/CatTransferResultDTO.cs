@@ -4,6 +4,6 @@ namespace Kissarekisteri.DTOs
 {
     public class CatTransferResultDTO : CatTransfer
     {
-        public UserResponse Requester { get; set; }
+        public UserResponseDTO Requester { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Kissarekisteri.DTOs;
-using Kissarekisteri.ErrorHandling;
 using Kissarekisteri.Models;
 using Kissarekisteri.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -36,70 +35,47 @@ public class CatController(CatService catService) : ODataController
     public async Task<ActionResult<Cat>> UploadCatPhoto(int catId, IFormFile file)
     {
         var result = await catService.UploadCatPhoto(catId, file);
-        if (!result.IsSuccess)
-        {
-            return HttpStatusMapper.Map(result.Errors);
-        }
-        return Ok(result.Data);
+        return Ok(result);
     }
 
     [Authorize]
     [HttpPut("{catId}")]
-    public async Task<ActionResult<Cat>> EditCat(int catId, [FromBody] CatRequest catPayload)
+    public async Task<ActionResult<Cat>> EditCat(int catId, [FromBody] CatCreateRequestDTO catPayload)
     {
         var result = await catService.UpdateCatByIdAsync(catId, catPayload);
-
-        if (!result.IsSuccess)
-        {
-            return HttpStatusMapper.Map(result.Errors);
-        }
-
-        return Ok(result.Data);
+        return Ok(result);
     }
 
     [Authorize]
     [HttpPost("{catId}/transfer")]
-    public async Task<ActionResult<Result<CatTransfer>>> TransferCat([FromRoute] int catId)
+    public async Task<ActionResult<CatTransfer>> TransferCat([FromRoute] int catId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var result = await catService.CreateTransferRequest(userId, catId);
-
-        if (!result.IsSuccess)
-        {
-            return HttpStatusMapper.Map(result.Errors);
-        }
-
         return Ok(result);
     }
 
     [Authorize]
     [HttpGet("transfer-requests")]
-    public async Task<ActionResult<Result<List<CatTransfer>>>> GetTransferRequests()
+    public async Task<ActionResult<List<CatTransfer>>> GetTransferRequests()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var result = await catService.GetTransferRequests(userId);
-        return Ok(result.Data);
+        return Ok(result);
     }
 
     [Authorize]
     [HttpPost("transfer-requests/{transferId}/confirm")]
-    public async Task<ActionResult<Result<CatTransfer>>> ConfirmTransferRequest([FromRoute] int transferId)
+    public async Task<ActionResult<CatTransfer>> ConfirmTransferRequest([FromRoute] int transferId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
         var result = await catService.ConfirmTransferRequest(userId, transferId);
-
-        if (!result.IsSuccess)
-        {
-            return HttpStatusMapper.Map(result.Errors);
-        }
-
         return Ok(result);
     }
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<Cat>> CreateCat([FromBody] CatRequest catPayload)
+    public async Task<ActionResult<Cat>> CreateCat([FromBody] CatCreateRequestDTO catPayload)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

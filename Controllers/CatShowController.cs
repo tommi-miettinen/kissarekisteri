@@ -19,13 +19,12 @@ public class CatShowController(CatShowService catShowService) : ODataController
     [HttpPost("{catShowId}/join")]
     public async Task<IActionResult> JoinCatShow(
         int catShowId,
-        [FromBody] CatShowCatAttendeeIds catIds
+        [FromBody] CatIdsDTO catIds
     )
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        await catShowService.JoinCatShowAsync(catShowId, userId, catIds);
-
-        return Ok("onnistu");
+        var result = await catShowService.JoinCatShowAsync(catShowId, userId, catIds.CatIds);
+        return Ok(result);
     }
 
     [Authorize]
@@ -33,9 +32,8 @@ public class CatShowController(CatShowService catShowService) : ODataController
     public async Task<IActionResult> LeaveCatShow(int catShowId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        await catShowService.LeaveCatShowAsync(catShowId, userId);
-
-        return Ok("Left cat show successfully");
+        var result = await catShowService.LeaveCatShowAsync(catShowId, userId);
+        return Ok(result);
     }
 
     [HttpGet]
@@ -69,7 +67,8 @@ public class CatShowController(CatShowService catShowService) : ODataController
     [HttpPost("{catShowId}/place")]
     public async Task<ActionResult<CatShowResult>> AssignCatPlacing(int catShowId, [FromBody] CatShowResultDTO resultPayload)
     {
-        var result = await catShowService.AssignCatPlacing(catShowId, resultPayload);
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var result = await catShowService.AssignCatPlacing(userId, catShowId, resultPayload);
         return Ok(result);
     }
 

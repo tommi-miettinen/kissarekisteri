@@ -96,7 +96,7 @@ watchEffect(() => route.path && refetch());
             @click="requestOwnershipTransfer"
             class="btn rounded-3 px-5 py-2 bg-black text-white focus-ring mt-auto ms-auto w-sm-100"
           >
-            {{ cat.owner ? "Pyydä omistajuutta" : "Ilmottaudu omistajaksi" }}
+            {{ cat.owner ? t("Buttons.requestOwnership") : "Ilmottaudu omistajaksi" }}
           </button>
         </div>
       </div>

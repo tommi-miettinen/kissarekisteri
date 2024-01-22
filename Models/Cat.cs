@@ -20,11 +20,11 @@ namespace Kissarekisteri.Models
         [Required]
         public required string OwnerId { get; set; }
         [NotMapped]
-        public UserResponse Owner { get; set; }
+        public UserResponseDTO Owner { get; set; }
         [Required]
         public required string BreederId { get; set; }
         [NotMapped]
-        public UserResponse Breeder { get; set; }
+        public UserResponseDTO Breeder { get; set; }
         public string ImageUrl { get; set; }
         public List<CatRelation> Parents { get; set; }
         public List<CatRelation> Kittens { get; set; }
