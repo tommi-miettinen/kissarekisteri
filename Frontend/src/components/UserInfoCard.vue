@@ -13,6 +13,7 @@ import Modal from "./Modal.vue";
 import { isMobile } from "../store/actionStore";
 import { Tooltip } from "bootstrap";
 import Overlay from "./Overlay.vue";
+import ProfileForm from "./ProfileForm.vue";
 
 const { t } = useI18n();
 const queryClient = useQueryClient();
@@ -36,16 +37,17 @@ const uploadAvatarMutation = useMutation({
   },
 });
 
-/*
-const registerAsBreederMutation = useMutation({
-  mutationFn: () => userAPI.registerAsBreeder(),
-  onSuccess: () => {
+const userMutation = useMutation({
+  mutationFn: (user: User) => userAPI.editUser(user),
+  onSuccess: async () => {
     toast.dismiss();
-    toast.success("Kasvattajaksi rekisteröityminen onnistui");
+    toast.success("Tiedot päivitetty");
     queryClient.invalidateQueries({ queryKey: QueryKeys.USER_BY_ID(props.user.id) });
+    removeAction(ActionTypes.USER_SETTINGS);
+    removeAction(ActionTypes.USER_SETTINGS_MOBILE);
+    await fetchUser();
   },
 });
-*/
 
 onMounted(() => {
   if (!userIsLoggedInUser(props.user)) return;
@@ -92,80 +94,38 @@ const handleStopAvatarEdit = () => {
       {{ t(`Roles.${user.userRole.roleName}`) }}
     </div>
     <div>
-      <div>{{ user.email }}</div>
-      <div>{{ user.phoneNumber }}</div>
+      <div v-if="user.showEmail">{{ user.email }}</div>
+      <div v-if="user.showPhoneNumber">{{ user.phoneNumber }}</div>
+      <div v-if="user.isBreeder">{{ "Kasvattaja" }}</div>
     </div>
-    <div v-if="user.isBreeder">{{ "Kasvattaja" }}</div>
     <button
       tabIndex="0"
-      @click="pushAction(ActionTypes.USER_SETTINGS)"
-      v-if="!user.isBreeder && userIsLoggedInUser(user)"
+      @click="pushAction(isMobile ? ActionTypes.USER_SETTINGS_MOBILE : ActionTypes.USER_SETTINGS)"
+      v-if="userIsLoggedInUser(user)"
       class="btn bg-black text-white focus-ring px-4 rounded-3 me-auto w-sm-100"
     >
       Muokkaa tietoja
     </button>
   </div>
-
   <Modal :visible="isCurrentAction(ActionTypes.EDITING_AVATAR_MOBILE) && isMobile" @onCancel="handleStopAvatarEdit">
     <div style="width: 90vw" class="rounded-3 overflow-hidden">
       <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>
   </Modal>
-
   <Modal :visible="isCurrentAction(ActionTypes.EDITING_AVATAR) && !isMobile" @onCancel="handleStopAvatarEdit">
     <div style="width: 500px" class="rounded-3 overflow-hidden">
       <Cropper @onCrop="uploadAvatarMutation.mutate" :imageSrc="user.avatarUrl" />
     </div>
   </Modal>
-  <Overlay :visible="isCurrentAction(ActionTypes.USER_SETTINGS) && isMobile" @onCancel="removeAction(ActionTypes.USER_SETTINGS)">
-    <div class="p-3 d-flex flex-column gap-2">
-      <h2 class="mb-4">Profiilin asetukset</h2>
-      <div class="d-flex flex-column gap-2">
-        <div class="form-check form-switch align-items-center p-0 d-flex gap-2">
-          <label class="form-check-label fw-semibold me-auto" for="show-email">Näytä sähköposti</label>
-          <input
-            :checked="user.showEmail"
-            style="height: 24px; width: 48px"
-            class="form-check-input form-check form-switch"
-            type="checkbox"
-            role="switch"
-            id="show-email"
-          />
-        </div>
-        <div class="form-check form-switch align-items-center p-0 d-flex gap-2">
-          <label class="form-check-label fw-semibold me-auto" for="show-phone">Näytä puhelinnumero</label>
-          <input
-            :checked="user.showPhoneNumber"
-            style="height: 24px; width: 48px"
-            class="form-check-input form-check form-switch"
-            type="checkbox"
-            role="switch"
-            id="show-phone"
-          />
-        </div>
-        <div class="form-check form-switch align-items-center p-0 d-flex gap-2">
-          <label class="form-check-label fw-semibold me-auto" for="show-phone">Rekisteröidy kasvattajaksi</label>
-          <input
-            :checked="user.isBreeder"
-            style="height: 24px; width: 48px"
-            class="form-check-input form-check form-switch"
-            type="checkbox"
-            role="switch"
-            id="show-phone"
-          />
-        </div>
-        <div>
-          <label for="password" class="form-label w-100 fw-semibold">Puhelin</label>
-          <input id="password" data-testid="new-cat-birthdate-input" type="text" class="form-control" />
-        </div>
-        <button
-          tabIndex="0"
-          v-if="!user.isBreeder && userIsLoggedInUser(user)"
-          class="btn bg-black text-white focus-ring px-4 rounded-3 me-auto w-sm-100"
-        >
-          Tallenna muutokset
-        </button>
-      </div>
+  <Modal :visible="isCurrentAction(ActionTypes.USER_SETTINGS) && !isMobile" @onCancel="removeAction(ActionTypes.USER_SETTINGS)">
+    <div style="width: 500px" class="rounded-3 overflow-hidden">
+      <ProfileForm v-if="!isMobile" :user="user" @onSave="userMutation.mutate" />
     </div>
+  </Modal>
+  <Overlay
+    :visible="isCurrentAction(ActionTypes.USER_SETTINGS_MOBILE) && isMobile"
+    @onCancel="removeAction(ActionTypes.USER_SETTINGS_MOBILE)"
+  >
+    <ProfileForm v-if="isMobile" :user="user" @onSave="userMutation.mutate" />
   </Overlay>
 </template>

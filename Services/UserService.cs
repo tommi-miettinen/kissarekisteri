@@ -87,6 +87,9 @@ public class UserService(
         if (userInfo != null)
         {
             userInfo.IsBreeder = updatePayload.IsBreeder;
+            userInfo.ShowEmail = updatePayload.ShowEmail;
+            userInfo.ShowPhoneNumber = updatePayload.ShowPhoneNumber;
+            userInfo.PhoneNumber = updatePayload.PhoneNumber;
             await dbContext.SaveChangesAsync();
         }
 

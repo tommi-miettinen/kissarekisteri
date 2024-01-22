@@ -5,7 +5,6 @@ import { ref } from "vue";
 import BottomNavigation from "./components/BottomNavigation.vue";
 import { focusFirstVisibleElement } from "./utils/focusFirstVisibleElement";
 import Appbar from "./components/Appbar.vue";
-import { toast } from "vue-sonner";
 import { isMobile } from "./store/actionStore";
 
 const mainRef = ref<HTMLElement>();
@@ -19,8 +18,8 @@ const focusMainContent = () => mainRef.value && focusFirstVisibleElement(mainRef
   <div style="height: 100dvh" class="d-flex flex-column align-items-center flex-grow-1">
     <Navigation v-if="!isMobile" />
     <Appbar v-if="isMobile" />
-    <div @click="toast.dismiss()">
-      <Toaster :visibleToasts="1" :position="isMobile ? 'top-center' : 'bottom-right'" />
+    <div style="pointer-events: none">
+      <Toaster :duration="1000" :visibleToasts="1" :position="isMobile ? 'top-center' : 'bottom-right'" />
     </div>
     <main ref="mainRef" tabIndex="-1" class="d-flex flex-column overflow-auto w-100 h-100 overflow-auto">
       <RouterView />

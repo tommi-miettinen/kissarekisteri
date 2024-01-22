@@ -6,7 +6,7 @@ import { useQuery, useMutation } from "@tanstack/vue-query";
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import CatListItem from "../components/CatListItem.vue";
-import getMedalColor from "../utils/getMedalColor";
+import { getMedalColor } from "../utils/catShowUtils";
 import UserListItem from "../components/UserListItem.vue";
 import ImageGallery from "../components/ImageGallery.vue";
 import { user } from "../store/userStore";
@@ -32,8 +32,8 @@ const {
   isLoading,
   isFetched: catIsFetched,
 } = useQuery({
-  queryKey: QueryKeys.CAT_BY_ID(+route.params.catId),
-  queryFn: () => catAPI.getCatWithOwnerAndBreeder(+route.params.catId),
+  queryKey: QueryKeys.CAT_BY_ID(routeParamCatId),
+  queryFn: () => catAPI.getCatWithOwnerAndBreeder(routeParamCatId),
   enabled: Boolean(routeParamCatId),
 });
 
@@ -123,12 +123,10 @@ watchEffect(() => route.path && refetch());
         <h5 class="m-2">{{ t("CatDetails.parents") }}</h5>
         <CatListItem v-for="parent in cat.parents" :cat="parent.parentCat" />
       </div>
-
       <div v-if="cat.kittens && cat.kittens.length > 0">
         <h5 class="m-2">{{ t("CatDetails.kittens") }}</h5>
         <CatListItem v-for="kitten in cat.kittens" :cat="kitten.childCat" />
       </div>
-
       <div v-if="cat.owner">
         <h5 class="m-2">{{ t("CatDetails.owner") }}</h5>
         <UserListItem :user="cat.owner" />
@@ -169,3 +167,4 @@ watchEffect(() => route.path && refetch());
   }
 }
 </style>
+../utils/catShowUtils

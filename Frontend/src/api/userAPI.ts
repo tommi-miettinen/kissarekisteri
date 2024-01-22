@@ -22,7 +22,7 @@ const getCatsByUserId = async (userId: string) => {
 };
 
 const editUser = async (user: User) => {
-  const result = await apiClient.put(`/users/${user.id}`, user);
+  const result = await apiClient.patch(`/users/${user.id}`, user);
   return result.data;
 };
 

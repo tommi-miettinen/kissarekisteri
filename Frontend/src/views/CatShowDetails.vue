@@ -9,7 +9,7 @@ import Modal from "../components/Modal.vue";
 import catShowAPI from "../api/catShowAPI";
 import { useI18n } from "vue-i18n";
 import CatListItem from "../components/CatListItem.vue";
-import getMedalColor from "../utils/getMedalColor";
+import { getMedalColor } from "../utils/catShowUtils";
 import ImageGallery from "../components/ImageGallery.vue";
 import Dropdown from "../components/Dropdown.vue";
 import { ActionTypes, isCurrentAction, removeAction, pushAction } from "../store/actionStore";
@@ -146,6 +146,11 @@ const toggleAllCats = () => {
   if (!userCats.value) return;
   selectedCatIds.value = userCats.value.map((c) => c.id);
 };
+
+const findCatPlacing = (cat: Cat) => {
+  if (!catShow.value) return;
+  return catShow.value.results.find((result) => result.catId === cat.id)?.place;
+};
 </script>
 
 <template>
@@ -199,11 +204,11 @@ const toggleAllCats = () => {
             <CatListItem v-for="cat in cats" :cat="cat">
               <template #medal>
                 <div
-                  :style="{ backgroundColor: getMedalColor(cat.results.find((result) => result.catShowId === eventId)?.place || 0) }"
-                  v-if="cat.results"
+                  v-if="findCatPlacing(cat)"
+                  :style="{ backgroundColor: getMedalColor(findCatPlacing(cat) as number) }"
                   class="badge rounded-pill fw-bold text-black"
                 >
-                  #{{ cat.results.find((result) => result.catShowId === eventId)?.place }}
+                  #{{ findCatPlacing(cat) }}
                 </div>
               </template>
               <template #actions>
@@ -351,3 +356,4 @@ const toggleAllCats = () => {
   }
 }
 </style>
+../utils/catShowUtils

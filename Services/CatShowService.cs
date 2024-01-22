@@ -156,7 +156,7 @@ namespace Kissarekisteri.Services
                 .Where(v => v.CatShowId == catShowId)
                 .Where(
                     v =>
-                        v.Breed == newPlacing.Breed && v.Place == (Models.Place)newPlacing.Place
+                        v.Breed == newPlacing.Breed && v.Place == newPlacing.Place
                         || v.CatId == newPlacing.CatId
                 )
                 .ToListAsync();
@@ -172,7 +172,7 @@ namespace Kissarekisteri.Services
                 CatId = newPlacing.CatId,
                 Breed = newPlacing.Breed,
                 CatShowId = catShowId,
-                Place = (Models.Place)newPlacing.Place
+                Place = newPlacing.Place
             };
             dbContext.CatShowResults.Add(newCatShowResult);
 

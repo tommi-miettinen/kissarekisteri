@@ -55,8 +55,7 @@ const handleDropdownClose = (event: MouseEvent | KeyboardEvent) => {
 watch(
   () => props.triggerRef,
   () => {
-    if (!props.triggerRef) return console.error("Trigger ref is null");
-    if (dropdown.value) return console.log("Dropdown already initialized");
+    if (!props.triggerRef || dropdown.value) return;
 
     dropdown.value = new Dropdown(props.triggerRef!, {
       reference: props.triggerRef,
@@ -77,9 +76,7 @@ watch(
 watch(focused, (isFocused) => {
   if (!props.closeOnFocusLost) return;
   if (isFocused) hasBeenFocused.value = true;
-  if (!isFocused && hasBeenFocused.value) {
-    dropdown.value?.hide();
-  }
+  if (!isFocused && hasBeenFocused.value) dropdown.value?.hide();
 });
 </script>
 

@@ -4,13 +4,6 @@ using System.Text.Json.Serialization;
 
 namespace Kissarekisteri.Models
 {
-    public enum Place
-    {
-        First = 1,
-        Second = 2,
-        Third = 3,
-    }
-
     [Index(nameof(CatId), nameof(Breed), nameof(CatShowId), IsUnique = true)]
     public class CatShowResult
     {
@@ -30,6 +23,6 @@ namespace Kissarekisteri.Models
         public Cat Cat { get; set; }
 
         [Required]
-        public required Place Place { get; set; }
+        public required int Place { get; set; }
     }
 }

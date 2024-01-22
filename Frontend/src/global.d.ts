@@ -8,6 +8,7 @@ interface CatShowEvent {
   cats: { cat: Cat }[];
   photos?: { id: string; url: string }[];
   imageUrl: string;
+  results: CatShowResult[];
 }
 
 interface Attendee {

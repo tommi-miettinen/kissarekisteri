@@ -23,6 +23,8 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(["onThumbnailActionClick"]);
+
 const drawerOpen = ref(false);
 const currentImage = ref<HTMLElement>();
 const currentIndex = ref(0);
@@ -106,7 +108,7 @@ useEventListener(scrollContainer, "scroll", getClosestImage);
         <div v-if="showThumbnailActionButton && !isMobile" class="d-flex position-absolute w-100 bottom-0">
           <button
             @keyup.enter.stop="$emit('onThumbnailActionClick', photo)"
-            @click.stop="$emit('onThumbnailActionClick', photo)"
+            @click.stop="emit('onThumbnailActionClick', photo)"
             class="w-100 rounded-3 border btn-border focus-ring py-2 m-2"
           >
             {{ thumbnailActionButtonText }}
