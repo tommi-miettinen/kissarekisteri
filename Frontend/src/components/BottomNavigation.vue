@@ -7,17 +7,47 @@ import UsersIcon from "../icons/UsersIcon.vue";
 import AwardIcon from "../icons/AwardIcon.vue";
 import CatIcon from "../icons/CatIcon.vue";
 import NotificationIcon from "../icons/NotificationIcon.vue";
-import { isCurrentAction, removeAction, pushAction, ActionTypes } from "../store/actionStore";
 import { navigateTo } from "../store/routeStore";
 import { isMobile } from "../store/actionStore";
 import Notifications from "./Notifications.vue";
 import Overlay from "./Overlay.vue";
 import { useI18n } from "vue-i18n";
+import catAPI from "../api/catAPI";
+import { QueryKeys } from "../api/queryKeys";
+import { useQuery } from "@tanstack/vue-query";
+import Drawer from "./Drawer.vue";
+import { pushAction, isCurrentAction, removeAction, ActionTypes } from "../store/actionStore";
+import { login } from "../auth";
 
 const { t } = useI18n();
 const route = useRoute();
 
 const isCurrentUser = computed(() => user.value?.id === route.params.userId);
+
+const { data: confirmationRequests } = useQuery({
+  queryKey: QueryKeys.CONFIRMATION_REQUESTS,
+  queryFn: () => catAPI.getConfirmationRequests(),
+  refetchInterval: 5000,
+});
+
+const handleUserClick = () => {
+  if (user.value) {
+    navigateTo(`/users/${user.value.id}`);
+    return;
+  }
+
+  pushAction(ActionTypes.LOGIN_PROMPT);
+};
+
+const handleNotificationClick = () => {
+  if (user.value) {
+    pushAction(ActionTypes.NOTIFICATIONS_MOBILE);
+    return;
+  }
+  pushAction(ActionTypes.LOGIN_PROMPT);
+};
+
+const userText = computed(() => (user.value ? `${user.value.givenName} ${user.value.surname}` : "Profiili"));
 </script>
 
 <template>
@@ -53,30 +83,28 @@ const isCurrentUser = computed(() => user.value?.id === route.params.userId);
     </div>
     <div
       tabIndex="0"
-      v-if="user"
       :class="{ 'opacity-100': isCurrentUser }"
       class="focus-ring position-relative col-2 d-flex flex-column justify-content-center align-items-center rounded-3 p-2"
-      @click="pushAction(ActionTypes.NOTIFICATIONS_MOBILE)"
-      @keyup.enter="pushAction(ActionTypes.NOTIFICATIONS_MOBILE)"
+      @click="handleNotificationClick"
+      @keyup.enter="handleNotificationClick"
     >
       <div class="position-relative d-flex flex-column align-items-center h-100">
         <NotificationIcon strokeWidth="1.5" />
         <span :class="{ 'opacity-100': isCurrentUser }" class="d-inline-block mt-auto opacity-75">Ilmoitukset</span>
-        <div style="right: 12px" class="position-absolute">
-          <span class="badge rounded-circle bg-danger">{{ 1 }}</span>
+        <div v-if="confirmationRequests" style="right: 12px" class="position-absolute">
+          <span class="badge rounded-circle bg-danger">{{ confirmationRequests.length }}</span>
         </div>
       </div>
     </div>
     <div
       tabIndex="0"
-      v-if="user"
       :class="{ 'opacity-100': isCurrentUser }"
       class="focus-ring col-2 d-flex flex-column justify-content-center align-items-center rounded-3 p-2 opacity-75"
-      @click="navigateTo(`/users/${user?.id}`)"
-      @keyup.enter="navigateTo(`/users/${user?.id}`)"
+      @click="handleUserClick"
+      @keyup.enter="handleUserClick"
     >
       <UserIcon strokeWidth="1.5" />
-      <span class="d-inline-block text-truncate" style="max-width: 100%"> {{ user?.givenName || "" + user?.surname }}</span>
+      <span class="d-inline-block text-truncate" style="max-width: 100%"> {{ userText }}</span>
     </div>
   </div>
   <Overlay
@@ -85,7 +113,12 @@ const isCurrentUser = computed(() => user.value?.id === route.params.userId);
   >
     <div style="height: 100vh" class="">
       <h3 class="m-3 mb-0">{{ t("Notifications.notifications") }}</h3>
-      <Notifications :navigateTo="navigateTo" />
+      <Notifications />
     </div>
   </Overlay>
+  <Drawer :visible="isCurrentAction(ActionTypes.LOGIN_PROMPT)" @onCancel="removeAction(ActionTypes.LOGIN_PROMPT)">
+    <div style="height: 30vh">
+      <div @click="login" class="p-3">Kirjaudu sisään</div>
+    </div>
+  </Drawer>
 </template>
