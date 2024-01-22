@@ -1,7 +1,7 @@
 import apiClient from "./apiClient";
 
 const getCurrentUser = async () => {
-  const result = await apiClient.get<OdataResponse<User>>(`/users/me?$expand=Userrole($expand=role)`);
+  const result = await apiClient.get<User>(`/users/me?$expand=Userrole($expand=role)`);
   return result.data;
 };
 
