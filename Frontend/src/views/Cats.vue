@@ -24,19 +24,19 @@ watchEffect(() => {
   translatedValues.value = catsQuery.data.value.map((cat) => {
     return {
       ...cat,
-      breed: t(`Breeds.${cat.breed}`),
+      translatedBreed: t(`Breeds.${cat.breed}`),
       translatedSex: t(`CatDetails.${cat.sex.toLowerCase()}`),
     };
   });
 });
 
-const searchKeys = computed<SearchKeys<Cat & { translatedSex: string }>>(() => {
+const searchKeys = computed<SearchKeys<Cat & { translatedSex: string; translatedBreed: string }>>(() => {
   return [
     {
       key: "name",
     },
     {
-      key: "breed",
+      key: "translatedBreed",
     },
     {
       key: "translatedSex",

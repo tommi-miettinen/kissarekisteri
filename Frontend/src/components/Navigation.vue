@@ -1,11 +1,9 @@
 <script async lang="ts" setup>
-import { ref, onMounted, computed } from "vue";
-import { msalInstance } from "../auth";
+import { ref, computed } from "vue";
 import { user } from "../store/userStore";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { login, logout } from "../auth";
-import { useWindowSize } from "@vueuse/core";
 import Drawer from "./Drawer.vue";
 import { ActionTypes, pushAction, isCurrentAction, removeAction } from "../store/actionStore";
 import { useQuery } from "@tanstack/vue-query";
@@ -17,21 +15,21 @@ import moment from "moment";
 import Notifications from "./Notifications.vue";
 import { QueryKeys } from "../api/queryKeys";
 import { navigateTo } from "../store/routeStore";
+import { isMobile } from "../store/actionStore";
 
 const route = useRoute();
 const router = useRouter();
 const { t, locale } = useI18n();
 
-const { data: confirmationRequestsData } = useQuery({
+const { data: confirmationRequests } = useQuery({
   queryKey: QueryKeys.CONFIRMATION_REQUESTS,
   queryFn: () => catAPI.getConfirmationRequests(),
   refetchInterval: 5000,
 });
 
-const confirmationRequests = computed(() => confirmationRequestsData.value?.data);
-
 const handleLocaleClick = () => {
   locale.value === "fi" ? (locale.value = "en") : (locale.value = "fi");
+  localStorage.locale = locale.value;
   moment.locale(locale.value);
 };
 const localeString = computed(() => (locale.value === "fi" ? "In English" : "Suomeksi"));
@@ -40,10 +38,6 @@ const logoutFromApp = () => {
   logout();
   router.push("/");
 };
-
-const isMobile = computed(() => useWindowSize().width.value < 768);
-
-onMounted(async () => await msalInstance.handleRedirectPromise());
 
 const handleAvatarClick = async () => {
   if (isMobile.value && !isCurrentAction(ActionTypes.BOTTOM_SHEET)) pushAction(ActionTypes.BOTTOM_SHEET);
@@ -94,17 +88,26 @@ const requestsRef = ref<HTMLDivElement>();
       <button @click="login" data-testid="login-btn" v-if="!user" class="btn bg-black rounded-3 text-white">
         {{ t("Navigation.login") }}
       </button>
-      <li class="nav-item rounded-3 hover-bg-1" :class="{ 'd-none': isMobile, 'bg-1': route.path.includes('catshows') }">
-        <router-link style="color: black" class="nav-link rounded-3" to="/catshows">{{ t("Navigation.catShows") }}</router-link>
+      <li
+        @click="navigateTo('/catshows')"
+        class="rounded-3 hover-bg-1 px-3 py-2 cursor-pointer"
+        :class="{ 'd-none': isMobile, 'bg-1': route.path.includes('catshows') }"
+      >
+        {{ t("Navigation.catShows") }}
       </li>
       <li
-        class="nav-item rounded-3 hover-bg-1"
+        @click="navigateTo('/cats')"
+        class="rounded-3 hover-bg-1 px-3 py-2 cursor-pointer"
         :class="{ 'd-none': isMobile, 'bg-1': route.path === '/cats' || route.path.startsWith('/cats/') }"
       >
-        <router-link ref="cats" style="color: black" class="nav-link rounded-3" to="/cats">{{ t("Navigation.cats") }}</router-link>
+        {{ t("Navigation.cats") }}
       </li>
-      <li class="nav-item rounded-3 hover-bg-1" :class="{ 'd-none': isMobile, 'bg-1': route.path.includes('users') }">
-        <router-link style="color: black" class="nav-link rounded-3" to="/users">{{ t("Navigation.members") }}</router-link>
+      <li
+        @click="navigateTo('/users')"
+        class="rounded-3 hover-bg-1 px-3 py-2 cursor-pointer"
+        :class="{ 'd-none': isMobile, 'bg-1': route.path.includes('users') }"
+      >
+        {{ t("Navigation.members") }}
       </li>
 
       <div

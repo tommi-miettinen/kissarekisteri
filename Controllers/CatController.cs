@@ -77,15 +77,8 @@ public class CatController(CatService catService) : ODataController
     public async Task<ActionResult<Result<List<CatTransfer>>>> GetTransferRequests()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
         var result = await catService.GetTransferRequests(userId);
-
-        if (!result.IsSuccess)
-        {
-            return HttpStatusMapper.Map(result.Errors);
-        }
-
-        return Ok(result);
+        return Ok(result.Data);
     }
 
     [Authorize]

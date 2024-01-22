@@ -6,9 +6,9 @@ const getCurrentUser = async () => {
 };
 
 const getUserById = async (userId: string): Promise<User | undefined> => {
-  if (!userId) return console.error("USER ID MISSING");
-  const result = await apiClient.get<OdataResponse<User>>(`/users/${userId}?$expand=Userrole($expand=role)`);
-  return result.data as User;
+  if (!userId) return;
+  const result = await apiClient.get<User>(`/users/${userId}?$expand=Userrole($expand=role)`);
+  return result.data;
 };
 
 const getUsers = async () => {

@@ -9,16 +9,17 @@ import { navigateTo } from "../store/routeStore";
 import { actionStack, popAction } from "../store/actionStore";
 import { user as loggedInUser } from "../store/userStore";
 import { currentNotificationTab, setCurrentNotificationTab } from "../store/notificationStore";
+import { useI18n } from "vue-i18n";
 
 const queryClient = useQueryClient();
 
-const { data: confirmationRequestsData, refetch } = useQuery({
+const { t } = useI18n();
+
+const { data: confirmationRequests, refetch: refetchConfirmatioRequests } = useQuery({
   queryKey: QueryKeys.CONFIRMATION_REQUESTS,
   queryFn: () => catAPI.getConfirmationRequests(),
   refetchInterval: 5000,
 });
-
-const confirmationRequests = computed(() => confirmationRequestsData.value?.data);
 
 const confirmationRequestMutation = useMutation({
   mutationFn: (requestId: number) => catAPI.confirmTransferRequest(requestId),
@@ -26,7 +27,7 @@ const confirmationRequestMutation = useMutation({
     toast.success("Omistajuuspyyntö hyväksytty");
     await queryClient.invalidateQueries({ queryKey: QueryKeys.CAT });
     await queryClient.invalidateQueries({ queryKey: QueryKeys.USER });
-    refetch();
+    refetchConfirmatioRequests();
   },
 });
 
@@ -64,7 +65,7 @@ const navigate = (path: string) => {
         }"
         class="btn btn-sm border rounded-3 focus-ring col-3"
       >
-        Omat
+        {{ t("Notifications.personal") }}
       </button>
       <button
         tabindex="0"
@@ -76,7 +77,7 @@ const navigate = (path: string) => {
         }"
         class="btn border btn-sm rounded-3 focus-ring col-3"
       >
-        Ylläpitäjä
+        {{ t("Notifications.admin") }}
       </button>
     </div>
 
@@ -85,7 +86,7 @@ const navigate = (path: string) => {
         <a class="cursor-pointer text-underline text-black" @click="navigate(`/users/${request.requester.id}`)">{{
           request.requester?.givenName
         }}</a>
-        pyytää omistajuutta kissalle
+        {{ t("Notifications.requestingCatOwnership") }}
         <a class="cursor-pointer text-underline text-black" @click="navigate(`/cats/${request.cat.id}`)">{{ request.cat?.name }}</a></span
       >
       <button
@@ -93,7 +94,7 @@ const navigate = (path: string) => {
         style="min-width: 80px"
         class="btn btn-sm rounded-3 bg-black text-white px-2 py-1 ms-auto mb-auto fs-7"
       >
-        Hyväksy
+        {{ t("Buttons.accept") }}
       </button>
     </div>
     <div class="py-3" v-if="!confirmationRequestsToDisplay">Ei ilmoituksia</div>

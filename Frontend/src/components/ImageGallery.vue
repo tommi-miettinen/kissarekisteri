@@ -99,7 +99,7 @@ useEventListener(scrollContainer, "scroll", getClosestImage);
         <img
           :src="photo.url"
           alt="Cat image"
-          class="image thumbnail scale-up-animation"
+          class="cursor-pointer thumbnail scale-up-animation"
           style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
           oncontextmenu="return false;"
         />
@@ -149,7 +149,7 @@ useEventListener(scrollContainer, "scroll", getClosestImage);
   </div>
 </template>
 
-<style>
+<style scoped>
 .lightbox-container {
   position: absolute;
   top: 0;
@@ -179,5 +179,28 @@ useEventListener(scrollContainer, "scroll", getClosestImage);
 .scroller {
   scroll-snap-type: x mandatory;
   scroll-snap-stop: always;
+}
+.thumbnail:hover {
+  opacity: 0.8;
+}
+
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media screen and (max-width: 1400px) {
+  .image-gallery {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.image-container:focus-within .btn-border,
+.image-container .btn-border:focus {
+  visibility: visible;
+}
+
+.image-container:hover .btn-border {
+  visibility: visible;
 }
 </style>

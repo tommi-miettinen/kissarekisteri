@@ -18,8 +18,7 @@ const emit = defineEmits(["onCancel"]);
 const close = () => emit("onCancel");
 
 onMounted(() => {
-  if (!modalRef.value) return console.error("Modal ref is null");
-
+  if (!modalRef.value) return;
   modal.value = new Modal(modalRef.value);
   modalRef.value.addEventListener("hide.bs.modal", close);
 });

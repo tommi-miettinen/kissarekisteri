@@ -67,7 +67,7 @@ const requestOwnershipTransfer = async (catId: number) => {
 };
 
 const getConfirmationRequests = async () => {
-  const result = await apiClient.get<ApiResponse<CatTransferRequest[]>>(`/cats/transfer-requests`);
+  const result = await apiClient.get<CatTransferRequest[]>(`/cats/transfer-requests`);
   return result.data;
 };
 

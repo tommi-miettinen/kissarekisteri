@@ -79,7 +79,7 @@ watchEffect(() => route.path && refetch());
         <div class="d-flex flex-column p-2 gap-2" style="width: 100%">
           <h3 class="m-0">{{ cat.name }}</h3>
           <p class="m-0">
-            {{ cat.breed }}
+            {{ t(`Breeds.${cat.breed}`) }}
           </p>
           <div
             :style="{ backgroundColor: isMale ? '#93c5fd' : '#fda4af' }"
@@ -89,7 +89,7 @@ watchEffect(() => route.path && refetch());
             {{ t(`CatDetails.${cat.sex.toLowerCase()}`) }}
           </div>
           <p class="m-0 fw-semibold">
-            <span>Syntynyt {{ moment(cat.birthDate).format("LLL") }}</span>
+            <span>{{ t("CatDetails.born") }} {{ moment(cat.birthDate).format("LLL") }}</span>
           </p>
           <button
             v-if="!userIsCatOwner"

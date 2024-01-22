@@ -21,6 +21,7 @@ import { PermissionTypes } from "../store/userStore";
 import { setCurrentRouteLabel } from "../store/routeStore";
 import { useFileDialog } from "@vueuse/core";
 import { formatDate } from "../utils/formatDate";
+import { catAltUrl } from "../placeholders";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -147,7 +148,10 @@ const removeSingleCat = (catId: number) => {
     <div class="col-12 col-xxl-8 flex-grow-1 d-flex flex-column gap-2 gap-sm-5">
       <div class="d-flex flex-column flex-md-row gap-sm-4 gap-2 hero-container">
         <div class="border rounded-4 hero-image" style="position: relative; overflow: hidden">
-          <img style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover" :src="catShow.imageUrl" />
+          <img
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover"
+            :src="catShow.imageUrl || catAltUrl"
+          />
         </div>
         <div class="d-flex flex-column gap-2 w-100">
           <div>

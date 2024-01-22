@@ -37,6 +37,7 @@ const en = {
     uploadImage: "Upload image",
     male: "Male",
     female: "Female",
+    born: "Born",
   },
   CatShowList: {
     catShows: "Cat shows",
@@ -60,11 +61,21 @@ const en = {
     EventOrganizer: "Event organizer",
     User: "User",
   },
-
   Breeds: {
     Siamese: "Siamese",
     Persian: "Persian",
     ["Maine Coon"]: "Maine Coon",
+  },
+  Notifications: {
+    admin: "Admin",
+    personal: "Personal",
+    requestingCatOwnership: "is requesting ownership for",
+  },
+  Buttons: {
+    accept: "Accept",
+    cancel: "Cancel",
+    edit: "Edit",
+    delete: "Delete",
   },
 };
 

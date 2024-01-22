@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { watchEffect } from "vue";
 import { ref, computed } from "vue";
-import { useI18n } from "vue-i18n";
 import { createPagination } from "../utils/createPagination";
 
 interface SearchProp {
@@ -29,16 +28,12 @@ const props = defineProps({
   },
 });
 
-const { t } = useI18n();
-
 const searchQuery = ref("");
 const currentPage = ref(1);
 const filteredItems = ref<any>([]);
 const pages = ref<string | number[]>([]);
 
-const totalPages = computed(() => {
-  return Math.ceil(filteredItems.value.length / props.itemsPerPage);
-});
+const totalPages = computed(() => Math.ceil(filteredItems.value.length / props.itemsPerPage));
 
 const displayedItems = computed(() => {
   const startIndex = (currentPage.value - 1) * props.itemsPerPage;
@@ -55,16 +50,19 @@ const valueMatchesSearchQuery = (item: any, searchKey: SearchProp) => {
 
   if (searchKey.exactMatch) return itemValue.toLowerCase() === queryValue;
   if (searchKey.startsWith) return itemValue.toLowerCase().startsWith(queryValue);
+
   return itemValue.toLowerCase().includes(queryValue);
 };
+
+watchEffect(() => currentPage > totalPages && (currentPage.value = totalPages.value));
 
 watchEffect(() => {
   if (!searchQuery.value) {
     filteredItems.value = props.items;
-  } else {
-    currentPage.value = 1;
-    filteredItems.value = props.items.filter((item) => props.searchKeys.some((searchKey) => valueMatchesSearchQuery(item, searchKey)));
+    return;
   }
+
+  filteredItems.value = props.items.filter((item) => props.searchKeys.some((searchKey) => valueMatchesSearchQuery(item, searchKey)));
 });
 
 watchEffect(() => (pages.value = createPagination(currentPage.value, totalPages.value, 3)));
@@ -79,7 +77,7 @@ watchEffect(() => (pages.value = createPagination(currentPage.value, totalPages.
           class="form-control"
           type="text"
           v-model="searchQuery"
-          :placeholder="t(searchQueryPlaceholder)"
+          :placeholder="searchQueryPlaceholder"
         />
       </div>
     </div>
@@ -90,7 +88,7 @@ watchEffect(() => (pages.value = createPagination(currentPage.value, totalPages.
     </div>
     <div class="d-flex mt-auto flex-wrap flex-column flex-sm-row gap-2 py-2">
       <nav v-if="totalPages > 1" aria-label="Page navigation" class="me-auto mt-auto">
-        <div class="d-flex flex-wrap gap-1">
+        <ul class="d-flex flex-wrap gap-1 m-0 list-unstyled">
           <li
             :tabindex="typeof page === 'number' ? 0 : undefined"
             @keyup.enter="typeof page === 'number' && goToPage(page)"
@@ -102,7 +100,7 @@ watchEffect(() => (pages.value = createPagination(currentPage.value, totalPages.
           >
             {{ page }}
           </li>
-        </div>
+        </ul>
       </nav>
       <slot name="action"></slot>
     </div>

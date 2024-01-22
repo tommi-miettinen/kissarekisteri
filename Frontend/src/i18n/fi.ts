@@ -37,6 +37,7 @@ const fi = {
     uploadImage: "Lisää kuva",
     male: "Uros",
     female: "Naaras",
+    born: "Syntynyt",
   },
   CatShowList: {
     catShows: "Näyttelyt",
@@ -63,6 +64,17 @@ const fi = {
     Siamese: "Siamilainen",
     Persian: "Persialainen",
     ["Maine Coon"]: "Maine Coon",
+  },
+  Notifications: {
+    admin: "Ylläpitäjä",
+    personal: "Omat",
+    requestingCatOwnership: "pyytää omistajuutta kissalle",
+  },
+  Buttons: {
+    accept: "Hyväksy",
+    cancel: "Peruuta",
+    edit: "Muokkaa",
+    delete: "Poista",
   },
 };
 

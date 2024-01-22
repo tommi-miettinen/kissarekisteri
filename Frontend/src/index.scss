@@ -65,49 +65,15 @@
   box-shadow: 0 0 var(--focus-ring-blur) var(--focus-ring-width) var(--focus-ring-color) !important;
 }
 
-@media (max-width: 768px) {
-  .focus-ring:focus {
-    outline: none !important;
-    box-shadow: none !important;
-  }
-}
-
-.image-container:focus-within .btn-border,
-.image-container .btn-border:focus {
-  visibility: visible;
-}
-
-.image-container:hover .btn-border {
-  visibility: visible;
-}
-.cat-thumbnail:hover {
-  cursor: pointer;
-  opacity: 0.8;
-}
-
 .fs-7 {
   font-size: 14px;
 }
 
-.image-gallery {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-}
-
-@media screen and (max-width: 1400px) {
-  .image-gallery {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 .btn-border {
   background-color: white;
 }
 .btn-border:hover {
   background-color: #f8f9fa;
-}
-.thumbnail:hover {
-  cursor: pointer;
-  opacity: 0.8;
 }
 
 .skip-link {
@@ -147,6 +113,13 @@ $utilities: map-merge(
 @media (max-width: 768px) {
   .w-sm-100 {
     width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .focus-ring:focus {
+    outline: none !important;
+    box-shadow: none !important;
   }
 }
 

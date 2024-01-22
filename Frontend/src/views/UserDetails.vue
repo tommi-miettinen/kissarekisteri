@@ -121,7 +121,7 @@ const startAddingCat = () => pushAction(isMobile.value ? ActionTypes.ADDING_CAT_
                 tabIndex="0"
                 class="hover-bg-1 focus-ring px-3 py-2 rounded-2"
               >
-                Muokkaa
+                {{ t("Buttons.edit") }}
               </li>
               <li
                 tabIndex="0"
@@ -130,7 +130,7 @@ const startAddingCat = () => pushAction(isMobile.value ? ActionTypes.ADDING_CAT_
                 @keyup.enter="startDeletingCat(cat)"
                 @click="startDeletingCat(cat)"
               >
-                Poista
+                {{ t("Buttons.delete") }}
               </li>
             </Dropdown>
           </div>
@@ -160,7 +160,7 @@ const startAddingCat = () => pushAction(isMobile.value ? ActionTypes.ADDING_CAT_
         tabIndex="0"
         class="cursor-pointer fw-semibold px-3 p-2 hover-bg-1 rounded-3"
       >
-        Muokkaa
+        {{ t("Buttons.edit") }}
       </li>
       <li
         tabIndex="0"
@@ -169,7 +169,7 @@ const startAddingCat = () => pushAction(isMobile.value ? ActionTypes.ADDING_CAT_
         @keyup.enter="startDeletingCat(catForActionToBeSelected!)"
         @click.stop="startDeletingCat(catForActionToBeSelected!)"
       >
-        Poista
+        {{ t("Buttons.delete") }}
       </li>
     </div>
   </Drawer>
@@ -205,8 +205,10 @@ const startAddingCat = () => pushAction(isMobile.value ? ActionTypes.ADDING_CAT_
     <div style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
       <p>Poistetaanko kissan tiedot?</p>
       <div class="d-flex gap-2 justify-content-end">
-        <button type="button" class="btn btn-secondary" @click="removeAction(ActionTypes.DELETING_CAT)">Peruuta</button>
-        <button data-testid="confirm-cat-delete" @click="deleteMutation.mutate" type="button" class="btn btn-danger">Poista</button>
+        <button type="button" class="btn border px-4" @click="removeAction(ActionTypes.DELETING_CAT)">Peruuta</button>
+        <button data-testid="confirm-cat-delete" @click="deleteMutation.mutate" type="button" class="btn bg-black text-white px-4">
+          Poista
+        </button>
       </div>
     </div>
   </Modal>

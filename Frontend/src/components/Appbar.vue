@@ -13,6 +13,7 @@ const { locale } = useI18n();
 const handleLocaleClick = (localeOption: "en" | "fi") => {
   locale.value = localeOption;
   moment.locale(locale.value);
+  localStorage.locale = locale.value;
   removeAction(ActionTypes.SELECTING_LANGUAGE);
 };
 

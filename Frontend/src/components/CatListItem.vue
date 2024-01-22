@@ -13,10 +13,8 @@ const props = defineProps({
   },
 });
 
-const navigateToCat = (cat: Cat) => navigateTo(`/cats/${cat.id}`);
-
-const badgeColor = computed(() => (isMale ? "#93c5fd" : "#fda4af"));
 const isMale = computed(() => props.cat.sex === "Male");
+const badgeColor = computed(() => (isMale.value ? "#93c5fd" : "#fda4af"));
 </script>
 
 <template>
@@ -24,8 +22,8 @@ const isMale = computed(() => props.cat.sex === "Male");
     <div
       tabindex="0"
       role="button"
-      @keyup.enter="navigateToCat(cat)"
-      @click="navigateToCat(cat)"
+      @keyup.enter="navigateTo(`/cats/${cat.id}`)"
+      @click="navigateTo(`/cats/${cat.id}`)"
       class="hover-bg-1 rounded-3 p-2 p-sm-2 focus-ring gap-3 d-flex justify-content-between align-items-center w-100 cursor-pointer h-100"
     >
       <div class="d-flex gap-2 rounded-3 align-items-center pointer hover-bg w-100">
@@ -42,7 +40,7 @@ const isMale = computed(() => props.cat.sex === "Male");
         </div>
         <div class="d-flex flex-column gap-1 m-0">
           <div class="text-capitalize fw-semibold">{{ cat.name }}</div>
-          <div class="text-capitalize">{{ cat.breed }}</div>
+          <div class="text-capitalize">{{ t(`Breeds.${cat.breed}`) }}</div>
           <div :style="{ backgroundColor: badgeColor }" style="width: 100px" class="text-black badge rounded-pill bg-opacity-75">
             {{ t(`CatDetails.${cat.sex.toLowerCase()}`) }}
           </div>

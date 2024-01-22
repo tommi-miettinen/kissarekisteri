@@ -3,6 +3,7 @@ import { ref, watch, nextTick } from "vue";
 import { useElementVisibility } from "@vueuse/core";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
+import { useFileDialog } from "@vueuse/core";
 
 const emits = defineEmits(["onCrop"]);
 
@@ -17,7 +18,6 @@ const cropper = ref<Cropper>();
 const croppable = ref(false);
 const imageRef = ref<HTMLImageElement>();
 const imageSource = ref(props.imageSrc);
-const inputRef = ref();
 const containerRef = ref();
 
 const targetIsVisible = useElementVisibility(containerRef);
@@ -60,6 +60,12 @@ const cropImage = () => {
   emits("onCrop", file);
 };
 
+const { onChange: onFileChange, open } = useFileDialog({
+  accept: "image/*",
+});
+
+onFileChange((files) => files && (imageSource.value = URL.createObjectURL(files[0])));
+
 watch([() => targetIsVisible.value, () => imageSource.value], async () => {
   if (imageRef.value) {
     cropper.value?.destroy();
@@ -82,15 +88,6 @@ watch([() => targetIsVisible.value, () => imageSource.value], async () => {
     });
   }
 });
-
-const handleFileChange = async (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  if (!input || !input.files) return;
-
-  imageSource.value = URL.createObjectURL(input.files[0]);
-};
-
-const triggerFileInput = () => inputRef.value?.click();
 </script>
 
 <template>
@@ -105,10 +102,7 @@ const triggerFileInput = () => inputRef.value?.click();
       />
     </div>
     <div class="d-flex flex-grow-1 p-2 gap-2">
-      <button @click="triggerFileInput" class="btn bg-black rounded-3 text-white w-100 py-2 focus-ring">
-        <input accept="image/*" class="d-none" ref="inputRef" type="file" @change="handleFileChange" id="catImageInput" />
-        Valitse tiedosto
-      </button>
+      <button @click="() => open()" class="btn bg-black rounded-3 text-white w-100 py-2 focus-ring">Valitse tiedosto</button>
       <button class="btn focus-ring accordion bg-black w-100 rounded-3 py-2 text-white" type="button" @click="cropImage">Tallenna</button>
     </div>
   </div>
