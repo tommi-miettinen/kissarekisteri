@@ -30,7 +30,7 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((_, __, next) => {
+router.beforeEach(async (_, __, next) => {
   if (actionStack.value && actionStack.value.length > 0) {
     popAction();
     return next(false);

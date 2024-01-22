@@ -6,9 +6,13 @@ import BottomNavigation from "./components/BottomNavigation.vue";
 import { focusFirstVisibleElement } from "./utils/focusFirstVisibleElement";
 import Appbar from "./components/Appbar.vue";
 import { isMobile } from "./store/actionStore";
+import { onMounted } from "vue";
+import { handleFirstLoad } from "./utils/handleFirstLoad";
 
 const mainRef = ref<HTMLElement>();
 const focusMainContent = () => mainRef.value && focusFirstVisibleElement(mainRef.value);
+
+onMounted(() => handleFirstLoad());
 </script>
 
 <template>
