@@ -175,18 +175,18 @@ onMounted(() => setCurrentRouteLabel("Käyttäjät"));
     </div>
   </Modal>
   <Modal :visible="isCurrentAction(ActionTypes.DELETING_USER)" @onCancel="removeAction(ActionTypes.DELETING_USER)">
-    <div v-if="userToBeDeleted" style="width: 90vw; max-width: 500px" class="p-4 d-flex flex-column">
+    <div v-if="userToBeDeleted" style="width: 95vw; max-width: 500px" class="p-4 d-flex flex-column">
       <p>Poistetaanko käyttäjä? {{ userToBeDeleted.givenName }}</p>
       <div class="d-flex gap-2 justify-content-end">
         <button
           @keyup.enter="removeAction(ActionTypes.DELETING_USER)"
           type="button"
-          class="btn btn-secondary"
+          class="btn border px-4"
           @click.stop="removeAction(ActionTypes.DELETING_USER)"
         >
           Peruuta
         </button>
-        <button @click="deleteUserMutation.mutate" type="button" class="btn btn-danger">Poista</button>
+        <button @click="deleteUserMutation.mutate" type="button" class="btn bg-black text-white px-4">Poista</button>
       </div>
     </div>
   </Modal>

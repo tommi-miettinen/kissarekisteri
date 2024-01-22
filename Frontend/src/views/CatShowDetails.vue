@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, computed, watchEffect } from "vue";
+import { ref, computed, watchEffect, watch } from "vue";
 import userAPI from "../api/userAPI";
 import { userHasPermission, user } from "../store/userStore";
 import { useRoute } from "vue-router";
@@ -39,10 +39,6 @@ const {
 const usersAttendingCats = computed(() => catShow.value?.cats.filter((c) => c.cat.ownerId === user.value?.id) || []);
 const isUserAnAttendee = computed(() => catShow.value && catShow.value.cats.some((cat) => cat.cat.ownerId === user.value?.id));
 
-watchEffect(() => {
-  selectedCatIds.value = catShow.value ? usersAttendingCats.value.map((c) => c.cat.id) : [];
-});
-
 const joinEventMutation = useMutation({
   mutationFn: () => catShowAPI.joinEvent(eventId, selectedCatIds.value),
   onSuccess: () => {
@@ -80,6 +76,10 @@ const { data: userCats, refetch: refetchUserCats } = useQuery({
   queryKey: ["userCats"],
   queryFn: () => user.value && userAPI.getCatsByUserId(user.value.id),
   enabled: Boolean(user.value),
+});
+
+watch([() => catShow.value, () => userCats.value], () => {
+  selectedCatIds.value = catShow.value ? usersAttendingCats.value.map((c) => c.cat.id) : [];
 });
 
 watchEffect(() => user && refetchUserCats());
@@ -136,6 +136,15 @@ const removeSingleCat = (catId: number) => {
   const userCats = catShow.value?.cats.filter((c) => c.cat.ownerId === user.value?.id && c.cat.id !== catId);
   selectedCatIds.value = userCats?.map((c) => c.cat.id) || [];
   joinEventMutation.mutate();
+};
+
+const toggleAllCats = () => {
+  if (selectedCatIds.value.length > 0) {
+    selectedCatIds.value = [];
+    return;
+  }
+  if (!userCats.value) return;
+  selectedCatIds.value = userCats.value.map((c) => c.id);
 };
 </script>
 
@@ -291,6 +300,14 @@ const removeSingleCat = (catId: number) => {
     <div class="d-flex flex-column bg-white p-4 gap-4 rounded">
       <div v-if="userCats && userCats.length > 0">
         <h5>Osallistuvat kissat:</h5>
+        <label @click="toggleAllCats">
+          <input
+            :checked="selectedCatIds.length === userCats.length && userCats.length > 0"
+            class="form-check-input focus-ring focus-ring-dark"
+            type="checkbox"
+          />
+          Valitse kaikki
+        </label>
         <div v-for="(cat, index) in userCats" :key="index">
           <label>
             <input

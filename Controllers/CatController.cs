@@ -19,16 +19,16 @@ public class CatController(CatService catService) : ODataController
 {
     [HttpGet]
     [EnableQuery]
-    public ActionResult<IQueryable> GetCats()
+    public IQueryable<Cat> GetCats()
     {
-        return Ok(catService.GetCats());
+        return catService.GetCats();
     }
 
     [HttpGet("catbreeds")]
     [EnableQuery]
-    public ActionResult<IQueryable<CatBreed>> GetBreeds()
+    public IQueryable<CatBreed> GetBreeds()
     {
-        return Ok(catService.GetBreeds());
+        return catService.GetBreeds();
     }
 
     [Authorize]

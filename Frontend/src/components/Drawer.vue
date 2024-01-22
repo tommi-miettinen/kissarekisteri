@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, watch, reactive } from "vue";
 import { Offcanvas } from "bootstrap";
-import { useSwipe, useElementBounding } from "@vueuse/core";
+import { useSwipe, useElementBounding, useScroll, useScrollLock } from "@vueuse/core";
 import { disablePullToRefresh, enablePullToRefresh } from "../utils/pullToRefresh";
 
 type Placement = "top" | "bottom" | "start" | "end";
@@ -22,6 +22,7 @@ const props = defineProps({
 
 const sideOffCanvas = ref<Offcanvas>();
 const sideOffcanvasRef = ref<HTMLDivElement>();
+const contentContainerRef = ref<HTMLDivElement>();
 const swipeStart = ref(0);
 const swipeEnd = ref(0);
 
@@ -31,9 +32,11 @@ const drawerStyle = reactive({
 });
 
 const { height, top } = useElementBounding(sideOffcanvasRef);
+const { isScrolling } = useScroll(contentContainerRef);
+const isLocked = useScrollLock(contentContainerRef);
 
 onMounted(() => {
-  if (!sideOffcanvasRef.value) return console.error("ref is null");
+  if (!sideOffcanvasRef.value) return;
   sideOffCanvas.value = new Offcanvas(sideOffcanvasRef.value);
   sideOffcanvasRef.value.addEventListener("hide.bs.offcanvas", () => emit("onCancel"));
 });
@@ -68,14 +71,21 @@ const moveDown = (time: number) => {
   setTimeout(() => sideOffCanvas.value?.hide(), animationTime);
 };
 
+const disableTransitionAnimation = () => (drawerStyle.transition = "none");
+
+const lockScroll = () => (isLocked.value = true);
+const unlockScroll = () => (isLocked.value = false);
+
 const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
   onSwipeStart: () => (swipeStart.value = performance.now()),
   onSwipe() {
+    if (isScrolling.value) return;
+    unlockScroll();
     disablePullToRefresh();
     if (top.value === 0 && direction.value === "up") return;
 
     const swipeLength = Math.abs(lengthY.value);
-    drawerStyle.transition = "none";
+    disableTransitionAnimation();
 
     const height2 = height.value * 2;
     const boundary = 24;
@@ -94,6 +104,7 @@ const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
   },
   onSwipeEnd() {
     swipeEnd.value = performance.now();
+    lockScroll();
     const swipeLength = Math.abs(lengthY.value);
     enablePullToRefresh();
 
@@ -128,7 +139,7 @@ const { direction, lengthY } = useSwipe(sideOffcanvasRef, {
     <div class="d-flex px-3 pt-3">
       <button type="button" class="rounded-circle p-2 btn-close ms-auto" @click="sideOffCanvas?.hide()" aria-label="Close"></button>
     </div>
-    <div class="d-flex flex-column z-1">
+    <div ref="contentContainerRef" class="d-flex flex-column z-1 overflow-auto">
       <slot></slot>
     </div>
     <div v-if="direction === 'up'" style="height: 40px" class="w-100 bg-white position-fixed z-0 bottom-0 left-0" />
