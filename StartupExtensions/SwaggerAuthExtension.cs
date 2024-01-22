@@ -11,28 +11,32 @@ public static class SwaggerAuthExtension
 {
     private static readonly string authType = "Bearer JWT";
 
-    private static readonly OpenApiSecurityRequirement requirement = new()
-        {{
-            new OpenApiSecurityScheme
+    private static readonly OpenApiSecurityRequirement requirement =
+        new()
+        {
             {
-                Reference = new OpenApiReference
+                new OpenApiSecurityScheme
                 {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = authType
-                }
-            },
-            new string[]{}
-        }};
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = authType
+                    }
+                },
+                new string[] { }
+            }
+        };
 
-    private static readonly OpenApiSecurityScheme scheme = new()
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    };
+    private static readonly OpenApiSecurityScheme scheme =
+        new()
+        {
+            In = ParameterLocation.Header,
+            Description = "Please enter a valid token",
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            BearerFormat = "JWT",
+            Scheme = "Bearer"
+        };
 
     public static void AddJWTAuth(this SwaggerGenOptions option)
     {
@@ -50,14 +54,15 @@ public static class SwaggerAuthExtension
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
             if (
-                context.MethodInfo.GetCustomAttributes(true).Any(x => x is AuthorizeAttribute) ||
-                (context.MethodInfo.DeclaringType?.GetCustomAttributes(true).Any(x => x is AuthorizeAttribute) ?? false)
+                context.MethodInfo.GetCustomAttributes(true).Any(x => x is AuthorizeAttribute)
+                || (
+                    context.MethodInfo.DeclaringType
+                        ?.GetCustomAttributes(true)
+                        .Any(x => x is AuthorizeAttribute) ?? false
+                )
             )
             {
-                operation.Security = new List<OpenApiSecurityRequirement>
-                    {
-                        requirement
-                    };
+                operation.Security = new List<OpenApiSecurityRequirement> { requirement };
             }
         }
     }

@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
-
 namespace Kissarekisteri.Services;
 
 public class UploadService(BlobServiceClient blobServiceClient)
@@ -19,7 +18,8 @@ public class UploadService(BlobServiceClient blobServiceClient)
             return null;
         }
 
-        var envIsDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+        var envIsDevelopment =
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
         var containerName = envIsDevelopment ? "dev-images" : "images";
         var container = _blobServiceClient.GetBlobContainerClient(containerName);
         var publicAccessType = PublicAccessType.Blob;
@@ -30,13 +30,13 @@ public class UploadService(BlobServiceClient blobServiceClient)
 
         using (var stream = file.OpenReadStream())
         {
-            await blobClient.UploadAsync(stream, new BlobUploadOptions
-            {
-                HttpHeaders = new BlobHttpHeaders
+            await blobClient.UploadAsync(
+                stream,
+                new BlobUploadOptions
                 {
-                    ContentType = "image/jpeg"
+                    HttpHeaders = new BlobHttpHeaders { ContentType = "image/jpeg" }
                 }
-            });
+            );
         }
 
         return blobClient;

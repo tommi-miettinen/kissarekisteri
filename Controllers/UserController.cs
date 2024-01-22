@@ -14,7 +14,8 @@ using System.Threading.Tasks;
 namespace Kissarekisteri.Controllers;
 
 [Route("odata/users")]
-public class UserController(UserService userService, PermissionService permissionService) : ODataController
+public class UserController(UserService userService, PermissionService permissionService)
+    : ODataController
 {
     [Authorize]
     [HttpGet("{userId}/permissions")]
@@ -67,7 +68,9 @@ public class UserController(UserService userService, PermissionService permissio
 
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<UserResponseDTO>> CreateUser([FromBody] UserCreatePayloadDTO userPayload)
+    public async Task<ActionResult<UserResponseDTO>> CreateUser(
+        [FromBody] UserCreatePayloadDTO userPayload
+    )
     {
         var result = await userService.CreateUser(userPayload);
         return Ok(result);
@@ -75,7 +78,9 @@ public class UserController(UserService userService, PermissionService permissio
 
     [Authorize]
     [HttpPatch("{userId}")]
-    public async Task<ActionResult<UserResponseDTO>> UpdateUser([FromBody] UserUpdateRequestDTO userPayload)
+    public async Task<ActionResult<UserResponseDTO>> UpdateUser(
+        [FromBody] UserUpdateRequestDTO userPayload
+    )
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var result = await userService.UpdateUser(userId, userPayload);
@@ -91,4 +96,3 @@ public class UserController(UserService userService, PermissionService permissio
         return Ok(user);
     }
 }
-

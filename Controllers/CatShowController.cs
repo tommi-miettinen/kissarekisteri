@@ -17,10 +17,7 @@ public class CatShowController(CatShowService catShowService) : ODataController
 {
     [Authorize]
     [HttpPost("{catShowId}/join")]
-    public async Task<IActionResult> JoinCatShow(
-        int catShowId,
-        [FromBody] CatIdsDTO catIds
-    )
+    public async Task<IActionResult> JoinCatShow(int catShowId, [FromBody] CatIdsDTO catIds)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var result = await catShowService.JoinCatShowAsync(catShowId, userId, catIds.CatIds);
@@ -65,7 +62,10 @@ public class CatShowController(CatShowService catShowService) : ODataController
 
     [Authorize]
     [HttpPost("{catShowId}/place")]
-    public async Task<ActionResult<CatShowResult>> AssignCatPlacing(int catShowId, [FromBody] CatShowResultDTO resultPayload)
+    public async Task<ActionResult<CatShowResult>> AssignCatPlacing(
+        int catShowId,
+        [FromBody] CatShowResultDTO resultPayload
+    )
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var result = await catShowService.AssignCatPlacing(userId, catShowId, resultPayload);

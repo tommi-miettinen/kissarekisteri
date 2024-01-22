@@ -9,20 +9,28 @@ namespace Kissarekisteri.Models
     public class Cat : IValidatableObject
     {
         public int Id { get; set; }
+
         [Required]
         public required string Name { get; set; }
+
         [Required]
         public required DateTime BirthDate { get; set; }
+
         [Required]
         public required string Breed { get; set; }
+
         [Required]
         public required string Sex { get; set; }
+
         [Required]
         public required string OwnerId { get; set; }
+
         [NotMapped]
         public UserResponseDTO Owner { get; set; }
+
         [Required]
         public required string BreederId { get; set; }
+
         [NotMapped]
         public UserResponseDTO Breeder { get; set; }
         public string ImageUrl { get; set; }
@@ -39,7 +47,8 @@ namespace Kissarekisteri.Models
             {
                 yield return new ValidationResult(
                     "Sex must be either 'Male' or 'Female'.",
-                    new[] { nameof(Sex) });
+                    new[] { nameof(Sex) }
+                );
             }
         }
     }

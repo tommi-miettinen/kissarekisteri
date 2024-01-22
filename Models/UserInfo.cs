@@ -1,5 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace Kissarekisteri.Models
@@ -17,6 +16,5 @@ namespace Kissarekisteri.Models
         public bool ShowEmail { get; set; }
 
         public bool ShowPhoneNumber { get; set; }
-
     }
 }

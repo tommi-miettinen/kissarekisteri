@@ -40,7 +40,10 @@ public class CatController(CatService catService) : ODataController
 
     [Authorize]
     [HttpPut("{catId}")]
-    public async Task<ActionResult<Cat>> EditCat(int catId, [FromBody] CatCreateRequestDTO catPayload)
+    public async Task<ActionResult<Cat>> EditCat(
+        int catId,
+        [FromBody] CatCreateRequestDTO catPayload
+    )
     {
         var result = await catService.UpdateCatByIdAsync(catId, catPayload);
         return Ok(result);

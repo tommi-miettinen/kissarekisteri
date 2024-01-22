@@ -10,10 +10,13 @@ namespace Kissarekisteri.Models
 
         [Required]
         public string RoleName { get; set; }
+
         [Required]
         public int RoleId { get; set; }
+
         [Required]
         public string PermissionName { get; set; }
+
         [Required]
         public int PermissionId { get; set; }
 

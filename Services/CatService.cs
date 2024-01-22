@@ -26,7 +26,9 @@ public class CatService(
             return false;
         }
 
-        await dbContext.CatPhotos.AddAsync(new CatPhoto { CatId = cat.Id, Url = uploadedPhoto.Uri.AbsoluteUri });
+        await dbContext.CatPhotos.AddAsync(
+            new CatPhoto { CatId = cat.Id, Url = uploadedPhoto.Uri.AbsoluteUri }
+        );
         await dbContext.SaveChangesAsync();
         return true;
     }
@@ -106,11 +108,11 @@ public class CatService(
     {
         var user = await userService.GetUserById(userId);
 
-        var transfer = await dbContext.CatTransfers
-           .FirstOrDefaultAsync(ct =>
-               (ct.Id == transferId && ct.ConfirmerId == userId) ||
-               (ct.Id == transferId && user.UserRole.Role.Name == "Admin")
-           );
+        var transfer = await dbContext.CatTransfers.FirstOrDefaultAsync(
+            ct =>
+                (ct.Id == transferId && ct.ConfirmerId == userId)
+                || (ct.Id == transferId && user.UserRole.Role.Name == "Admin")
+        );
 
         transfer.Confirmed = true;
         await dbContext.SaveChangesAsync();

@@ -16,11 +16,7 @@ namespace Kissarekisteri.Services
         PermissionService permissionService
     )
     {
-        public async Task<bool> JoinCatShowAsync(
-            int catShowId,
-            string userId,
-            List<int> catIds
-        )
+        public async Task<bool> JoinCatShowAsync(int catShowId, string userId, List<int> catIds)
         {
             var catShow = dbContext.CatShows.FirstOrDefault(e => e.Id == catShowId);
             if (catShow == null)
@@ -29,9 +25,9 @@ namespace Kissarekisteri.Services
             }
 
             var catsThatHavePlacingIds = await dbContext.CatShowResults
-               .Where(c => c.CatShowId == catShowId)
-               .Select(c => c.CatId)
-               .ToListAsync();
+                .Where(c => c.CatShowId == catShowId)
+                .Select(c => c.CatId)
+                .ToListAsync();
 
             var catsToRemove = await dbContext.CatShowCats
                 .Where(c => c.CatShowId == catShowId)
@@ -62,13 +58,12 @@ namespace Kissarekisteri.Services
             return true;
         }
 
-
         public async Task<bool> LeaveCatShowAsync(int catShowId, string userId)
         {
             var catsThatHavePlacingIds = await dbContext.CatShowResults
-       .Where(c => c.CatShowId == catShowId)
-       .Select(c => c.CatId)
-       .ToListAsync();
+                .Where(c => c.CatShowId == catShowId)
+                .Select(c => c.CatId)
+                .ToListAsync();
 
             var catsToRemove = await dbContext.CatShowCats
                 .Where(c => c.CatShowId == catShowId)
@@ -90,7 +85,10 @@ namespace Kissarekisteri.Services
 
         public async Task<CatShow> UploadCatShowPhoto(string userId, int catShowId, IFormFile file)
         {
-            var hasPermission = await permissionService.HasPermission(userId, Permissions.CatShowWrite);
+            var hasPermission = await permissionService.HasPermission(
+                userId,
+                Permissions.CatShowWrite
+            );
 
             if (!hasPermission)
             {
@@ -137,7 +135,10 @@ namespace Kissarekisteri.Services
             CatShowResultDTO newPlacing
         )
         {
-            var hasPermission = await permissionService.HasPermission(userId, Permissions.CatShowWrite);
+            var hasPermission = await permissionService.HasPermission(
+                userId,
+                Permissions.CatShowWrite
+            );
 
             if (!hasPermission)
             {
@@ -152,10 +153,13 @@ namespace Kissarekisteri.Services
             }
 
             var conflictingResults = await dbContext.CatShowResults
-            .Where(v => v.CatShowId == catShowId)
-            .Where(v => v.Breed == newPlacing.Breed && v.Place == (Models.Place)newPlacing.Place ||
-                        v.CatId == newPlacing.CatId)
-            .ToListAsync();
+                .Where(v => v.CatShowId == catShowId)
+                .Where(
+                    v =>
+                        v.Breed == newPlacing.Breed && v.Place == (Models.Place)newPlacing.Place
+                        || v.CatId == newPlacing.CatId
+                )
+                .ToListAsync();
 
             if (conflictingResults.Count != 0)
             {

@@ -15,6 +15,5 @@ namespace Kissarekisteri.Models
         public int CatShowId { get; set; }
 
         public CatShow CatShow { get; set; }
-
     }
 }

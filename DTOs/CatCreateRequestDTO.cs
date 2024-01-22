@@ -7,8 +7,10 @@ namespace Kissarekisteri.DTOs
     {
         [Required]
         public required string Name { get; set; }
+
         [Required]
         public required DateTime BirthDate { get; set; }
+
         [Required]
         public required string Breed { get; set; }
 
@@ -17,7 +19,6 @@ namespace Kissarekisteri.DTOs
         public string ImageUrl { get; set; }
         public int? MotherId { get; set; }
         public int? FatherId { get; set; }
-
         public string OwnerId { get; set; }
         public string BreederId { get; set; }
     }

@@ -25,6 +25,7 @@ namespace Kissarekisteri.Models
 
         [Required]
         public required string Breed { get; set; }
+
         [JsonIgnore]
         public Cat Cat { get; set; }
 
