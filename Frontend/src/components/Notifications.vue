@@ -97,6 +97,6 @@ const navigate = (path: string) => {
         {{ t("Buttons.accept") }}
       </button>
     </div>
-    <div class="py-3" v-if="!confirmationRequestsToDisplay">Ei ilmoituksia</div>
+    <div class="py-3" v-if="!confirmationRequestsToDisplay || confirmationRequestsToDisplay.length === 0">Ei ilmoituksia</div>
   </div>
 </template>

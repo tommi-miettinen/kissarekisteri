@@ -20,7 +20,6 @@ import { navigateTo } from "../store/routeStore";
 
 const { t } = useI18n();
 const route = useRoute();
-const routeParamCatId = +route.params.catId;
 
 const isMale = computed(() => cat.value?.sex === "Male");
 const userIsCatOwner = computed(() => user.value && cat.value && user.value.id === cat.value.ownerId);
@@ -32,9 +31,9 @@ const {
   isLoading,
   isFetched: catIsFetched,
 } = useQuery({
-  queryKey: QueryKeys.CAT_BY_ID(routeParamCatId),
-  queryFn: () => catAPI.getCatWithOwnerAndBreeder(routeParamCatId),
-  enabled: Boolean(routeParamCatId),
+  queryKey: QueryKeys.CAT_BY_ID(+route.params.catId),
+  queryFn: () => catAPI.getCatWithOwnerAndBreeder(+route.params.catId),
+  enabled: Boolean(route.params.catId),
 });
 
 const uploadMutation = useMutation({
@@ -56,14 +55,14 @@ const { onChange: onFileChange, open } = useFileDialog({
 onFileChange((files) => files && uploadMutation.mutate(files[0]));
 
 watchEffect(() => cat.value && setCurrentRouteLabel(cat.value.name));
-watchEffect(() => route.path && refetch());
+watchEffect(() => route.params.catId && refetch());
 </script>
 
 <template>
   <h3 v-if="isCatError && !catIsFetched" class="m-5 fw-bold">{{ t("CatDetails.404") }}</h3>
   <Spinner v-if="isLoading" />
   <div
-    :key="cat.id + routeParamCatId"
+    :key="cat.id + route.params.catId.toString()"
     v-if="cat"
     class="p-2 w-100 h-100 d-flex flex-column align-items-center col-12 col-xxl-8 p-sm-5 d-flex flex-column gap-sm-5"
   >
